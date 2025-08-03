@@ -28,6 +28,10 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiM2MzY2ZjEiLz4KPHA+PGNpcmNsZSBjeD0iMjQiIGN5PSIxNiIgcj0iNCIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTIiIHk9IjI0IiB3aWR0aD0iMjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjEyIiB5PSIzMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjQiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -662,6 +666,7 @@
             <button class="tab active" onclick="showTab('harcama')">Harcama Ekle</button>
             <button class="tab" onclick="showTab('liste')">Harcama Listesi</button>
             <button class="tab" onclick="showTab('duzenli')">Düzenli Ödemeler</button>
+            <button class="tab" onclick="showTab('analitik')">📊 Analitik</button>
             <button class="tab" onclick="showTab('hesaplar')">Hesaplar</button>
             <button class="tab" onclick="showTab('aylik')">Aylık Özet</button>
             <button class="tab" onclick="showTab('yedekleme')">Veri Yönetimi</button>
@@ -935,6 +940,167 @@
                 </div>
             </div>
 
+            <!-- Analitik -->
+            <div id="analitik" class="tab-content">
+                <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">📊 Gelişmiş Analitik ve Raporlar</h2>
+                
+                <!-- Analitik Filtreler -->
+                <div class="summary-card" style="margin-bottom: 24px;">
+                    <h3>📈 Analiz Ayarları</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="analitikBaslangic">Başlangıç Tarihi</label>
+                            <input type="month" id="analitikBaslangic">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="analitikBitis">Bitiş Tarihi</label>
+                            <input type="month" id="analitikBitis">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="analitikKullanici">Kullanıcı Filtresi</label>
+                            <select id="analitikKullanici">
+                                <option value="">Tüm Kullanıcılar</option>
+                                <option value="Sen">Sen</option>
+                                <option value="SinanAbi">SinanAbi</option>
+                                <option value="SemihAbi">SemihAbi</option>
+                                <option value="Anne">Anne</option>
+                                <option value="Talha">Talha</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="analitikKart">Kart Filtresi</label>
+                            <select id="analitikKart">
+                                <option value="">Tüm Kartlar</option>
+                                <option value="Axess">Axess</option>
+                                <option value="Vakıf">Vakıf</option>
+                                <option value="Enpara">Enpara</option>
+                                <option value="World">World</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" onclick="updateAnalytics()" style="background: var(--primary);">
+                            🔄 Analizi Güncelle
+                        </button>
+                        <button class="btn" onclick="exportAnalyticsReport()" style="background: var(--success);">
+                            📄 PDF Rapor İndir
+                        </button>
+                        <button class="btn" onclick="exportToExcel()" style="background: var(--warning);">
+                            📊 Excel İndir
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="summary-cards" style="margin-bottom: 32px;">
+                    <div class="summary-card">
+                        <h3>💰 Toplam Harcama</h3>
+                        <div class="amount" style="color: var(--primary);" id="metricsToplamHarcama">0 TL</div>
+                        <div style="font-size: 14px; color: var(--text-secondary);">
+                            <span id="metricsHarcamaSayisi">0</span> işlem
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>📊 Aylık Ortalama</h3>
+                        <div class="amount" style="color: var(--success);" id="metricsAylikOrtalama">0 TL</div>
+                        <div style="font-size: 14px; color: var(--text-secondary);">
+                            Son <span id="metricsAySayisi">0</span> ay
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>💳 En Çok Kullanılan Kart</h3>
+                        <div class="amount" style="color: var(--warning);" id="metricsEnCokKart">-</div>
+                        <div style="font-size: 14px; color: var(--text-secondary);">
+                            <span id="metricsKartOran">0%</span> oranında
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>👤 En Aktif Kullanıcı</h3>
+                        <div class="amount" style="color: var(--danger);" id="metricsEnAktifKullanici">-</div>
+                        <div style="font-size: 14px; color: var(--text-secondary);">
+                            <span id="metricsKullaniciOran">0%</span> oranında
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <!-- Aylık Trend Chart -->
+                    <div class="summary-card">
+                        <h3>📈 Aylık Harcama Trendi</h3>
+                        <canvas id="monthlyTrendChart" width="400" height="200"></canvas>
+                    </div>
+
+                    <!-- Kart Dağılımı -->
+                    <div class="summary-card">
+                        <h3>💳 Kart Bazında Dağılım</h3>
+                        <canvas id="cardDistributionChart" width="400" height="200"></canvas>
+                    </div>
+
+                    <!-- Kullanıcı Dağılımı -->
+                    <div class="summary-card">
+                        <h3>👥 Kullanıcı Bazında Dağılım</h3>
+                        <canvas id="userDistributionChart" width="400" height="200"></canvas>
+                    </div>
+
+                    <!-- Haftalık Aktivite -->
+                    <div class="summary-card">
+                        <h3>📅 Haftalık Aktivite Haritası</h3>
+                        <canvas id="weeklyActivityChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Detaylı Tablolar -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                    <!-- Top Harcama Kategorileri -->
+                    <div class="summary-card">
+                        <h3>🏆 En Yüksek Harcamalar</h3>
+                        <div id="topExpensesTable">
+                            <p>Veri analiz ediliyor...</p>
+                        </div>
+                    </div>
+
+                    <!-- Trend Analizi -->
+                    <div class="summary-card">
+                        <h3>📊 Trend Analizi</h3>
+                        <div id="trendAnalysis">
+                            <p>Trend hesaplanıyor...</p>
+                        </div>
+                    </div>
+
+                    <!-- Düzenli Ödeme Analizi -->
+                    <div class="summary-card">
+                        <h3>🔄 Düzenli Ödeme Analizi</h3>
+                        <div id="recurringAnalysis">
+                            <p>Düzenli ödemeler analiz ediliyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Karşılaştırmalı Analiz -->
+                <div class="summary-card" style="margin-top: 24px;">
+                    <h3>🔄 Karşılaştırmalı Analiz</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="compareMonth1">1. Dönem</label>
+                            <input type="month" id="compareMonth1">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="compareMonth2">2. Dönem</label>
+                            <input type="month" id="compareMonth2">
+                        </div>
+                        <div style="display: flex; align-items: end;">
+                            <button class="btn" onclick="generateComparison()" style="background: var(--primary); width: 100%;">
+                                🔍 Karşılaştır
+                            </button>
+                        </div>
+                    </div>
+                    <div id="comparisonResults" style="display: none;">
+                        <canvas id="comparisonChart" width="800" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <!-- Hesaplar -->
             <div id="hesaplar" class="tab-content">
                 <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">Hesaplar</h2>
@@ -1038,6 +1204,8 @@
                 updateHarcamaTable();
             } else if (tabName === 'duzenli') {
                 updateDuzenliOdemelerListesi();
+            } else if (tabName === 'analitik') {
+                initializeAnalytics();
             } else if (tabName === 'hesaplar') {
                 updateHesaplar();
             } else if (tabName === 'aylik') {
@@ -2523,6 +2691,571 @@
             document.querySelectorAll('.field-error, .field-success').forEach(msg => {
                 msg.classList.remove('show');
             });
+        }
+
+        // Analytics Variables
+        let chartInstances = {};
+        
+        // Analytics Functions
+        function initializeAnalytics() {
+            // Set default date range
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            const startMonth = sixMonthsAgo.toISOString().slice(0, 7);
+            
+            document.getElementById('analitikBaslangic').value = startMonth;
+            document.getElementById('analitikBitis').value = currentMonth;
+            
+            // Set comparison defaults
+            const lastMonth = new Date();
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            document.getElementById('compareMonth1').value = lastMonth.toISOString().slice(0, 7);
+            document.getElementById('compareMonth2').value = currentMonth;
+            
+            updateAnalytics();
+        }
+
+        function updateAnalytics() {
+            const filters = getAnalyticsFilters();
+            const data = getFilteredAnalyticsData(filters);
+            
+            updateMetrics(data);
+            createCharts(data);
+            updateDetailedTables(data);
+        }
+
+        function getAnalyticsFilters() {
+            return {
+                startDate: document.getElementById('analitikBaslangic').value,
+                endDate: document.getElementById('analitikBitis').value,
+                user: document.getElementById('analitikKullanici').value,
+                card: document.getElementById('analitikKart').value
+            };
+        }
+
+        function getFilteredAnalyticsData(filters) {
+            let filtered = [...harcamalar];
+            
+            // Date filter
+            if (filters.startDate || filters.endDate) {
+                filtered = filtered.filter(h => {
+                    const harcamaMonth = h.tarih.slice(0, 7);
+                    const afterStart = !filters.startDate || harcamaMonth >= filters.startDate;
+                    const beforeEnd = !filters.endDate || harcamaMonth <= filters.endDate;
+                    return afterStart && beforeEnd;
+                });
+            }
+            
+            // User filter
+            if (filters.user) {
+                filtered = filtered.filter(h => h.kullanici === filters.user);
+            }
+            
+            // Card filter
+            if (filters.card) {
+                filtered = filtered.filter(h => h.kart === filters.card);
+            }
+            
+            return filtered;
+        }
+
+        function updateMetrics(data) {
+            const totalAmount = data.reduce((sum, h) => sum + (h.tutar || 0), 0);
+            const transactionCount = data.length;
+            
+            // Calculate monthly average
+            const months = [...new Set(data.map(h => h.tarih.slice(0, 7)))];
+            const monthlyAverage = months.length > 0 ? totalAmount / months.length : 0;
+            
+            // Find most used card
+            const cardStats = {};
+            data.forEach(h => {
+                cardStats[h.kart] = (cardStats[h.kart] || 0) + h.tutar;
+            });
+            const mostUsedCard = Object.keys(cardStats).reduce((a, b) => cardStats[a] > cardStats[b] ? a : b, '-');
+            const cardPercentage = totalAmount > 0 ? ((cardStats[mostUsedCard] || 0) / totalAmount * 100).toFixed(1) : 0;
+            
+            // Find most active user
+            const userStats = {};
+            data.forEach(h => {
+                userStats[h.kullanici] = (userStats[h.kullanici] || 0) + h.tutar;
+            });
+            const mostActiveUser = Object.keys(userStats).reduce((a, b) => userStats[a] > userStats[b] ? a : b, '-');
+            const userPercentage = totalAmount > 0 ? ((userStats[mostActiveUser] || 0) / totalAmount * 100).toFixed(1) : 0;
+            
+            // Update UI
+            document.getElementById('metricsToplamHarcama').textContent = `${totalAmount.toFixed(2)} TL`;
+            document.getElementById('metricsHarcamaSayisi').textContent = transactionCount;
+            document.getElementById('metricsAylikOrtalama').textContent = `${monthlyAverage.toFixed(2)} TL`;
+            document.getElementById('metricsAySayisi').textContent = months.length;
+            document.getElementById('metricsEnCokKart').textContent = mostUsedCard;
+            document.getElementById('metricsKartOran').textContent = `${cardPercentage}%`;
+            document.getElementById('metricsEnAktifKullanici').textContent = mostActiveUser;
+            document.getElementById('metricsKullaniciOran').textContent = `${userPercentage}%`;
+        }
+
+        function createCharts(data) {
+            createMonthlyTrendChart(data);
+            createCardDistributionChart(data);
+            createUserDistributionChart(data);
+            createWeeklyActivityChart(data);
+        }
+
+        function createMonthlyTrendChart(data) {
+            const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
+            
+            // Destroy existing chart
+            if (chartInstances.monthlyTrend) {
+                chartInstances.monthlyTrend.destroy();
+            }
+            
+            // Group by month
+            const monthlyData = {};
+            data.forEach(h => {
+                const month = h.tarih.slice(0, 7);
+                monthlyData[month] = (monthlyData[month] || 0) + h.tutar;
+            });
+            
+            const sortedMonths = Object.keys(monthlyData).sort();
+            const amounts = sortedMonths.map(month => monthlyData[month]);
+            
+            chartInstances.monthlyTrend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedMonths.map(month => {
+                        const [year, monthNum] = month.split('-');
+                        return new Date(year, monthNum - 1).toLocaleDateString('tr-TR', { 
+                            month: 'short', 
+                            year: '2-digit' 
+                        });
+                    }),
+                    datasets: [{
+                        label: 'Aylık Harcama (TL)',
+                        data: amounts,
+                        borderColor: 'rgb(99, 102, 241)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Toplam: ' + context.parsed.y.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCardDistributionChart(data) {
+            const ctx = document.getElementById('cardDistributionChart').getContext('2d');
+            
+            if (chartInstances.cardDistribution) {
+                chartInstances.cardDistribution.destroy();
+            }
+            
+            const cardData = {};
+            data.forEach(h => {
+                cardData[h.kart] = (cardData[h.kart] || 0) + h.tutar;
+            });
+            
+            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            
+            chartInstances.cardDistribution = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(cardData),
+                    datasets: [{
+                        data: Object.values(cardData),
+                        backgroundColor: colors.slice(0, Object.keys(cardData).length),
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return context.label + ': ' + context.parsed.toLocaleString('tr-TR') + ' TL (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createUserDistributionChart(data) {
+            const ctx = document.getElementById('userDistributionChart').getContext('2d');
+            
+            if (chartInstances.userDistribution) {
+                chartInstances.userDistribution.destroy();
+            }
+            
+            const userData = {};
+            data.forEach(h => {
+                userData[h.kullanici] = (userData[h.kullanici] || 0) + h.tutar;
+            });
+            
+            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            
+            chartInstances.userDistribution = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(userData),
+                    datasets: [{
+                        label: 'Harcama (TL)',
+                        data: Object.values(userData),
+                        backgroundColor: colors.slice(0, Object.keys(userData).length),
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createWeeklyActivityChart(data) {
+            const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
+            
+            if (chartInstances.weeklyActivity) {
+                chartInstances.weeklyActivity.destroy();
+            }
+            
+            // Group by day of week
+            const dayData = new Array(7).fill(0);
+            const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+            
+            data.forEach(h => {
+                const date = new Date(h.tarih);
+                const dayOfWeek = date.getDay();
+                dayData[dayOfWeek] += h.tutar;
+            });
+            
+            chartInstances.weeklyActivity = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: dayNames,
+                    datasets: [{
+                        label: 'Haftalık Harcama Dağılımı',
+                        data: dayData,
+                        borderColor: 'rgb(99, 102, 241)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        pointBackgroundColor: 'rgb(99, 102, 241)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(99, 102, 241)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.r.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDetailedTables(data) {
+            updateTopExpensesTable(data);
+            updateTrendAnalysis(data);
+            updateRecurringAnalysis();
+        }
+
+        function updateTopExpensesTable(data) {
+            const topExpenses = data
+                .sort((a, b) => b.tutar - a.tutar)
+                .slice(0, 10);
+            
+            let html = '<div style="max-height: 300px; overflow-y: auto;">';
+            topExpenses.forEach((expense, index) => {
+                const date = new Date(expense.tarih).toLocaleDateString('tr-TR');
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">${expense.aciklama || 'Harcama'}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">${expense.kullanici} • ${expense.kart} • ${date}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; color: var(--danger);">${expense.tutar.toFixed(2)} TL</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">#${index + 1}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            document.getElementById('topExpensesTable').innerHTML = html;
+        }
+
+        function updateTrendAnalysis(data) {
+            if (data.length < 2) {
+                document.getElementById('trendAnalysis').innerHTML = '<p>Yeterli veri yok.</p>';
+                return;
+            }
+            
+            // Group by month and calculate trend
+            const monthlyData = {};
+            data.forEach(h => {
+                const month = h.tarih.slice(0, 7);
+                monthlyData[month] = (monthlyData[month] || 0) + h.tutar;
+            });
+            
+            const sortedMonths = Object.keys(monthlyData).sort();
+            const amounts = sortedMonths.map(month => monthlyData[month]);
+            
+            // Calculate trend (simple linear regression)
+            const n = amounts.length;
+            const sumX = amounts.reduce((sum, _, i) => sum + i, 0);
+            const sumY = amounts.reduce((sum, amount) => sum + amount, 0);
+            const sumXY = amounts.reduce((sum, amount, i) => sum + (i * amount), 0);
+            const sumXX = amounts.reduce((sum, _, i) => sum + (i * i), 0);
+            
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const avgAmount = sumY / n;
+            
+            let trendText = '';
+            let trendColor = '';
+            
+            if (slope > avgAmount * 0.1) {
+                trendText = '📈 Harcamalarınız artma eğiliminde';
+                trendColor = 'var(--danger)';
+            } else if (slope < -avgAmount * 0.1) {
+                trendText = '📉 Harcamalarınız azalma eğiliminde';
+                trendColor = 'var(--success)';
+            } else {
+                trendText = '📊 Harcamalarınız stabil';
+                trendColor = 'var(--primary)';
+            }
+            
+            const html = `
+                <div style="padding: 16px; background: var(--secondary); border-radius: 8px; margin-bottom: 12px;">
+                    <div style="font-weight: 600; color: ${trendColor}; margin-bottom: 8px;">${trendText}</div>
+                    <div style="font-size: 14px; color: var(--text-secondary);">
+                        Son ${n} ayın ortalaması: ${avgAmount.toFixed(2)} TL
+                    </div>
+                </div>
+                <div style="font-size: 13px; color: var(--text-secondary);">
+                    • En yüksek ay: ${Math.max(...amounts).toFixed(2)} TL<br>
+                    • En düşük ay: ${Math.min(...amounts).toFixed(2)} TL<br>
+                    • Standart sapma: ${Math.sqrt(amounts.reduce((sum, x) => sum + Math.pow(x - avgAmount, 2), 0) / n).toFixed(2)} TL
+                </div>
+            `;
+            
+            document.getElementById('trendAnalysis').innerHTML = html;
+        }
+
+        function updateRecurringAnalysis() {
+            const activeRecurring = duzenliOdemeler.filter(o => o.aktif);
+            const totalMonthlyRecurring = activeRecurring.reduce((sum, o) => sum + o.tutar, 0);
+            
+            let html = `
+                <div style="margin-bottom: 16px;">
+                    <div style="font-weight: 600; font-size: 16px; color: var(--primary);">
+                        ${totalMonthlyRecurring.toFixed(2)} TL/ay
+                    </div>
+                    <div style="font-size: 14px; color: var(--text-secondary);">
+                        ${activeRecurring.length} aktif düzenli ödeme
+                    </div>
+                </div>
+            `;
+            
+            if (activeRecurring.length > 0) {
+                html += '<div style="font-size: 13px;">';
+                activeRecurring.forEach(odeme => {
+                    html += `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>${odeme.ad}</span>
+                            <span style="font-weight: 600;">${odeme.tutar.toFixed(2)} TL</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                // Yearly projection
+                const yearlyTotal = totalMonthlyRecurring * 12;
+                html += `
+                    <div style="margin-top: 16px; padding: 12px; background: var(--primary-light); border-radius: 6px;">
+                        <div style="font-size: 14px; font-weight: 600; color: var(--primary);">
+                            Yıllık Projeksiyon: ${yearlyTotal.toFixed(2)} TL
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('recurringAnalysis').innerHTML = html;
+        }
+
+        function generateComparison() {
+            const month1 = document.getElementById('compareMonth1').value;
+            const month2 = document.getElementById('compareMonth2').value;
+            
+            if (!month1 || !month2) {
+                showToast('Lütfen her iki dönemi de seçin', 'error');
+                return;
+            }
+            
+            const data1 = harcamalar.filter(h => h.tarih.startsWith(month1));
+            const data2 = harcamalar.filter(h => h.tarih.startsWith(month2));
+            
+            const total1 = data1.reduce((sum, h) => sum + h.tutar, 0);
+            const total2 = data2.reduce((sum, h) => sum + h.tutar, 0);
+            
+            createComparisonChart(month1, month2, data1, data2);
+            document.getElementById('comparisonResults').style.display = 'block';
+            
+            showToast(`Karşılaştırma tamamlandı: ${total1.toFixed(2)} TL vs ${total2.toFixed(2)} TL`, 'success');
+        }
+
+        function createComparisonChart(month1, month2, data1, data2) {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            if (chartInstances.comparison) {
+                chartInstances.comparison.destroy();
+            }
+            
+            // Group by users for comparison
+            const users = ['Sen', 'SinanAbi', 'SemihAbi', 'Anne', 'Talha'];
+            const data1ByUser = {};
+            const data2ByUser = {};
+            
+            users.forEach(user => {
+                data1ByUser[user] = data1.filter(h => h.kullanici === user).reduce((sum, h) => sum + h.tutar, 0);
+                data2ByUser[user] = data2.filter(h => h.kullanici === user).reduce((sum, h) => sum + h.tutar, 0);
+            });
+            
+            const month1Name = new Date(month1 + '-01').toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' });
+            const month2Name = new Date(month2 + '-01').toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' });
+            
+            chartInstances.comparison = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: users,
+                    datasets: [{
+                        label: month1Name,
+                        data: users.map(user => data1ByUser[user]),
+                        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                        borderRadius: 6
+                    }, {
+                        label: month2Name,
+                        data: users.map(user => data2ByUser[user]),
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportAnalyticsReport() {
+            showToast('PDF rapor özelliği geliştiriliyor...', 'info');
+            // TODO: Implement PDF export with jsPDF
+        }
+
+        function exportToExcel() {
+            const filters = getAnalyticsFilters();
+            const data = getFilteredAnalyticsData(filters);
+            
+            // Create CSV content
+            let csvContent = 'Tarih,Kart,Kullanıcı,Açıklama,Tutar,Taksit\n';
+            data.forEach(h => {
+                const taksitInfo = h.isTaksit ? `${h.taksitNo}/${h.toplamTaksit}` : '';
+                csvContent += `${h.tarih},${h.kart},${h.kullanici},"${h.aciklama}",${h.tutar},${taksitInfo}\n`;
+            });
+            
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `harcama-analizi-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('Excel dosyası indirildi!', 'success');
         }
 
         // PWA Functions
