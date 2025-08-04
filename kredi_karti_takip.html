@@ -539,6 +539,12 @@
             max-height: 300px;
         }
 
+        #dashboardTrendChart, #dashboardUserChart {
+            width: 100% !important;
+            height: 200px !important;
+            max-height: 200px;
+        }
+
         .debt-positive {
             color: var(--danger);
         }
@@ -891,17 +897,97 @@
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="showTab('harcama')">Harcama Ekle</button>
-            <button class="tab" onclick="showTab('liste')">Harcama Listesi</button>
-            <button class="tab" onclick="showTab('duzenli')">Düzenli Ödemeler</button>
-            <button class="tab" onclick="showTab('analitik')">📊 Analitik</button>
-            <button class="tab" onclick="showTab('hesaplar')">Hesaplar</button>
-            <button class="tab" onclick="showTab('aylik')">Aylık Özet</button>
-            <button class="tab" onclick="showTab('yedekleme')">Veri Yönetimi</button>
+            <button class="tab active" onclick="showTab('dashboard')">📊 Gösterge Paneli</button>
+            <button class="tab" onclick="showTab('harcama')">➕ Harcama Ekle</button>
+            <button class="tab" onclick="showTab('liste')">📋 Harcama Listesi</button>
+            <button class="tab" onclick="showTab('duzenli')">🔄 Düzenli Ödemeler</button>
+            <button class="tab" onclick="showTab('analitik')">📈 Analitik</button>
+            <button class="tab" onclick="showTab('hesaplar')">💰 Hesaplar</button>
+            <button class="tab" onclick="showTab('aylik')">📅 Aylık Özet</button>
+            <button class="tab" onclick="showTab('yedekleme')">⚙️ Veri Yönetimi</button>
         </div>
 
         <div class="content">
-            <div id="harcama" class="tab-content active">
+            <div id="dashboard" class="tab-content active">
+                <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">📊 Gösterge Paneli</h2>
+                
+                <div class="summary-cards" style="margin-bottom: 32px;">
+                    <div class="summary-card">
+                        <h3>💰 Bu Ay Toplam Harcama</h3>
+                        <div class="amount" id="dashboardThisMonth">0 TL</div>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+                            <span id="dashboardThisMonthComparison">-</span>
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>📈 Geçen Ay Karşılaştırma</h3>
+                        <div class="amount" id="dashboardLastMonth">0 TL</div>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+                            <span id="dashboardTrendIndicator">-</span>
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>🎯 Ortalama Günlük Harcama</h3>
+                        <div class="amount" id="dashboardDailyAverage">0 TL</div>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+                            Bu aya göre hesaplanmış
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>💳 En Çok Kullanılan Kart</h3>
+                        <div class="amount" id="dashboardTopCard">-</div>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+                            <span id="dashboardTopCardAmount">0 TL</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <div class="summary-card">
+                        <h3>📊 Son 6 Ay Trend</h3>
+                        <canvas id="dashboardTrendChart"></canvas>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
+                        <canvas id="dashboardUserChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="summary-cards" style="margin-bottom: 24px;">
+                    <div class="summary-card">
+                        <h3>⚡ Hızlı İşlemler</h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button class="btn" onclick="showTab('harcama')" style="width: 100%;">
+                                ➕ Yeni Harcama Ekle
+                            </button>
+                            <button class="btn" onclick="showTab('liste')" style="width: 100%;">
+                                📋 Harcamaları Görüntüle
+                            </button>
+                            <button class="btn" onclick="showTab('hesaplar')" style="width: 100%;">
+                                💰 Borç Durumunu Gör
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>📋 Son Harcamalar</h3>
+                        <div id="dashboardRecentExpenses" style="max-height: 200px; overflow-y: auto;">
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>🔔 Yaklaşan Taksitler</h3>
+                        <div id="dashboardUpcomingInstallments" style="max-height: 200px; overflow-y: auto;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="harcama" class="tab-content">
                 <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">Yeni Harcama Ekle</h2>
                 <div class="quick-info">
                     <h3>Hızlı Ekleme</h3>
@@ -2237,6 +2323,208 @@
             localStorage.setItem('lastUpdate', new Date().toISOString());
         }
 
+        function updateDashboard() {
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const lastMonth = new Date();
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            const lastMonthStr = lastMonth.toISOString().slice(0, 7);
+
+            const thisMonthExpenses = harcamalar.filter(h => h.tarih.startsWith(currentMonth));
+            const lastMonthExpenses = harcamalar.filter(h => h.tarih.startsWith(lastMonthStr));
+
+            const thisMonthTotal = thisMonthExpenses.reduce((sum, h) => sum + h.tutar, 0);
+            const lastMonthTotal = lastMonthExpenses.reduce((sum, h) => sum + h.tutar, 0);
+
+            document.getElementById('dashboardThisMonth').textContent = thisMonthTotal.toLocaleString('tr-TR') + ' TL';
+            document.getElementById('dashboardLastMonth').textContent = lastMonthTotal.toLocaleString('tr-TR') + ' TL';
+
+            const comparison = thisMonthTotal - lastMonthTotal;
+            const comparisonText = comparison > 0 ? 
+                `+${comparison.toLocaleString('tr-TR')} TL (↑${((comparison/lastMonthTotal)*100).toFixed(1)}%)` :
+                `${comparison.toLocaleString('tr-TR')} TL (↓${(Math.abs(comparison/lastMonthTotal)*100).toFixed(1)}%)`;
+            
+            document.getElementById('dashboardThisMonthComparison').textContent = lastMonthTotal > 0 ? comparisonText : 'İlk ay';
+            document.getElementById('dashboardTrendIndicator').textContent = comparison > 0 ? 
+                '📈 Artış' : comparison < 0 ? '📉 Azalış' : '➡️ Sabit';
+
+            const daysInMonth = new Date().getDate();
+            const dailyAverage = thisMonthTotal / daysInMonth;
+            document.getElementById('dashboardDailyAverage').textContent = dailyAverage.toLocaleString('tr-TR') + ' TL';
+
+            const cardTotals = {};
+            thisMonthExpenses.forEach(h => {
+                cardTotals[h.kart] = (cardTotals[h.kart] || 0) + h.tutar;
+            });
+            
+            const topCard = Object.keys(cardTotals).reduce((a, b) => cardTotals[a] > cardTotals[b] ? a : b, Object.keys(cardTotals)[0]);
+            if (topCard) {
+                document.getElementById('dashboardTopCard').textContent = topCard;
+                document.getElementById('dashboardTopCardAmount').textContent = cardTotals[topCard].toLocaleString('tr-TR') + ' TL';
+            }
+
+            updateDashboardCharts();
+            updateDashboardRecentExpenses();
+            updateDashboardUpcomingInstallments();
+        }
+
+        function updateDashboardCharts() {
+            const chartInstances = window.chartInstances || {};
+
+            const currentDate = new Date();
+            const months = [];
+            const monthlyTotals = [];
+
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const monthStr = `${year}-${month}`;
+                const monthName = date.toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' });
+                
+                const monthExpenses = harcamalar.filter(h => h.tarih.startsWith(monthStr));
+                const monthTotal = monthExpenses.reduce((sum, h) => sum + h.tutar, 0);
+                
+                months.push(monthName);
+                monthlyTotals.push(monthTotal);
+            }
+
+            const trendCtx = document.getElementById('dashboardTrendChart').getContext('2d');
+            if (chartInstances.dashboardTrend) {
+                chartInstances.dashboardTrend.destroy();
+            }
+            chartInstances.dashboardTrend = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Aylık Harcama',
+                        data: monthlyTotals,
+                        borderColor: 'rgb(99, 102, 241)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('tr-TR') + ' TL';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const thisMonthExpenses = harcamalar.filter(h => h.tarih.startsWith(currentMonth));
+            
+            const userTotals = {};
+            thisMonthExpenses.forEach(h => {
+                userTotals[h.kullanici] = (userTotals[h.kullanici] || 0) + h.tutar;
+            });
+
+            const userCtx = document.getElementById('dashboardUserChart').getContext('2d');
+            if (chartInstances.dashboardUser) {
+                chartInstances.dashboardUser.destroy();
+            }
+            chartInstances.dashboardUser = new Chart(userCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(userTotals),
+                    datasets: [{
+                        data: Object.values(userTotals),
+                        backgroundColor: [
+                            '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                            '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#14b8a6'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            window.chartInstances = chartInstances;
+        }
+
+        function updateDashboardRecentExpenses() {
+            const recentExpenses = harcamalar
+                .sort((a, b) => new Date(b.tarih) - new Date(a.tarih))
+                .slice(0, 5);
+
+            let html = '';
+            recentExpenses.forEach(expense => {
+                const date = new Date(expense.tarih).toLocaleDateString('tr-TR');
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                        <div>
+                            <div style="font-weight: 600;">${expense.aciklama || 'Harcama'}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">${date} • ${expense.kullanici} • ${expense.kart}</div>
+                        </div>
+                        <div style="font-weight: 700; color: var(--primary);">${expense.tutar.toLocaleString('tr-TR')} TL</div>
+                    </div>
+                `;
+            });
+
+            if (html === '') {
+                html = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">Henüz harcama yok</p>';
+            }
+
+            document.getElementById('dashboardRecentExpenses').innerHTML = html;
+        }
+
+        function updateDashboardUpcomingInstallments() {
+            const upcomingInstallments = [];
+            const currentDate = new Date();
+            const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+            const nextMonthStr = nextMonth.toISOString().slice(0, 7);
+
+            harcamalar.forEach(harcama => {
+                if (harcama.isTaksit && harcama.taksitNo && harcama.toplamTaksit) {
+                    const remainingInstallments = harcama.toplamTaksit - harcama.taksitNo;
+                    if (remainingInstallments > 0) {
+                        upcomingInstallments.push({
+                            aciklama: harcama.aciklama || 'Taksitli Ödeme',
+                            tutar: harcama.tutar,
+                            kullanici: harcama.kullanici,
+                            kart: harcama.kart,
+                            kalan: remainingInstallments
+                        });
+                    }
+                }
+            });
+
+            let html = '';
+            upcomingInstallments.slice(0, 5).forEach(installment => {
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                        <div>
+                            <div style="font-weight: 600;">${installment.aciklama}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">${installment.kullanici} • ${installment.kart} • ${installment.kalan} taksit kaldı</div>
+                        </div>
+                        <div style="font-weight: 700; color: var(--warning);">${installment.tutar.toLocaleString('tr-TR')} TL</div>
+                    </div>
+                `;
+            });
+
+            if (html === '') {
+                html = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">Yaklaşan taksit yok</p>';
+            }
+
+            document.getElementById('dashboardUpcomingInstallments').innerHTML = html;
+        }
+
         function addCreditCard() {
             const yeniKart = document.getElementById('yeniKart').value.trim();
             if (!yeniKart) {
@@ -3114,6 +3402,10 @@
             localStorage.setItem('harcamalar', JSON.stringify(harcamalar));
             saveLastUpdate();
             
+            updateHarcamaTable();
+            updateHesaplar();
+            updateDashboard();
+            
             const form = document.getElementById('harcamaForm');
             const kart = document.getElementById('kart').value;
             const kullanici = document.getElementById('kullanici').value;
@@ -3876,6 +4168,7 @@
             updateAylikOzet();
             updateVeriDurumu();
             updateDuzenliOdemelerListesi();
+            updateDashboard();
             updateOnlineStatus();
             
             initializeAutocomplete();
