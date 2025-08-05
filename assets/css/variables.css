@@ -1,0 +1,70 @@
+/* CSS Variables ve Tema Tanımları */
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #e0e7ff;
+    --secondary: #f1f5f9;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --background: #f8fafc;
+    --white: #ffffff;
+    --card-bg: #ffffff;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius: 12px;
+    --radius-sm: 8px;
+    
+    --shadow-soft: 0 2px 15px rgba(0, 0, 0, 0.08);
+    --shadow-strong: 0 10px 40px rgba(0, 0, 0, 0.12);
+    --glow: 0 0 20px rgba(99, 102, 241, 0.3);
+    
+    --transition-fast: 0.15s ease-out;
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+    --primary: #8b5cf6;
+    --primary-dark: #7c3aed;
+    --primary-light: #1e1b4b;
+    --secondary: #1f2937;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --border: #374151;
+    --background: #111827;
+    --white: #1f2937;
+    --card-bg: #1f2937;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-soft: 0 2px 15px rgba(0, 0, 0, 0.4);
+    --shadow-strong: 0 10px 40px rgba(0, 0, 0, 0.6);
+    --glow: 0 0 20px rgba(139, 92, 246, 0.4);
+}
+
+[data-theme="blue"] {
+    --primary: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --primary-light: #dbeafe;
+    --glow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="green"] {
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --primary-light: #d1fae5;
+    --glow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+[data-theme="orange"] {
+    --primary: #f59e0b;
+    --primary-dark: #d97706;
+    --primary-light: #fef3c7;
+    --glow: 0 0 20px rgba(245, 158, 11, 0.3);
+}

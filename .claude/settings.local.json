@@ -5,7 +5,8 @@
       "Bash(python:*)",
       "Bash(powershell:*)",
       "Bash(sed:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
