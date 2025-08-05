@@ -100,6 +100,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Kart ve kullanıcı seçeneklerini initialize et
+    updateCardOptions();
+    updateUserOptions();
+    
     // Form başlangıç değerleri
     document.getElementById('ozet_tarih').value = currentMonth;
     document.getElementById('harcamaTarih').value = currentDate;

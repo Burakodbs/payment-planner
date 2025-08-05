@@ -156,22 +156,84 @@ function importData(event) {
         try {
             const data = JSON.parse(e.target.result);
             
-            if (data.harcamalar) harcamalar = data.harcamalar;
-            if (data.duzenliOdemeler) duzenliOdemeler = data.duzenliOdemeler;
-            if (data.kredikartlari) kredikartlari = data.kredikartlari;
-            if (data.kisiler) kisiler = data.kisiler;
+            // Veri kontrolü ve geri yükleme
+            if (data.harcamalar && Array.isArray(data.harcamalar)) {
+                harcamalar = data.harcamalar;
+                localStorage.setItem('harcamalar', JSON.stringify(harcamalar));
+            }
             
-            saveData();
+            if (data.duzenliOdemeler && Array.isArray(data.duzenliOdemeler)) {
+                duzenliOdemeler = data.duzenliOdemeler;
+                localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
+            }
+            
+            if (data.kredikartlari && Array.isArray(data.kredikartlari)) {
+                kredikartlari = data.kredikartlari;
+                localStorage.setItem('kredikartlari', JSON.stringify(kredikartlari));
+                updateCardOptions();
+            }
+            
+            if (data.kisiler && Array.isArray(data.kisiler)) {
+                kisiler = data.kisiler;
+                localStorage.setItem('kisiler', JSON.stringify(kisiler));
+                updateUserOptions();
+            }
+            
+            // UI'ları güncelle
             updateHarcamaTable();
             updateDashboard();
+            updateHesaplar();
             
-            showToast('Veriler başarıyla içe aktarıldı!', 'success');
+            const importCount = {
+                harcamalar: data.harcamalar ? data.harcamalar.length : 0,
+                kredikartlari: data.kredikartlari ? data.kredikartlari.length : 0,
+                kisiler: data.kisiler ? data.kisiler.length : 0
+            };
+            
+            showToast(`Veriler başarıyla içe aktarıldı! ${importCount.harcamalar} harcama, ${importCount.kredikartlari} kart, ${importCount.kisiler} kişi yüklendi.`, 'success');
         } catch (error) {
             showToast('Dosya okuma hatası: ' + error.message, 'error');
         }
     };
     
     reader.readAsText(file);
+}
+
+// Kart ve kullanıcı seçeneklerini güncelle
+function updateCardOptions() {
+    const kartSelects = document.querySelectorAll('#kart, #filtreKart');
+    kartSelects.forEach(select => {
+        const currentValue = select.value;
+        const options = select.querySelectorAll('option:not([value=""])');
+        options.forEach(option => option.remove());
+        
+        kredikartlari.forEach(kart => {
+            const option = document.createElement('option');
+            option.value = kart;
+            option.textContent = kart;
+            select.appendChild(option);
+        });
+        
+        select.value = currentValue;
+    });
+}
+
+function updateUserOptions() {
+    const kullaniciSelects = document.querySelectorAll('#kullanici, #filtreKullanici');
+    kullaniciSelects.forEach(select => {
+        const currentValue = select.value;
+        const options = select.querySelectorAll('option:not([value=""])');
+        options.forEach(option => option.remove());
+        
+        kisiler.forEach(kisi => {
+            const option = document.createElement('option');
+            option.value = kisi;
+            option.textContent = kisi;
+            select.appendChild(option);
+        });
+        
+        select.value = currentValue;
+    });
 }
 
 function clearAllData() {
