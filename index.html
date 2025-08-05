@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kredi Kartı Harcama Takip Sistemi</title>
+    
+    <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+    <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
+    <meta name="author" content="Harcama Takip Sistemi">
+    
+    <meta name="theme-color" content="#6366f1">
+    <meta name="msapplication-navbutton-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Harcama Takip">
+    
+    <link rel="manifest" href="./manifest.json">
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iNDgiIGZpbGw9IiM2MzY2ZjEiLz4KPGNpcmNsZSBjeD0iOTYiIGN5PSI2NCIgcj0iMTYiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjQ4IiB5PSI5NiIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iNDgiIHk9IjEyOCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==">
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiM2MzY2ZjEiLz4KPHA+PGNpcmNsZSBjeD0iMjQiIGN5PSIxNiIgcj0iNCIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTIiIHk9IjI0IiB3aWR0aD0iMjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjEyIiB5PSIzMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjQiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+    
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="./assets/css/variables.css">
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/layout.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="theme-switcher">
+                <button class="theme-btn" onclick="toggleTheme()" title="Tema Değiştir">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <div class="theme-colors">
+                    <button class="color-btn" data-theme="light" title="Varsayılan">🔮</button>
+                    <button class="color-btn" data-theme="blue" title="Mavi">💙</button>
+                    <button class="color-btn" data-theme="green" title="Yeşil">💚</button>
+                    <button class="color-btn" data-theme="orange" title="Turuncu">🧡</button>
+                </div>
+            </div>
+            <h1>Kredi Kartı Harcama Takip Sistemi</h1>
+            <p>Kredi kartı harcamalarınızı takip edin ve kimin ne kadar ödeyeceğini hesaplayın</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('dashboard')">📊 Gösterge Paneli</button>
+            <button class="tab" onclick="showTab('harcama')">➕ Harcama Ekle</button>
+            <button class="tab" onclick="showTab('liste')">📋 Harcama Listesi</button>
+            <button class="tab" onclick="showTab('hesaplar')">💰 Hesaplar</button>
+            <button class="tab" onclick="showTab('aylik')">📅 Aylık Özet</button>
+            <button class="tab" onclick="showTab('yedekleme')">⚙️ Veri Yönetimi</button>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <h2>📊 Gösterge Paneli</h2>
+                
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>💰 Bu Ay Toplam Harcama</h3>
+                        <div class="amount" id="thisMonthTotal">0 TL</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>📊 Toplam Borç</h3>
+                        <div class="amount" id="totalCurrentDebt">0 TL</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>⏳ Gelecek Taksitler</h3>
+                        <div class="amount" id="totalFuturePayments">0 TL</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <div class="summary-card">
+                        <h3>📊 Son 6 Ay Trend</h3>
+                        <canvas id="dashboardTrendChart"></canvas>
+                    </div>
+                    <div class="summary-card">
+                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
+                        <canvas id="dashboardUserChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>📋 Son Harcamalar</h3>
+                        <div id="recentExpensesList"></div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>🔔 Yaklaşan Taksitler</h3>
+                        <div id="upcomingInstallmentsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Harcama Ekleme Tab -->
+            <div id="harcama" class="tab-content">
+                <h2>Yeni Harcama Ekle</h2>
+                <div class="quick-info">
+                    <h3>Hızlı Ekleme</h3>
+                    <p>Sadece zorunlu alanları doldurun, Tab tuşuyla hızlıca geçiş yapın ve Enter'a basarak ekleyin.</p>
+                    <p class="shortcut-info">Kısayollar: 1=Sen, 2=SinanAbi, 3=SemihAbi, 4=Anne, 5=Talha</p>
+                </div>
+
+                <form id="harcamaForm" onsubmit="handleHarcamaSubmit(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kart">Kredi Kartı *</label>
+                            <select name="kart" id="kart" required>
+                                <option value="">Kart Seçin</option>
+                                <option value="Axess">Axess</option>
+                                <option value="Vakıf">Vakıf</option>
+                                <option value="Enpara">Enpara</option>
+                                <option value="World">World</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="harcamaTarih">Hangi Tarih? *</label>
+                            <input type="date" name="tarih" id="harcamaTarih" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tutar">Tutar (TL) *</label>
+                            <input type="number" name="tutar" id="tutar" step="0.01" min="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kullanici">Kim Harcadı? *</label>
+                            <select name="kullanici" id="kullanici" required>
+                                <option value="">Kullanıcı Seçin</option>
+                                <option value="Sen">Sen</option>
+                                <option value="SinanAbi">SinanAbi</option>
+                                <option value="SemihAbi">SemihAbi</option>
+                                <option value="Anne">Anne</option>
+                                <option value="Talha">Talha</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taksitNo">Kaçıncı Taksit?</label>
+                            <input type="number" name="taksitNo" id="taksitNo" min="1" max="99">
+                        </div>
+                        <div class="form-group">
+                            <label for="toplamTaksit">Toplam Taksit</label>
+                            <input type="number" name="toplamTaksit" id="toplamTaksit" min="1" max="99">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="aciklama">Açıklama</label>
+                            <input type="text" name="aciklama" id="aciklama" placeholder="Harcama detayı...">
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="kategori" value="Diğer">
+                        </div>
+                        <div class="form-group">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Harcama Ekle</button>
+                </form>
+            </div>
+
+            <!-- Harcama Listesi Tab -->
+            <div id="liste" class="tab-content">
+                <h2>Harcama Listesi</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; padding: 20px; background: var(--secondary); border-radius: var(--radius-sm);">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filtreTarih">Tarih Filtresi (Ay/Yıl)</label>
+                        <input type="month" id="filtreTarih" onchange="updateHarcamaTable()">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filtreKullanici">Kullanıcı Filtresi</label>
+                        <select id="filtreKullanici" onchange="updateHarcamaTable()">
+                            <option value="">Tüm Kullanıcılar</option>
+                            <option value="Sen">Sen</option>
+                            <option value="SinanAbi">SinanAbi</option>
+                            <option value="SemihAbi">SemihAbi</option>
+                            <option value="Anne">Anne</option>
+                            <option value="Talha">Talha</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filtreKart">Kart Filtresi</label>
+                        <select id="filtreKart" onchange="updateHarcamaTable()">
+                            <option value="">Tüm Kartlar</option>
+                            <option value="Axess">Axess</option>
+                            <option value="Vakıf">Vakıf</option>
+                            <option value="Enpara">Enpara</option>
+                            <option value="World">World</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="siralamaKriteri">Sıralama</label>
+                        <select id="siralamaKriteri" onchange="updateHarcamaTable()">
+                            <option value="tarih-desc">Tarih (Yeni → Eski)</option>
+                            <option value="tarih-asc">Tarih (Eski → Yeni)</option>
+                            <option value="tutar-desc">Tutar (Yüksek → Alçak)</option>
+                            <option value="tutar-asc">Tutar (Alçak → Yüksek)</option>
+                            <option value="kullanici-asc">Kullanıcı (A → Z)</option>
+                            <option value="kart-asc">Kart (A → Z)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="minTutar">Min Tutar (TL)</label>
+                        <input type="number" id="minTutar" step="0.01" min="0" onchange="updateHarcamaTable()">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="maxTutar">Max Tutar (TL)</label>
+                        <input type="number" id="maxTutar" step="0.01" min="0" onchange="updateHarcamaTable()">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div id="sonucSayisi" style="color: var(--text-secondary); font-size: 14px;"></div>
+                </div>
+
+                <div class="table-container">
+                    <table id="harcamaTable">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Kart</th>
+                                <th>Kullanıcı</th>
+                                <th>Açıklama</th>
+                                <th>Taksit</th>
+                                <th class="text-right">Tutar</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hesaplar Tab -->
+            <div id="hesaplar" class="tab-content">
+                <h2>Hesaplar</h2>
+                <div class="table-container">
+                    <table id="hesaplarTable">
+                        <thead>
+                            <tr>
+                                <th>Kişi</th>
+                                <th class="text-right">Mevcut Harcama</th>
+                                <th class="text-right">Gelecek Taksitler</th>
+                                <th class="text-right">Toplam</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Aylık Özet Tab -->
+            <div id="aylik" class="tab-content">
+                <h2>Aylık Özet</h2>
+                <div style="margin-bottom: 20px;">
+                    <label for="ozet_tarih">Ay/Yıl Seçin</label>
+                    <input type="month" id="ozet_tarih" onchange="updateAylikOzet()">
+                </div>
+                <div id="aylikOzetContent">
+                    <p>Tarih seçin ve özet gösterilsin.</p>
+                </div>
+            </div>
+
+            <!-- Veri Yönetimi Tab -->
+            <div id="yedekleme" class="tab-content">
+                <h2>Veri Yönetimi</h2>
+                
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Veri Yedekleme</h3>
+                        <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">
+                            Verilerinizi JSON dosyası olarak bilgisayarınıza kaydedin.
+                        </p>
+                        <button class="btn" onclick="exportData()" style="width: 100%;">
+                            📥 Verileri Dışa Aktar
+                        </button>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>Veri Yükleme</h3>
+                        <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">
+                            Daha önce kaydettiğiniz JSON dosyasını yükleyin.
+                        </p>
+                        <input type="file" id="fileInput" accept=".json" style="margin-bottom: 12px;" onchange="importData(event)">
+                        <button class="btn btn-danger" onclick="clearAllData()" style="width: 100%;">
+                            🗑️ Tüm Verileri Sil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/data-manager.js"></script>
+    <script src="./assets/js/calculations.js"></script>
+    <script src="./assets/js/chart-manager.js"></script>
+    <script src="./assets/js/utils.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "name": "kredi-karti-takip",
+  "version": "2.0.0",
+  "description": "Kredi kartı harcama takip sistemi - Modern ve profesyonel yapı",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "serve": "python -m http.server 8000",
+    "lint": "echo 'Lint kontrolü için ESLint kurulması gerekiyor'",
+    "format": "echo 'Format kontrolü için Prettier kurulması gerekiyor'",
+    "build": "echo 'Bu proje statik dosyalardan oluşur, build gerekmez'",
+    "preview": "python -m http.server 8000"
+  },
+  "keywords": [
+    "expense-tracker",
+    "credit-card",
+    "finance",
+    "pwa",
+    "turkish",
+    "family-finance"
+  ],
+  "author": "Payment Planner Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/kredi-karti-takip.git"
+  },
+  "bugs": {
+    "url": "https://github.com/user/kredi-karti-takip/issues"
+  },
+  "homepage": "https://github.com/user/kredi-karti-takip#readme",
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {},
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "not op_mini all"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
