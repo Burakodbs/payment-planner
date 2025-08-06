@@ -1,5 +1,46 @@
 // Utility Fonksiyonları
 
+// Data Migration Functions
+function migrateDuzenliOdemeData() {
+    console.log('Düzenli ödeme migration başlatılıyor...');
+    
+    let migrationCount = 0;
+    harcamalar.forEach(harcama => {
+        // Eski isDuzenliOtomatik özelliğini isRegular'a çevir
+        if (harcama.isDuzenliOtomatik && !harcama.isRegular) {
+            harcama.isRegular = true;
+            delete harcama.isDuzenliOtomatik;
+            
+            // "(Otomatik)" yazısını "(Düzenli)" ile değiştir
+            if (harcama.aciklama && harcama.aciklama.includes('(Otomatik)')) {
+                harcama.aciklama = harcama.aciklama.replace('(Otomatik)', '(Düzenli)');
+            }
+            
+            migrationCount++;
+        }
+    });
+    
+    if (migrationCount > 0) {
+        console.log(`${migrationCount} düzenli ödeme migration yapıldı`);
+        // Verileri kaydet
+        if (typeof saveData === 'function') {
+            saveData();
+        } else if (authSystem && authSystem.currentUser) {
+            authSystem.saveUserData();
+        }
+        
+        // UI güncellemeleri
+        if (typeof updateHarcamaTable === 'function') {
+            updateHarcamaTable();
+        }
+        if (typeof updateDashboard === 'function') {
+            updateDashboard();
+        }
+        
+        showToast(`${migrationCount} düzenli ödeme güncellendi`, 'success');
+    }
+}
+
 // Dashboard Updates
 function updateDashboard() {
     updateDashboardStats();
@@ -952,12 +993,12 @@ function processDuzenliOdemeler() {
                     kart: odeme.kart,
                     kullanici: odeme.kullanici,
                     kategori: 'Düzenli Ödeme',
-                    aciklama: `${odeme.aciklama} (Otomatik)`,
+                    aciklama: `${odeme.aciklama} (Düzenli)`,
                     tutar: odeme.tutar,
                     taksitNo: null,
                     toplamTaksit: null,
                     isTaksit: false,
-                    isDuzenliOtomatik: true, // Bu otomatik oluşturulan düzenli ödeme
+                    isRegular: true, // Bu otomatik oluşturulan düzenli ödeme
                     duzenliOdemeId: odeme.id // Hangi düzenli ödemeden geldiğini takip et
                 };
                 

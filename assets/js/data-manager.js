@@ -38,7 +38,7 @@ function updateHarcamaTable() {
             rowStyle = 'background-color: #fff3cd; color: #856404;';
             taksitEtiket = '';
             actionButton = '<span style="color: #856404; font-size: 12px;">Gelecek Taksit</span>';
-        } else if (harcama.isRegular || harcama.isDuzenliOtomatik) {
+        } else if (harcama.isRegular) {
             rowStyle = 'background-color: #e3f2fd; color: #1565c0;';
             taksitEtiket = '';
             actionButton = `
@@ -72,9 +72,9 @@ function updateSonucSayisi(filteredHarcamalar) {
     const toplamHarcama = harcamalar.length;
     const gosterilenSayi = filteredHarcamalar.length;
     
-    const gercekHarcamalar = filteredHarcamalar.filter(h => !h.isFuture && !h.isRegular && !h.isDuzenliOtomatik).length;
+    const gercekHarcamalar = filteredHarcamalar.filter(h => !h.isFuture && !h.isRegular).length;
     const gelecekTaksitler = filteredHarcamalar.filter(h => h.isFuture).length;
-    const duzenliOdemeSayisi = filteredHarcamalar.filter(h => h.isRegular || h.isDuzenliOtomatik).length;
+    const duzenliOdemeSayisi = filteredHarcamalar.filter(h => h.isRegular).length;
     
     let mesaj = `${gosterilenSayi} kayıt gösteriliyor`;
     
@@ -278,7 +278,7 @@ function deleteHarcama(id) {
     let confirmMessage = 'Bu harcamayı silmek istediğinizden emin misiniz?';
     
     // Otomatik oluşturulan düzenli ödeme ise uyarı ver
-    if (harcama.isDuzenliOtomatik) {
+    if (harcama.isRegular) {
         confirmMessage = `Bu otomatik oluşturulan düzenli ödemeyi silmek istediğinizden emin misiniz?\n\n"${harcama.aciklama}"\n\nNot: Gelecek ay tekrar otomatik olarak oluşturulacaktır.`;
     }
     
@@ -288,8 +288,8 @@ function deleteHarcama(id) {
         updateHarcamaTable();
         updateDashboard();
         
-        if (harcama.isDuzenliOtomatik) {
-            showToast('Otomatik ödeme silindi (gelecek ay yeniden oluşturulacak)', 'info');
+        if (harcama.isRegular) {
+            showToast('Düzenli ödeme silindi (gelecek ay yeniden oluşturulacak)', 'info');
         } else {
             showToast('Harcama silindi', 'success');
         }

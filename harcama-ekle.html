@@ -253,35 +253,7 @@
     <script src="./assets/js/chart-manager.js?v=17"></script>
     <script src="./assets/js/utils.js?v=17"></script>
 
-    <script>
-        // Bu sayfaya özel kod - Harcama Ekleme
-        console.log('Harcama ekleme sayfası yüklendi');
-
-        // Kısayol bilgisini güncelle
-        function updateKisayolBilgi() {
-            const kisayolElement = document.getElementById('kisayolBilgi');
-            if (!kisayolElement || !kisiler || kisiler.length === 0) {
-                return;
-            }
-
-            const kisayollar = kisiler.map((kisi, index) => `${index + 1}=${kisi}`).join(', ');
-            kisayolElement.textContent = `Kısayollar: ${kisayollar}`;
-        }
-
-        // Auth sistem yüklendikten sonra kısayol bilgisini güncelle
-        document.addEventListener('DOMContentLoaded', function() {
-            // Kısa bir gecikme ile kısayol bilgisini güncelle
-            setTimeout(updateKisayolBilgi, 500);
-            
-            // Auth sistem data yükledikten sonra da güncelle
-            if (typeof authSystem !== 'undefined') {
-                const originalTrigger = authSystem.triggerPageUpdates;
-                authSystem.triggerPageUpdates = function() {
-                    originalTrigger.call(this);
-                    setTimeout(updateKisayolBilgi, 100);
-                };
-            }
-        });
-    </script>
+    <!-- Page Specific Scripts -->
+    <script src="./assets/js/pages/harcama-ekle.js?v=1"></script>
 </body>
 </html>

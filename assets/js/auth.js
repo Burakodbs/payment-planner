@@ -157,6 +157,17 @@ class AuthSystem {
     triggerPageUpdates() {
         console.log('📋 Sayfa güncellemeleri başlıyor...');
         
+        // Data migration işlemi
+        if (typeof migrateDuzenliOdemeData === 'function') {
+            console.log('🔄 Veri migration kontrol ediliyor...');
+            try {
+                migrateDuzenliOdemeData();
+                console.log('✅ Migration tamamlandı');
+            } catch (error) {
+                console.error('❌ Migration hatası:', error);
+            }
+        }
+        
         // Dashboard güncellemeleri
         if (typeof updateDashboard === 'function') {
             console.log('📊 Dashboard güncelleniyor...');
