@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kredi Kartı Harcama Takip Sistemi</title>
+    <title>Veri Yönetimi - Kredi Kartı Harcama Takip Sistemi</title>
     
     <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
@@ -28,12 +28,12 @@
     <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
-    <link rel="stylesheet" href="./assets/css/variables.css?v=14">
-    <link rel="stylesheet" href="./assets/css/base.css?v=14">
-    <link rel="stylesheet" href="./assets/css/layout.css?v=14">
-    <link rel="stylesheet" href="./assets/css/components.css?v=14">
-    <link rel="stylesheet" href="./assets/css/utilities.css?v=14">
-    <link rel="stylesheet" href="./assets/css/auth.css?v=14">
+    <link rel="stylesheet" href="./assets/css/variables.css?v=20">
+    <link rel="stylesheet" href="./assets/css/base.css?v=20">
+    <link rel="stylesheet" href="./assets/css/layout.css?v=20">
+    <link rel="stylesheet" href="./assets/css/components.css?v=20">
+    <link rel="stylesheet" href="./assets/css/utilities.css?v=20">
+    <link rel="stylesheet" href="./assets/css/auth.css?v=20">
 </head>
 <body>
     <!-- Authentication Container -->
@@ -175,53 +175,157 @@
         </div>
 
         <div class="tabs">
-            <a href="index.html" class="tab active">📊 Gösterge Paneli</a>
+            <a href="index.html" class="tab">📊 Gösterge Paneli</a>
             <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-            <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
+            <a href="veri-yonetimi.html" class="tab active">⚙️ Veri Yönetimi</a>
         </div>
 
         <div class="content">
-            <!-- Dashboard Content -->
+            <!-- Veri Yönetimi Content -->
             <div class="page-content">
-                <h2>📊 Gösterge Paneli</h2>
+                <h2>Veri Yönetimi</h2>
                 
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>💰 Bu Ay Toplam Harcama</h3>
-                        <div class="amount" id="thisMonthTotal">0 TL</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                    <!-- Veri Dışa Aktarma -->
+                    <div class="data-management-card">
+                        <h3>📤 Veri Dışa Aktarma</h3>
+                        <p>Tüm harcama verilerinizi, kart ve kullanıcı bilgilerinizi JSON formatında yedekleyin.</p>
+                        <button class="btn" onclick="exportData()">Verileri Dışa Aktar</button>
                     </div>
-                    <div class="summary-card">
-                        <h3>📊 Toplam Borç</h3>
-                        <div class="amount" id="totalCurrentDebt">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>⏳ Gelecek Taksitler</h3>
-                        <div class="amount" id="totalFuturePayments">0 TL</div>
-                    </div>
-                </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
-                    <div class="summary-card">
-                        <h3>📊 Son 6 Ay Trend</h3>
-                        <canvas id="dashboardTrendChart"></canvas>
+                    <!-- Veri İçe Aktarma -->
+                    <div class="data-management-card">
+                        <h3>📥 Veri İçe Aktarma</h3>
+                        <p>Daha önce dışa aktardığınız yedek dosyalarını geri yükleyin.</p>
+                        <input type="file" id="fileInput" accept=".json" style="margin-bottom: 12px;">
+                        <button class="btn" onclick="importData()">Verileri İçe Aktar</button>
                     </div>
-                    <div class="summary-card">
-                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
-                        <canvas id="dashboardUserChart"></canvas>
-                    </div>
-                </div>
 
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>📋 Son Harcamalar</h3>
-                        <div id="recentExpensesList"></div>
+                    <!-- Düzenli Ödemeler -->
+                    <div class="data-management-card">
+                        <h3>📋 Düzenli Ödemeler</h3>
+                        <p>Elektrik, su, internet gibi düzenli ödemelerinizi tanımlayın.</p>
+                        <div id="duzenliOdemelerContainer">
+                            <div id="duzenliOdemelerListesi"></div>
+                            <button class="btn btn-outline" onclick="showDuzenliOdemeForm()">Yeni Düzenli Ödeme</button>
+                        </div>
+                        
+                        <!-- Düzenli Ödeme Formu -->
+                        <div id="duzenliOdemeForm" style="display: none; margin-top: 16px; background: var(--bg-secondary); padding: 16px; border-radius: var(--radius);">
+                            <h4 id="duzenliFormTitle">Yeni Düzenli Ödeme</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="duzenliAciklama">Açıklama</label>
+                                    <input type="text" id="duzenliAciklama" placeholder="Elektrik faturası">
+                                </div>
+                                <div class="form-group">
+                                    <label for="duzenliTutar">Tutar (TL)</label>
+                                    <input type="number" id="duzenliTutar" step="0.01" min="0.01">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="duzenliKart">Kart</label>
+                                    <select id="duzenliKart">
+                                        <option value="">Kart Seçin</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="duzenliKullanici">Kullanıcı</label>
+                                    <select id="duzenliKullanici">
+                                        <option value="">Kullanıcı Seçin</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="duzenliBaslangic">Başlangıç Tarihi</label>
+                                    <input type="date" id="duzenliBaslangic">
+                                </div>
+                                <div class="form-group">
+                                    <label for="duzenliKategori">Kategori</label>
+                                    <input type="text" id="duzenliKategori" value="Düzenli Ödeme" readonly>
+                                </div>
+                            </div>
+                            <div style="margin-top: 16px;">
+                                <button id="duzenliSubmitBtn" class="btn" onclick="addDuzenliOdeme()">Ekle</button>
+                                <button class="btn btn-outline" onclick="cancelDuzenliOdeme()">İptal</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="summary-card">
-                        <h3>🔔 Yaklaşan Taksitler</h3>
-                        <div id="upcomingInstallmentsList"></div>
+
+                    <!-- Kart ve Kullanıcı Yönetimi -->
+                    <div class="data-management-card">
+                        <h3>👥 Kart ve Kullanıcı Yönetimi</h3>
+                        <p>Kredi kartlarınızı ve kullanıcılarınızı yönetin.</p>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <h4>Kartlar</h4>
+                            <div id="cardManagementList"></div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <input type="text" id="newCardInput" placeholder="Yeni kart adı">
+                                <button class="btn btn-sm" onclick="addNewCard()">Ekle</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4>Kullanıcılar</h4>
+                            <div id="userManagementList"></div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <input type="text" id="newUserInput" placeholder="Yeni kullanıcı adı">
+                                <button class="btn btn-sm" onclick="addNewUser()">Ekle</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Veri Silme -->
+                    <div class="data-management-card">
+                        <h3>🗑️ Veri Silme</h3>
+                        <p>Dikkatli olun! Bu işlemler geri alınamaz.</p>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button class="btn btn-danger" onclick="clearAllData()">Tüm Verileri Sil</button>
+                            <button class="btn btn-danger" onclick="clearExpenseData()">Sadece Harcamaları Sil</button>
+                        </div>
+                    </div>
+
+                    <!-- Test Araçları -->
+                    <div class="data-management-card">
+                        <h3>🧪 Test Araçları</h3>
+                        <p>Geliştirme ve test amaçlı araçlar</p>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button class="btn btn-outline" onclick="if(typeof processDuzenliOdemeler === 'function') { processDuzenliOdemeler(); showToast('Düzenli ödeme kontrolü yapıldı', 'info'); } else { showToast('Fonksiyon bulunamadı', 'error'); }">Düzenli Ödeme Kontrolü (Test)</button>
+                            <button class="btn btn-secondary" onclick="runManualMigration()">Düzenli Ödeme Migration (Tek Seferlik)</button>
+                        </div>
+                    </div>
+                    
+                    <!-- İstatistikler -->
+                    <div class="data-management-card">
+                        <h3>📊 Veri İstatistikleri</h3>
+                        <div id="dataStats">
+                            <div class="stat-item">
+                                <span class="stat-label">Toplam Harcama:</span>
+                                <span class="stat-value" id="totalExpenses">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Toplam Tutar:</span>
+                                <span class="stat-value" id="totalAmount">0 TL</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Kayıtlı Kart:</span>
+                                <span class="stat-value" id="totalCards">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Kayıtlı Kullanıcı:</span>
+                                <span class="stat-value" id="totalUsers">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Düzenli Ödeme:</span>
+                                <span class="stat-value" id="totalRegularPayments">0</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -230,15 +334,15 @@
     </div>
 
     <!-- JavaScript Files -->
-    <script src="./assets/js/auth.js?v=14"></script>
-    <script src="./assets/js/auth-ui.js?v=14"></script>
-    <script src="./assets/js/app.js?v=14"></script>
-    <script src="./assets/js/data-manager.js?v=14"></script>
-    <script src="./assets/js/calculations.js?v=14"></script>
-    <script src="./assets/js/chart-manager.js?v=14"></script>
-    <script src="./assets/js/utils.js?v=14"></script>
+    <script src="./assets/js/auth.js?v=20"></script>
+    <script src="./assets/js/auth-ui.js?v=20"></script>
+    <script src="./assets/js/app.js?v=20"></script>
+    <script src="./assets/js/data-manager.js?v=22"></script>
+    <script src="./assets/js/calculations.js?v=20"></script>
+    <script src="./assets/js/chart-manager.js?v=20"></script>
+    <script src="./assets/js/utils.js?v=22"></script>
 
     <!-- Page Specific Scripts -->
-    <script src="./assets/js/pages/dashboard.js?v=1"></script>
+    <script src="./assets/js/pages/veri-yonetimi.js?v=1"></script>
 </body>
 </html>

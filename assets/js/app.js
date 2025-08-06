@@ -1,66 +1,31 @@
-// Ana Uygulama Değişkenleri
-let harcamalar = JSON.parse(localStorage.getItem('harcamalar') || '[]');
-let duzenliOdemeler = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
-let kredikartlari = JSON.parse(localStorage.getItem('kredikartlari') || '["Axess", "Vakıf", "Enpara", "World"]');
-let kisiler = JSON.parse(localStorage.getItem('kisiler') || '["Sen", "SinanAbi", "SemihAbi", "Anne", "Talha"]');
+// Ana Uygulama Değişkenleri - Auth sistemi tarafından yönetilir
+let harcamalar = [];
+let duzenliOdemeler = [];
+let kredikartlari = [];
+let kisiler = [];
 
 const currentMonth = new Date().toISOString().slice(0, 7);
 const currentDate = new Date().toISOString().slice(0, 10);
 
-// Tema yönetimi
-let currentTheme = localStorage.getItem('theme') || 'light';
-let currentColorScheme = localStorage.getItem('colorScheme') || 'light';
-
+// Simple Default Theme - Clean and minimal
 function initializeTheme() {
-    document.documentElement.setAttribute('data-theme', currentColorScheme);
-    
-    const themeIcon = document.getElementById('themeIcon');
-    const isDark = currentTheme === 'dark';
-    themeIcon.textContent = isDark ? '☀️' : '🌙';
-    
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.theme === currentColorScheme) {
-            btn.classList.add('active');
-        }
-    });
+    // Simple light theme - no switching needed
+    document.documentElement.removeAttribute('data-theme');
+    updateThemeIcon();
 }
 
 function toggleTheme() {
-    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-    localStorage.setItem('theme', currentTheme);
-    
-    if (currentTheme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-        document.documentElement.setAttribute('data-theme', currentColorScheme);
-    }
-    
-    const themeIcon = document.getElementById('themeIcon');
-    themeIcon.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
-    
-    themeIcon.style.transform = 'rotate(360deg)';
-    setTimeout(() => {
-        themeIcon.style.transform = 'rotate(0deg)';
-    }, 300);
+    // Theme toggle disabled - simple light theme only
+    return;
 }
 
-function changeColorScheme(scheme) {
-    currentColorScheme = scheme;
-    localStorage.setItem('colorScheme', currentColorScheme);
-    
-    if (currentTheme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-        document.documentElement.setAttribute('data-theme', currentColorScheme);
+function updateThemeIcon() {
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        // Always show sun icon for simple light theme
+        themeIcon.textContent = '☀️';
+        themeIcon.title = 'Basit Tema Aktif';
     }
-    
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.theme === scheme) {
-            btn.classList.add('active');
-        }
-    });
 }
 
 // Tab Navigation
@@ -84,6 +49,11 @@ function showTab(tabName) {
     } else if (tabName === 'hesaplar') {
         updateHesaplar();
     } else if (tabName === 'aylik') {
+        // Ay seçili değilse bugünkü ayı set et
+        const ozetTarih = document.getElementById('ozet_tarih');
+        if (ozetTarih && !ozetTarih.value) {
+            ozetTarih.value = currentMonth;
+        }
         updateAylikOzet();
     } else if (tabName === 'dashboard') {
         updateDashboard();
@@ -92,21 +62,26 @@ function showTab(tabName) {
 
 // Uygulama Başlatma
 document.addEventListener('DOMContentLoaded', function() {
+    // Tema sistemini hemen başlat
     initializeTheme();
     
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            changeColorScheme(btn.dataset.theme);
-        });
-    });
-    
-    // Kart ve kullanıcı seçeneklerini initialize et
-    updateCardOptions();
-    updateUserOptions();
-    
-    // Form başlangıç değerleri
-    document.getElementById('ozet_tarih').value = currentMonth;
-    document.getElementById('harcamaTarih').value = currentDate;
-    document.getElementById('duzenliBaslangic').value = currentMonth;
-    document.getElementById('kart').focus();
+    // Auth sistemi başlatılana kadar bekle
+    setTimeout(() => {
+        if (authSystem && authSystem.currentUser) {
+            // Kart ve kullanıcı seçeneklerini initialize et
+            updateCardOptions();
+            updateUserOptions();
+            
+            // Form başlangıç değerleri
+            const ozetTarih = document.getElementById('ozet_tarih');
+            const harcamaTarih = document.getElementById('harcamaTarih');
+            const duzenliBaslangic = document.getElementById('duzenliBaslangic');
+            const kart = document.getElementById('kart');
+            
+            if (ozetTarih) ozetTarih.value = currentMonth;
+            if (harcamaTarih) harcamaTarih.value = currentDate;
+            if (duzenliBaslangic) duzenliBaslangic.value = currentMonth;
+            if (kart) kart.focus();
+        }
+    }, 100);
 });

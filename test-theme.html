@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tema Test</title>
+    <link rel="stylesheet" href="./assets/css/variables.css">
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+</head>
+<body>
+    <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
+        <h1 style="color: var(--text);">Tema Test Sayfası</h1>
+        
+        <button onclick="toggleTheme()" style="padding: 10px 20px; margin-bottom: 20px; background: var(--primary); color: var(--text-inverse); border: none; border-radius: var(--radius);">
+            🌙 Tema Değiştir
+        </button>
+        
+        <div style="background: var(--bg-secondary); padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
+            <h2 style="color: var(--text);">Ana Metin</h2>
+            <p style="color: var(--text-secondary);">İkincil metin - bu gece modunda görünür olmalı</p>
+            <p style="color: var(--text-muted);">Muted metin - bu da görünür olmalı</p>
+        </div>
+        
+        <div style="background: var(--bg); border: 1px solid var(--border); padding: 20px; border-radius: var(--radius);">
+            <h3 style="color: var(--text);">Form Elemanları</h3>
+            <input type="text" placeholder="Bu input görünür olmalı" style="width: 100%; padding: 10px; margin: 10px 0; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius);">
+            
+            <select style="width: 100%; padding: 10px; margin: 10px 0; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius);">
+                <option>Seçenek 1</option>
+                <option>Seçenek 2</option>
+            </select>
+        </div>
+        
+        <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+            <thead>
+                <tr style="background: var(--bg-secondary);">
+                    <th style="padding: 12px; color: var(--text); border: 1px solid var(--border);">Başlık 1</th>
+                    <th style="padding: 12px; color: var(--text); border: 1px solid var(--border);">Başlık 2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px; color: var(--text); border: 1px solid var(--border);">Veri 1</td>
+                    <td style="padding: 12px; color: var(--text); border: 1px solid var(--border);">Veri 2</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        
+        function initializeTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            console.log('Tema yüklendi:', currentTheme);
+        }
+        
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', currentTheme);
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            console.log('Tema değiştirildi:', currentTheme);
+        }
+        
+        // Sayfa yüklendiğinde temayı başlat
+        document.addEventListener('DOMContentLoaded', initializeTheme);
+    </script>
+</body>
+</html>

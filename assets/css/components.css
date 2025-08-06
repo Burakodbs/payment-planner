@@ -1,76 +1,137 @@
-/* Theme Switcher */
+/* Simplified Theme Switcher */
 .theme-switcher {
-    position: absolute;
-    top: 20px;
-    right: 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    z-index: 10;
 }
 
 .theme-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all var(--transition-normal);
-    backdrop-filter: blur(10px);
+    transition: all var(--transition);
     font-size: 18px;
+    color: var(--text);
 }
 
 .theme-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1) rotate(15deg);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    background: var(--hover);
+    border-color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: var(--shadow);
 }
 
-.theme-colors {
-    display: flex;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: 8px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+.theme-btn:active {
+    transform: scale(0.95);
 }
 
-.color-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
+.theme-btn #themeIcon {
+    transition: transform var(--transition-slow);
+}
+
+/* Filters - Kompakt tasarım */
+.filters {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.filter-group {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition-normal);
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
     font-size: 14px;
+    transition: all var(--transition);
+    min-height: 36px;
 }
 
-.color-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.15);
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-alpha);
 }
 
-.color-btn.active {
-    background: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
-    transform: scale(1.1);
+.filter-group .btn {
+    margin: 0;
+    padding: 8px 16px;
+    font-size: 14px;
+    min-height: 36px;
+    white-space: nowrap;
+}
+
+/* Responsive filter layout */
+@media (max-width: 768px) {
+    .filter-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    
+    .filter-group label {
+        font-size: 11px;
+    }
+    
+    .filter-group input,
+    .filter-group select {
+        padding: 6px 8px;
+        font-size: 13px;
+        min-height: 32px;
+    }
+    
+    .filter-group .btn {
+        padding: 6px 12px;
+        font-size: 13px;
+        min-height: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters {
+        padding: 12px;
+    }
 }
 
 /* Tabs */
 .tabs {
     display: flex;
-    background: var(--white);
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
     padding: 0 8px;
+    border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .tab {
@@ -81,19 +142,26 @@
     background: transparent;
     border: none;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-secondary);
-    transition: all 0.2s ease;
+    transition: all var(--transition);
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
     margin: 0 2px;
     position: relative;
+    text-decoration: none;
+}
+
+.tab:hover {
+    background: var(--hover);
+    color: var(--text);
+    text-decoration: none;
 }
 
 .tab.active {
-    background: var(--primary-light);
+    background: var(--primary-alpha);
     color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: var(--glow);
+    border-bottom: 2px solid var(--primary);
+    text-decoration: none;
 }
 
 .tab.active::after {
@@ -109,7 +177,7 @@
 
 .tab:hover:not(.active) {
     background: var(--secondary);
-    color: var(--text-primary);
+    color: var(--text);
     transform: translateY(-1px);
     box-shadow: var(--shadow-soft);
 }
@@ -160,7 +228,7 @@ label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text);
     font-size: 14px;
 }
 
@@ -170,9 +238,16 @@ input, select, textarea {
     border: 2px solid var(--border);
     border-radius: var(--radius-sm);
     font-size: 14px;
-    background: var(--white);
+    background: var(--bg);
+    color: var(--text);
     transition: all 0.2s ease;
     font-family: inherit;
+}
+
+input::placeholder, 
+textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -234,12 +309,44 @@ input:hover, select:hover, textarea:hover {
     transition: all var(--transition-fast);
 }
 
-.btn-danger {
-    background: var(--danger);
+.btn-primary {
+    background: var(--primary);
+    color: var(--text-inverse);
 }
 
-.btn-danger:hover {
-    background: #dc2626;
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-success {
+    background: var(--success);
+    color: var(--text-inverse);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: var(--text-inverse);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+    background: var(--hover);
+    border-color: var(--primary);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--hover);
 }
 
 .btn.loading {
@@ -283,7 +390,7 @@ th, td {
 th {
     background: var(--secondary);
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text);
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.025em;
@@ -301,6 +408,37 @@ tr:last-child td {
     text-align: right;
 }
 
+/* Debt Status Colors */
+.debt-positive {
+    color: var(--danger) !important;
+    font-weight: 600;
+}
+
+.debt-negative {
+    color: var(--success) !important;
+    font-weight: 600;
+}
+
+/* Table Styling */
+th {
+    background: var(--bg-secondary);
+    color: var(--text);
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+}
+
+td {
+    padding: 12px 16px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+tr:hover {
+    background: var(--hover);
+}
+
 /* Cards */
 .summary-cards {
     display: grid;
@@ -310,7 +448,7 @@ tr:last-child td {
 }
 
 .summary-card {
-    background: var(--white);
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 24px;
@@ -325,7 +463,7 @@ tr:last-child td {
 
 .summary-card h3 {
     margin: 0 0 16px 0;
-    color: var(--text-primary);
+    color: var(--text);
     font-size: 16px;
     font-weight: 600;
 }
@@ -375,7 +513,7 @@ tr:last-child td {
 
 .quick-info h3 {
     margin: 0 0 8px 0;
-    color: var(--text-primary);
+    color: var(--text);
     font-size: 16px;
     font-weight: 600;
 }

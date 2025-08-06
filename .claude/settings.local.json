@@ -6,7 +6,9 @@
       "Bash(powershell:*)",
       "Bash(sed:*)",
       "Bash(node:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }
