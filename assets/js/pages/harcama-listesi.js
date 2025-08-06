@@ -26,6 +26,11 @@ function clearAllFilters() {
 
 // Sayfa yüklendiğinde mevcut ayı ayarla
 document.addEventListener('DOMContentLoaded', function() {
+    // Ortak component'leri initialize et
+    if (typeof initializePage === 'function') {
+        initializePage('harcama-listesi');
+    }
+    
     // Kısa bir gecikme ile mevcut ayı ayarla
     setTimeout(setCurrentMonthFilter, 200);
     

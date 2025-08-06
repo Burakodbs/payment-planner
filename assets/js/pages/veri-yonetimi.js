@@ -2,6 +2,14 @@
 
 console.log('Veri yönetimi sayfası yüklendi');
 
+// Sayfa yüklendiğinde ortak component'leri initialize et
+document.addEventListener('DOMContentLoaded', function() {
+    // Ortak component'leri initialize et
+    if (typeof initializePage === 'function') {
+        initializePage('veri-yonetimi');
+    }
+});
+
 function updateDataStats() {
     document.getElementById('totalExpenses').textContent = harcamalar.length;
     const totalAmount = harcamalar.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);

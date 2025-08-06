@@ -15,6 +15,11 @@ function updateKisayolBilgi() {
 
 // Auth sistem yüklendikten sonra kısayol bilgisini güncelle
 document.addEventListener('DOMContentLoaded', function() {
+    // Ortak component'leri initialize et
+    if (typeof initializePage === 'function') {
+        initializePage('harcama-ekle');
+    }
+    
     // Kısa bir gecikme ile kısayol bilgisini güncelle
     setTimeout(updateKisayolBilgi, 500);
     
