@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kredi Kartı Harcama Takip Sistemi</title>
+    <title>Aylık Özet - Kredi Kartı Harcama Takip Sistemi</title>
     
     <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
@@ -28,12 +28,12 @@
     <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
-    <link rel="stylesheet" href="./assets/css/variables.css?v=14">
-    <link rel="stylesheet" href="./assets/css/base.css?v=14">
-    <link rel="stylesheet" href="./assets/css/layout.css?v=14">
-    <link rel="stylesheet" href="./assets/css/components.css?v=14">
-    <link rel="stylesheet" href="./assets/css/utilities.css?v=14">
-    <link rel="stylesheet" href="./assets/css/auth.css?v=14">
+    <link rel="stylesheet" href="./assets/css/variables.css?v=23">
+    <link rel="stylesheet" href="./assets/css/base.css?v=23">
+    <link rel="stylesheet" href="./assets/css/layout.css?v=23">
+    <link rel="stylesheet" href="./assets/css/components.css?v=23">
+    <link rel="stylesheet" href="./assets/css/utilities.css?v=23">
+    <link rel="stylesheet" href="./assets/css/auth.css?v=23">
 </head>
 <body>
     <!-- Authentication Container -->
@@ -175,53 +175,30 @@
         </div>
 
         <div class="tabs">
-            <a href="index.html" class="tab active">📊 Gösterge Paneli</a>
+            <a href="index.html" class="tab">📊 Gösterge Paneli</a>
             <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-            <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
+            <a href="aylik-ozet.html" class="tab active">📅 Aylık Özet</a>
             <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
         </div>
 
         <div class="content">
-            <!-- Dashboard Content -->
+            <!-- Aylık Özet Content -->
             <div class="page-content">
-                <h2>📊 Gösterge Paneli</h2>
+                <h2>Aylık Özet</h2>
                 
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>💰 Bu Ay Toplam Harcama</h3>
-                        <div class="amount" id="thisMonthTotal">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>📊 Toplam Borç</h3>
-                        <div class="amount" id="totalCurrentDebt">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>⏳ Gelecek Taksitler</h3>
-                        <div class="amount" id="totalFuturePayments">0 TL</div>
+                <div class="month-selector">
+                    <div class="form-group">
+                        <label for="ozet_tarih">Hangi Ay?</label>
+                        <input type="month" id="ozet_tarih" onchange="updateAylikOzet()">
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
-                    <div class="summary-card">
-                        <h3>📊 Son 6 Ay Trend</h3>
-                        <canvas id="dashboardTrendChart"></canvas>
-                    </div>
-                    <div class="summary-card">
-                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
-                        <canvas id="dashboardUserChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>📋 Son Harcamalar</h3>
-                        <div id="recentExpensesList"></div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>🔔 Yaklaşan Taksitler</h3>
-                        <div id="upcomingInstallmentsList"></div>
+                <div id="aylikOzetContent">
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <h3>Ay seçin ve özet görüntülensin</h3>
+                        <p>Yukarıdaki tarih seçiciden hangi ayı görmek istediğinizi seçin.</p>
                     </div>
                 </div>
             </div>
@@ -230,18 +207,18 @@
     </div>
 
     <!-- JavaScript Files -->
-    <script src="./assets/js/auth.js?v=14"></script>
-    <script src="./assets/js/auth-ui.js?v=14"></script>
-    <script src="./assets/js/app.js?v=14"></script>
-    <script src="./assets/js/data-manager.js?v=14"></script>
-    <script src="./assets/js/calculations.js?v=14"></script>
-    <script src="./assets/js/chart-manager.js?v=14"></script>
-    <script src="./assets/js/utils.js?v=14"></script>
+    <script src="./assets/js/auth.js?v=23"></script>
+    <script src="./assets/js/auth-ui.js?v=23"></script>
+    <script src="./assets/js/app.js?v=23"></script>
+    <script src="./assets/js/data-manager.js?v=23"></script>
+    <script src="./assets/js/calculations.js?v=23"></script>
+    <script src="./assets/js/chart-manager.js?v=23"></script>
+    <script src="./assets/js/utils.js?v=23"></script>
 
     <script>
-        // Bu sayfaya özel kod - Dashboard
-        // Auth sistem otomatik olarak dashboard güncellemelerini yapacak
-        console.log('Dashboard sayfası yüklendi');
+        // Bu sayfaya özel kod - Aylık Özet
+        // Auth sistem otomatik olarak aylık özet güncellemelerini yapacak
+        console.log('Aylık özet sayfası yüklendi');
     </script>
 </body>
 </html>

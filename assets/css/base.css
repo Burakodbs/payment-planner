@@ -1,23 +1,26 @@
-/* Temel Reset ve Body Stilleri */
+/* Modern Reset ve Base Styles */
 * {
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color var(--transition-normal), 
-               color var(--transition-normal), 
-               border-color var(--transition-normal),
-               box-shadow var(--transition-normal);
+}
+
+*:focus {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    box-shadow: var(--focus-shadow);
+    border-radius: var(--radius-sm);
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', sans-serif;
     margin: 0;
     padding: 24px;
-    background: linear-gradient(135deg, var(--background) 0%, var(--secondary) 100%);
-    color: var(--text-primary);
+    background: var(--bg);
+    color: var(--text);
     line-height: 1.6;
     min-height: 100vh;
-    transition: background-color var(--transition-normal), color var(--transition-normal);
+    transition: background-color var(--transition), color var(--transition);
     
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

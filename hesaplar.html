@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kredi Kartı Harcama Takip Sistemi</title>
+    <title>Hesaplar - Kredi Kartı Harcama Takip Sistemi</title>
     
     <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
@@ -175,53 +175,51 @@
         </div>
 
         <div class="tabs">
-            <a href="index.html" class="tab active">📊 Gösterge Paneli</a>
+            <a href="index.html" class="tab">📊 Gösterge Paneli</a>
             <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
-            <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
+            <a href="hesaplar.html" class="tab active">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
             <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
         </div>
 
         <div class="content">
-            <!-- Dashboard Content -->
+            <!-- Hesaplar Content -->
             <div class="page-content">
-                <h2>📊 Gösterge Paneli</h2>
+                <h2>Hesaplar</h2>
+                <p>Kişi bazında borç/alacak durumu ve gelecek taksit ödemeleri</p>
                 
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>💰 Bu Ay Toplam Harcama</h3>
-                        <div class="amount" id="thisMonthTotal">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>📊 Toplam Borç</h3>
-                        <div class="amount" id="totalCurrentDebt">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>⏳ Gelecek Taksitler</h3>
-                        <div class="amount" id="totalFuturePayments">0 TL</div>
-                    </div>
+                <div class="table-container">
+                    <table id="hesaplarTable" class="hesaplar-table">
+                        <thead>
+                            <tr>
+                                <th>Kişi</th>
+                                <th>Mevcut Harcama</th>
+                                <th>Gelecek Taksitler</th>
+                                <th>Toplam Borç</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    Henüz veri yok
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
-                    <div class="summary-card">
-                        <h3>📊 Son 6 Ay Trend</h3>
-                        <canvas id="dashboardTrendChart"></canvas>
-                    </div>
-                    <div class="summary-card">
-                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
-                        <canvas id="dashboardUserChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>📋 Son Harcamalar</h3>
-                        <div id="recentExpensesList"></div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>🔔 Yaklaşan Taksitler</h3>
-                        <div id="upcomingInstallmentsList"></div>
+                <div class="debt-summary">
+                    <h3>Borç Açıklaması</h3>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <span class="legend-color debt-positive"></span>
+                            <span>Pozitif: Bu kişi toplam bu kadar ödeme yapmış/yapacak</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color debt-negative"></span>
+                            <span>Negatif: Bu kişiye bu kadar borç var</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -239,9 +237,9 @@
     <script src="./assets/js/utils.js?v=14"></script>
 
     <script>
-        // Bu sayfaya özel kod - Dashboard
-        // Auth sistem otomatik olarak dashboard güncellemelerini yapacak
-        console.log('Dashboard sayfası yüklendi');
+        // Bu sayfaya özel kod - Hesaplar
+        // Auth sistem otomatik olarak hesaplar güncellemelerini yapacak
+        console.log('Hesaplar sayfası yüklendi');
     </script>
 </body>
 </html>

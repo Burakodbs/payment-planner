@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kredi Kartı Harcama Takip Sistemi</title>
+    <title>Harcama Ekle - Kredi Kartı Harcama Takip Sistemi</title>
     
     <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
@@ -28,12 +28,12 @@
     <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
-    <link rel="stylesheet" href="./assets/css/variables.css?v=14">
-    <link rel="stylesheet" href="./assets/css/base.css?v=14">
-    <link rel="stylesheet" href="./assets/css/layout.css?v=14">
-    <link rel="stylesheet" href="./assets/css/components.css?v=14">
-    <link rel="stylesheet" href="./assets/css/utilities.css?v=14">
-    <link rel="stylesheet" href="./assets/css/auth.css?v=14">
+    <link rel="stylesheet" href="./assets/css/variables.css?v=17">
+    <link rel="stylesheet" href="./assets/css/base.css?v=17">
+    <link rel="stylesheet" href="./assets/css/layout.css?v=17">
+    <link rel="stylesheet" href="./assets/css/components.css?v=17">
+    <link rel="stylesheet" href="./assets/css/utilities.css?v=17">
+    <link rel="stylesheet" href="./assets/css/auth.css?v=17">
 </head>
 <body>
     <!-- Authentication Container -->
@@ -175,8 +175,8 @@
         </div>
 
         <div class="tabs">
-            <a href="index.html" class="tab active">📊 Gösterge Paneli</a>
-            <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
+            <a href="index.html" class="tab">📊 Gösterge Paneli</a>
+            <a href="harcama-ekle.html" class="tab active">➕ Harcama Ekle</a>
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
@@ -184,64 +184,104 @@
         </div>
 
         <div class="content">
-            <!-- Dashboard Content -->
+            <!-- Harcama Ekleme Content -->
             <div class="page-content">
-                <h2>📊 Gösterge Paneli</h2>
-                
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>💰 Bu Ay Toplam Harcama</h3>
-                        <div class="amount" id="thisMonthTotal">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>📊 Toplam Borç</h3>
-                        <div class="amount" id="totalCurrentDebt">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>⏳ Gelecek Taksitler</h3>
-                        <div class="amount" id="totalFuturePayments">0 TL</div>
-                    </div>
+                <h2>Yeni Harcama Ekle</h2>
+                <div class="quick-info">
+                    <h3>Hızlı Ekleme</h3>
+                    <p>Sadece zorunlu alanları doldurun, Tab tuşuyla hızlıca geçiş yapın ve Enter'a basarak ekleyin.</p>
+                    <p class="shortcut-info" id="kisayolBilgi">Kısayollar: Kullanıcılar yükleniyor...</p>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
-                    <div class="summary-card">
-                        <h3>📊 Son 6 Ay Trend</h3>
-                        <canvas id="dashboardTrendChart"></canvas>
+                <form id="harcamaForm" onsubmit="handleHarcamaSubmit(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kart">Kredi Kartı *</label>
+                            <select name="kart" id="kart" required>
+                                <option value="">Kart Seçin</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="harcamaTarih">Hangi Tarih? *</label>
+                            <input type="date" name="tarih" id="harcamaTarih" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tutar">Tutar (TL) *</label>
+                            <input type="number" name="tutar" id="tutar" step="0.01" min="0.01" required>
+                        </div>
                     </div>
-                    <div class="summary-card">
-                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
-                        <canvas id="dashboardUserChart"></canvas>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kullanici">Kim Harcadı? *</label>
+                            <select name="kullanici" id="kullanici" required>
+                                <option value="">Kullanıcı Seçin</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taksitNo">Kaçıncı Taksit?</label>
+                            <input type="number" name="taksitNo" id="taksitNo" min="1" max="99">
+                        </div>
+                        <div class="form-group">
+                            <label for="toplamTaksit">Toplam Taksit</label>
+                            <input type="number" name="toplamTaksit" id="toplamTaksit" min="1" max="99">
+                        </div>
                     </div>
-                </div>
-
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>📋 Son Harcamalar</h3>
-                        <div id="recentExpensesList"></div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="aciklama">Açıklama</label>
+                            <input type="text" name="aciklama" id="aciklama" placeholder="Harcama detayı...">
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="kategori" value="Diğer">
+                        </div>
+                        <div class="form-group">
+                        </div>
                     </div>
-                    <div class="summary-card">
-                        <h3>🔔 Yaklaşan Taksitler</h3>
-                        <div id="upcomingInstallmentsList"></div>
-                    </div>
-                </div>
+                    <button type="submit" class="btn">Harcama Ekle</button>
+                </form>
             </div>
         </div>
     </div>
     </div>
 
     <!-- JavaScript Files -->
-    <script src="./assets/js/auth.js?v=14"></script>
-    <script src="./assets/js/auth-ui.js?v=14"></script>
-    <script src="./assets/js/app.js?v=14"></script>
-    <script src="./assets/js/data-manager.js?v=14"></script>
-    <script src="./assets/js/calculations.js?v=14"></script>
-    <script src="./assets/js/chart-manager.js?v=14"></script>
-    <script src="./assets/js/utils.js?v=14"></script>
+    <script src="./assets/js/auth.js?v=17"></script>
+    <script src="./assets/js/auth-ui.js?v=17"></script>
+    <script src="./assets/js/app.js?v=17"></script>
+    <script src="./assets/js/data-manager.js?v=17"></script>
+    <script src="./assets/js/calculations.js?v=17"></script>
+    <script src="./assets/js/chart-manager.js?v=17"></script>
+    <script src="./assets/js/utils.js?v=17"></script>
 
     <script>
-        // Bu sayfaya özel kod - Dashboard
-        // Auth sistem otomatik olarak dashboard güncellemelerini yapacak
-        console.log('Dashboard sayfası yüklendi');
+        // Bu sayfaya özel kod - Harcama Ekleme
+        console.log('Harcama ekleme sayfası yüklendi');
+
+        // Kısayol bilgisini güncelle
+        function updateKisayolBilgi() {
+            const kisayolElement = document.getElementById('kisayolBilgi');
+            if (!kisayolElement || !kisiler || kisiler.length === 0) {
+                return;
+            }
+
+            const kisayollar = kisiler.map((kisi, index) => `${index + 1}=${kisi}`).join(', ');
+            kisayolElement.textContent = `Kısayollar: ${kisayollar}`;
+        }
+
+        // Auth sistem yüklendikten sonra kısayol bilgisini güncelle
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kısa bir gecikme ile kısayol bilgisini güncelle
+            setTimeout(updateKisayolBilgi, 500);
+            
+            // Auth sistem data yükledikten sonra da güncelle
+            if (typeof authSystem !== 'undefined') {
+                const originalTrigger = authSystem.triggerPageUpdates;
+                authSystem.triggerPageUpdates = function() {
+                    originalTrigger.call(this);
+                    setTimeout(updateKisayolBilgi, 100);
+                };
+            }
+        });
     </script>
 </body>
 </html>
