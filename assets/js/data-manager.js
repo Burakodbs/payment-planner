@@ -1,30 +1,56 @@
 // Veri Kaydetme ve Yükleme
 function saveData() {
-    localStorage.setItem('harcamalar', JSON.stringify(harcamalar));
-    localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
-    localStorage.setItem('kredikartlari', JSON.stringify(kredikartlari));
-    localStorage.setItem('kisiler', JSON.stringify(kisiler));
+    // Auth sistemi üzerinden kaydet
+    if (authSystem && authSystem.currentUser) {
+        authSystem.saveUserData();
+    }
 }
 
 // Harcama Tablosu Güncelleme
 function updateHarcamaTable() {
     const tbody = document.querySelector('#harcamaTable tbody');
+    
+    // Check if table exists (only on harcama-listesi page)
+    if (!tbody) {
+        // console.log('Harcama table not found, skipping table update');
+        return;
+    }
+    
     const filteredHarcamalar = applyAllFilters();
     
     updateSonucSayisi(filteredHarcamalar);
     
     tbody.innerHTML = '';
     
-    console.log('Filtrelenmiş harcama sayısı:', filteredHarcamalar.length);
-    console.log('İlk 5 harcama:', filteredHarcamalar.slice(0, 5));
-    console.log('Tüm harcamalar:', harcamalar.length);
+    // console.log('Filtrelenmiş harcama sayısı:', filteredHarcamalar.length);
+    // console.log('İlk 5 harcama:', filteredHarcamalar.slice(0, 5));
+    // console.log('Tüm harcamalar:', harcamalar.length);
     
     filteredHarcamalar.forEach((harcama, index) => {
         const row = tbody.insertRow();
         const taksitBilgi = harcama.isTaksit ? `${harcama.taksitNo}/${harcama.toplamTaksit}` : '-';
         
-        const rowStyle = harcama.isFuture ? 'background-color: #fff3cd; color: #856404;' : '';
-        const taksitEtiket = harcama.isFuture ? ' (Gelecek Taksit)' : '';
+        let rowStyle = '';
+        let taksitEtiket = '';
+        let actionButton = '';
+        
+        if (harcama.isFuture) {
+            rowStyle = 'background-color: #fff3cd; color: #856404;';
+            taksitEtiket = '';
+            actionButton = '<span style="color: #856404; font-size: 12px;">Gelecek Taksit</span>';
+        } else if (harcama.isRegular) {
+            rowStyle = 'background-color: #e3f2fd; color: #1565c0;';
+            taksitEtiket = '';
+            actionButton = `
+                <button class="btn btn-sm btn-outline" onclick="editHarcama(${harcama.id || 'undefined'})" style="margin-right: 4px;">Düzenle</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteHarcama(${harcama.id || 'undefined'})">Sil</button>
+            `;
+        } else {
+            actionButton = `
+                <button class="btn btn-sm btn-outline" onclick="editHarcama(${harcama.id || 'undefined'})" style="margin-right: 4px;">Düzenle</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteHarcama(${harcama.id || 'undefined'})">Sil</button>
+            `;
+        }
         
         const tutarValue = harcama.tutar ? Number(harcama.tutar).toFixed(2) : '0.00';
         
@@ -36,10 +62,7 @@ function updateHarcamaTable() {
             <td style="${rowStyle}">${taksitBilgi}</td>
             <td class="text-right" style="${rowStyle}">${tutarValue} TL</td>
             <td style="${rowStyle}">
-                ${harcama.isFuture ? 
-                    '<span style="color: #856404; font-size: 12px;">Gelecek Taksit</span>' : 
-                    `<button class="btn btn-danger" onclick="deleteHarcama(${harcama.id || 'undefined'})">Sil</button>`
-                }
+                ${actionButton}
             </td>
         `;
     });
@@ -49,83 +72,150 @@ function updateSonucSayisi(filteredHarcamalar) {
     const toplamHarcama = harcamalar.length;
     const gosterilenSayi = filteredHarcamalar.length;
     
-    const gercekHarcamalar = filteredHarcamalar.filter(h => !h.isFuture).length;
+    const gercekHarcamalar = filteredHarcamalar.filter(h => !h.isFuture && !h.isRegular).length;
     const gelecekTaksitler = filteredHarcamalar.filter(h => h.isFuture).length;
+    const duzenliOdemeSayisi = filteredHarcamalar.filter(h => h.isRegular).length;
     
     let mesaj = `${gosterilenSayi} kayıt gösteriliyor`;
     
     if (gosterilenSayi < toplamHarcama) {
-        mesaj += ` (Toplam ${toplamHarcama} harcamadan)`;
+        mesaj += ` (Toplam ${toplamHarcama} kayıttan)`;
     }
     
-    if (gelecekTaksitler > 0) {
-        mesaj += ` | ${gercekHarcamalar} harcama + ${gelecekTaksitler} gelecek taksit`;
+    if (gelecekTaksitler > 0 || duzenliOdemeSayisi > 0) {
+        let detay = [];
+        if (gercekHarcamalar > 0) detay.push(`${gercekHarcamalar} harcama`);
+        if (duzenliOdemeSayisi > 0) detay.push(`${duzenliOdemeSayisi} düzenli ödeme`);
+        if (gelecekTaksitler > 0) detay.push(`${gelecekTaksitler} gelecek taksit`);
+        mesaj += ` | ${detay.join(' + ')}`;
     }
     
     const toplamTutar = filteredHarcamalar.reduce((sum, h) => sum + (Number(h.tutar) || 0), 0);
     mesaj += ` | Toplam: ${toplamTutar.toFixed(2)} TL`;
     
-    document.getElementById('sonucSayisi').textContent = mesaj;
+    const sonucSayisiElement = document.getElementById('sonucSayisi');
+    if (sonucSayisiElement) {
+        sonucSayisiElement.textContent = mesaj;
+    }
 }
 
 // Filtreleme ve Sıralama
-function applyAllFilters() {
-    console.log('--- FILTRE BAŞLANGICI ---');
-    console.log('Toplam harcama sayısı:', harcamalar.length);
+// Düzenli ödemeleri harcama formatına dönüştür
+function getDuzenliOdemelerAsHarcamalar() {
+    const currentDate = new Date();
+    const currentMonth = currentDate.toISOString().slice(0, 7); // YYYY-MM format
+    const today = currentDate.toISOString().slice(0, 10);
     
+    // Sadece aktif düzenli ödemeleri dahil et
+    const aktiveDuzenliOdemeler = duzenliOdemeler.filter(odeme => {
+        // Aktif olmayan ödemeleri hariç tut
+        if (odeme.aktif === false) {
+            return false;
+        }
+        
+        // Bitiş tarihi varsa ve bugünden önce ise hariç tut
+        if (odeme.birisTarihi && odeme.birisTarihi <= today) {
+            return false;
+        }
+        
+        // Başlangıç tarihi bugünden sonra ise henüz başlamamış, hariç tut
+        if (odeme.baslangicTarihi && odeme.baslangicTarihi > today) {
+            return false;
+        }
+        
+        return true;
+    });
+    
+    return aktiveDuzenliOdemeler.map(odeme => {
+        return {
+            id: `duzenli_${odeme.id}_${currentMonth}`,
+            tarih: `${currentMonth}-15`, // Ayın ortasına koy
+            kart: odeme.kart,
+            kullanici: odeme.kullanici,
+            kategori: 'Düzenli Ödeme',
+            aciklama: `${odeme.aciklama} (Düzenli Ödeme)`,
+            tutar: odeme.tutar,
+            taksitNo: null,
+            toplamTaksit: null,
+            isTaksit: false,
+            isDuzenli: true // Düzenli ödeme olduğunu belirten flag
+        };
+    });
+}
+
+function applyAllFilters() {
+    // console.log('--- FILTRE BAŞLANGICI ---');
+    // console.log('Toplam harcama sayısı:', harcamalar.length);
+    // console.log('Düzenli ödeme sayısı:', duzenliOdemeler.length);
+    
+    // Harcamaları ve düzenli ödemeleri birleştir
     let filtered = [...harcamalar];
     
-    const selectedMonth = document.getElementById('filtreTarih').value;
-    console.log('Seçilen ay:', selectedMonth);
+    // Check if filter elements exist (only on harcama-listesi page)
+    const filtreTarihElement = document.getElementById('filtreTarih');
+    if (!filtreTarihElement) {
+        // console.log('Filter elements not found, skipping filtering');
+        return filtered;
+    }
+    
+    const selectedMonth = filtreTarihElement.value;
+    // console.log('Seçilen ay:', selectedMonth);
     
     if (selectedMonth) {
         const monthFiltered = filtered.filter(harcama => harcama.tarih.startsWith(selectedMonth));
-        console.log('Ay filtresinden sonra:', monthFiltered.length);
+        // console.log('Ay filtresinden sonra:', monthFiltered.length);
         
         const futureTaksits = getFutureTaksits(selectedMonth);
-        console.log('Gelecek taksit sayısı:', futureTaksits.length);
+        const recurringPayments = getRecurringPaymentsForMonth(selectedMonth);
+        // console.log('Gelecek taksit sayısı:', futureTaksits.length);
+        // console.log('Düzenli ödeme sayısı:', recurringPayments.length);
         
-        filtered = [...monthFiltered, ...futureTaksits];
+        filtered = [...monthFiltered, ...futureTaksits, ...recurringPayments];
     } else {
         filtered = [...harcamalar];
-        console.log('Tarih filtresi yok, tüm harcamalar:', filtered.length);
+        // console.log('Tarih filtresi yok, tüm harcamalar:', filtered.length);
     }
     
-    console.log('Tarih filtresinden sonra toplam:', filtered.length);
+    // console.log('Tarih filtresinden sonra toplam:', filtered.length);
     
-    const selectedUser = document.getElementById('filtreKullanici').value;
-    console.log('Seçilen kullanıcı:', selectedUser);
+    const filtreKullaniciElement = document.getElementById('filtreKullanici');
+    const selectedUser = filtreKullaniciElement ? filtreKullaniciElement.value : '';
+    // console.log('Seçilen kullanıcı:', selectedUser);
     if (selectedUser) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(harcama => harcama.kullanici === selectedUser);
-        console.log(`Kullanıcı filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        // console.log(`Kullanıcı filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
     
-    const selectedCard = document.getElementById('filtreKart').value;
-    console.log('Seçilen kart:', selectedCard);
+    const filtreKartElement = document.getElementById('filtreKart');
+    const selectedCard = filtreKartElement ? filtreKartElement.value : '';
+    // console.log('Seçilen kart:', selectedCard);
     if (selectedCard) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(harcama => harcama.kart === selectedCard);
-        console.log(`Kart filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        // console.log(`Kart filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
     
-    const minTutarValue = document.getElementById('minTutar').value;
-    const maxTutarValue = document.getElementById('maxTutar').value;
+    const minTutarElement = document.getElementById('minTutar');
+    const maxTutarElement = document.getElementById('maxTutar');
+    const minTutarValue = minTutarElement ? minTutarElement.value : '';
+    const maxTutarValue = maxTutarElement ? maxTutarElement.value : '';
     const minTutar = minTutarValue ? parseFloat(minTutarValue) : 0;
     const maxTutar = maxTutarValue ? parseFloat(maxTutarValue) : Infinity;
     
-    console.log('Tutar aralığı:', minTutar, '-', maxTutar);
+    // console.log('Tutar aralığı:', minTutar, '-', maxTutar);
     if (minTutarValue || maxTutarValue) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(harcama => harcama.tutar >= minTutar && harcama.tutar <= maxTutar);
-        console.log(`Tutar filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        // console.log(`Tutar filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
     
-    console.log('Sıralama öncesi kayıt sayısı:', filtered.length);
+    // console.log('Sıralama öncesi kayıt sayısı:', filtered.length);
     
-    const sortCriteria = document.getElementById('siralamaKriteri').value;
+    const siralamaKriteriElement = document.getElementById('siralamaKriteri');
+    const sortCriteria = siralamaKriteriElement ? siralamaKriteriElement.value : 'tarih-desc';
     const [field, direction] = sortCriteria.split('-');
-    console.log('Sıralama kriteri:', field, direction);
+    // console.log('Sıralama kriteri:', field, direction);
     
     try {
         const beforeSort = filtered.length;
@@ -165,25 +255,44 @@ function applyAllFilters() {
                 return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
             }
         });
-        console.log(`Sıralama sonrası: ${beforeSort} -> ${filtered.length}`);
+        // console.log(`Sıralama sonrası: ${beforeSort} -> ${filtered.length}`);
     } catch (e) {
         console.error('Sıralama hatası:', e);
     }
     
-    console.log('--- FINAL SONUÇ ---');
-    console.log('Döndürülen kayıt sayısı:', filtered.length);
-    console.log('İlk 3 kayıt:', filtered.slice(0, 3));
+    // console.log('--- FINAL SONUÇ ---');
+    // console.log('Döndürülen kayıt sayısı:', filtered.length);
+    // console.log('İlk 3 kayıt:', filtered.slice(0, 3));
     
     return filtered;
 }
 
 // Harcama İşlemleri
 function deleteHarcama(id) {
-    if (confirm('Bu harcamayı silmek istediğinizden emin misiniz?')) {
+    const harcama = harcamalar.find(h => h.id === id);
+    if (!harcama) {
+        showToast('Harcama bulunamadı', 'error');
+        return;
+    }
+    
+    let confirmMessage = 'Bu harcamayı silmek istediğinizden emin misiniz?';
+    
+    // Otomatik oluşturulan düzenli ödeme ise uyarı ver
+    if (harcama.isRegular) {
+        confirmMessage = `Bu otomatik oluşturulan düzenli ödemeyi silmek istediğinizden emin misiniz?\n\n"${harcama.aciklama}"\n\nNot: Gelecek ay tekrar otomatik olarak oluşturulacaktır.`;
+    }
+    
+    if (confirm(confirmMessage)) {
         harcamalar = harcamalar.filter(h => h.id !== id);
         saveData();
         updateHarcamaTable();
         updateDashboard();
+        
+        if (harcama.isRegular) {
+            showToast('Düzenli ödeme silindi (gelecek ay yeniden oluşturulacak)', 'info');
+        } else {
+            showToast('Harcama silindi', 'success');
+        }
     }
 }
 
@@ -197,21 +306,33 @@ document.addEventListener('keydown', function(e) {
         const kullaniciSelect = document.getElementById('kullanici');
         const keyNum = parseInt(e.key);
         
+        // Check if kullanici select exists (only on harcama-ekle page)
+        if (!kullaniciSelect) {
+            return;
+        }
+        
         if (keyNum >= 1 && keyNum <= 5 && keyNum <= kisiler.length) {
             e.preventDefault();
             const selectedPerson = kisiler[keyNum - 1];
             kullaniciSelect.value = selectedPerson;
             kullaniciSelect.dispatchEvent(new Event('change'));
             if (!isInUserSelect) {
-                document.getElementById('aciklama').focus();
+                const aciklamaElement = document.getElementById('aciklama');
+                if (aciklamaElement) {
+                    aciklamaElement.focus();
+                }
             }
         }
     }
 });
 
-document.getElementById('harcamaForm').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
-        e.preventDefault();
-        this.dispatchEvent(new Event('submit'));
-    }
-});
+// Form event listener - sadece form varsa ekle
+const harcamaForm = document.getElementById('harcamaForm');
+if (harcamaForm) {
+    harcamaForm.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+            e.preventDefault();
+            this.dispatchEvent(new Event('submit'));
+        }
+    });
+}

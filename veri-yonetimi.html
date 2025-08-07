@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kredi Kartı Harcama Takip Sistemi</title>
+    <title>Veri Yönetimi - Kredi Kartı Harcama Takip Sistemi</title>
     
     <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
     <meta name="author" content="Harcama Takip Sistemi">
     
-    <meta name="theme-color" content="#6366f1">
-    <meta name="msapplication-navbutton-color" content="#6366f1">
+    <meta name="theme-color" content="#007bff">
+    <meta name="msapplication-navbutton-color" content="#007bff">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
     <meta name="mobile-web-app-capable" content="yes">
@@ -177,54 +177,86 @@
     </div>
 </div>
         <div class="tabs">
-            <a href="index.html" class="tab active">📊 Gösterge Paneli</a>
+            <a href="index.html" class="tab">📊 Gösterge Paneli</a>
             <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
             <a href="istatistikler.html" class="tab">📊 İstatistikler</a>
-            <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
+            <a href="veri-yonetimi.html" class="tab active">⚙️ Veri Yönetimi</a>
         </div>
 
         <div class="content">
-            <!-- Dashboard Content -->
+            <!-- Veri Yönetimi Content -->
             <div class="page-content">
-                <h2>📊 Gösterge Paneli</h2>
+                <h2>Veri Yönetimi</h2>
                 
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>💰 Bu Ay Toplam Harcama</h3>
-                        <div class="amount" id="thisMonthTotal">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>📊 Toplam Borç</h3>
-                        <div class="amount" id="totalCurrentDebt">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>⏳ Gelecek Taksitler</h3>
-                        <div class="amount" id="totalFuturePayments">0 TL</div>
-                    </div>
-                </div>
+                <div class="data-management-grid">
+                    <!-- Veri Yedekleme & Geri Yükleme -->
+                    <div class="data-management-card" style="order: 1;">
+                        <h3>💾 Veri Yedekleme & Geri Yükleme</h3>
+                        <p>Verilerinizi güvenle yedekleyin veya daha önce aldığınız yedeği geri yükleyin.</p>
+                        
+                        <!-- Dışa Aktarma Bölümü -->
+                        <div style="margin-bottom: 24px;">
+                            <h4 style="color: var(--text); font-size: 16px; margin-bottom: 8px; font-weight: 600;">📤 Yedek Al</h4>
+                            <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">Tüm verilerinizi JSON formatında kaydedin</p>
+                            <button class="btn btn-primary" onclick="exportData()" style="width: 100%;">
+                                <span>💾</span> Yedek Dosyası Oluştur
+                            </button>
+                        </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
-                    <div class="summary-card">
-                        <h3>📊 Son 6 Ay Trend</h3>
-                        <canvas id="dashboardTrendChart"></canvas>
+                        <!-- İçe Aktarma Bölümü -->
+                        <div>
+                            <h4 style="color: var(--text); font-size: 16px; margin-bottom: 8px; font-weight: 600;">📥 Yedek Yükle</h4>
+                            <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">Yedek dosyanızı seçin ve verilerinizi geri yükleyin</p>
+                            <div style="margin-bottom: 12px;">
+                                <input type="file" id="fileInput" accept=".json" placeholder="JSON dosyanızı seçin...">
+                            </div>
+                            <button class="btn btn-secondary" onclick="importData()" style="width: 100%;">
+                                <span>📂</span> Yedeği Geri Yükle
+                            </button>
+                        </div>
                     </div>
-                    <div class="summary-card">
-                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
-                        <canvas id="dashboardUserChart"></canvas>
-                    </div>
-                </div>
 
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>📋 Son Harcamalar</h3>
-                        <div id="recentExpensesList"></div>
+
+                    <!-- Kart ve Kullanıcı Yönetimi -->
+                    <div class="data-management-card" style="order: 2;">
+                        <h3>👥 Kart ve Kullanıcı Yönetimi</h3>
+                        <p>Kredi kartlarınızı ve kullanıcılarınızı kolayca ekleyin, düzenleyin ve silin.</p>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <h4 style="color: var(--text); font-size: 16px; margin-bottom: 12px; font-weight: 600;">💳 Kartlar</h4>
+                            <div id="cardManagementList"></div>
+                            <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 12px; align-items: center;">
+                                <input type="text" id="newCardInput" placeholder="Yeni kart adı" style="padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 14px; width: 100%;">
+                                <button class="btn btn-primary" onclick="addNewCard()" style="padding: 12px 20px; white-space: nowrap; min-width: 90px; font-size: 14px;">➕ Ekle</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 style="color: var(--text); font-size: 16px; margin-bottom: 12px; font-weight: 600;">👤 Kullanıcılar</h4>
+                            <div id="userManagementList"></div>
+                            <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 12px; align-items: center;">
+                                <input type="text" id="newUserInput" placeholder="Yeni kullanıcı adı" style="padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 14px; width: 100%;">
+                                <button class="btn btn-primary" onclick="addNewUser()" style="padding: 12px 20px; white-space: nowrap; min-width: 90px; font-size: 14px;">➕ Ekle</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="summary-card">
-                        <h3>🔔 Yaklaşan Taksitler</h3>
-                        <div id="upcomingInstallmentsList"></div>
+
+
+                    <!-- Veri Silme -->
+                    <div class="data-management-card" style="border-color: var(--danger); background: linear-gradient(135deg, var(--bg), var(--danger-bg)); order: 3;">
+                        <h3 style="color: var(--danger);">🗑️ Veri Silme</h3>
+                        <p><strong>⚠️ Dikkat:</strong> Bu işlemler geri alınamaz! Veri silmeden önce mutlaka yedek alın.</p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button class="btn btn-danger" onclick="clearAllData()" style="font-weight: 600;">
+                                <span>🗑️</span> Tüm Verileri Sil
+                            </button>
+                            <button class="btn btn-danger" onclick="clearExpenseData()" style="font-weight: 600;">
+                                <span>💸</span> Sadece Harcamaları Sil
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,6 +278,6 @@
     <script src="./assets/js/utils.js"></script>
 
     <!-- Page Specific Scripts -->
-    <script src="./assets/js/pages/dashboard.js"></script>
+    <script src="./assets/js/pages/veri-yonetimi.js"></script>
 </body>
 </html>

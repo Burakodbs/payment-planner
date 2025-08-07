@@ -6,7 +6,16 @@
       "Bash(powershell:*)",
       "Bash(sed:*)",
       "Bash(node:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(npm run dev:*)",
+      "Bash(mv:*)",
+      "WebFetch(domain:www.figma.com)",
+      "Bash(rm:*)",
+      "Bash(for file in harcama-listesi.html hesaplar.html aylik-ozet.html veri-yonetimi.html)",
+      "Bash(do sed -i 's|<a href=\"\"aylik-ozet.html\"\" class=\"\"tab\"\">📅 Aylık Özet</a>\\n            <a href=\"\"veri-yonetimi.html\"\" class=\"\"tab\"\">⚙️ Veri Yönetimi</a>|<a href=\"\"aylik-ozet.html\"\" class=\"\"tab\"\">📅 Aylık Özet</a>\\n            <a href=\"\"istatistikler.html\"\" class=\"\"tab\"\">📊 İstatistikler</a>\\n            <a href=\"\"veri-yonetimi.html\"\" class=\"\"tab\"\">⚙️ Veri Yönetimi</a>|g' \"$file\")",
+      "Bash(done)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
