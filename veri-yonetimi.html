@@ -51,11 +51,11 @@
                     <form onsubmit="handleLogin(event)">
                         <div class="form-group">
                             <label for="loginUsername">Kullanıcı Adı</label>
-                            <input type="text" id="loginUsername" required>
+                            <input type="text" id="loginUsername" required autocomplete="username">
                         </div>
                         <div class="form-group">
                             <label for="loginPassword">Şifre</label>
-                            <input type="password" id="loginPassword" required>
+                            <input type="password" id="loginPassword" required autocomplete="current-password">
                         </div>
                         <button type="submit" class="btn btn-primary">Giriş Yap</button>
                     </form>
@@ -70,21 +70,21 @@
                     <form onsubmit="handleRegister(event)">
                         <div class="form-group">
                             <label for="registerUsername">Kullanıcı Adı</label>
-                            <input type="text" id="registerUsername" required minlength="3">
+                            <input type="text" id="registerUsername" required minlength="3" autocomplete="username">
                             <small>En az 3 karakter</small>
                         </div>
                         <div class="form-group">
                             <label for="registerEmail">E-posta (Opsiyonel)</label>
-                            <input type="email" id="registerEmail">
+                            <input type="email" id="registerEmail" autocomplete="email">
                         </div>
                         <div class="form-group">
                             <label for="registerPassword">Şifre</label>
-                            <input type="password" id="registerPassword" required minlength="6">
+                            <input type="password" id="registerPassword" required minlength="6" autocomplete="new-password">
                             <small>En az 6 karakter</small>
                         </div>
                         <div class="form-group">
                             <label for="confirmPassword">Şifre Tekrar</label>
-                            <input type="password" id="confirmPassword" required>
+                            <input type="password" id="confirmPassword" required autocomplete="new-password">
                         </div>
                         <button type="submit" class="btn btn-primary">Kayıt Ol</button>
                     </form>
@@ -182,6 +182,7 @@
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
+            <a href="istatistikler.html" class="tab">📊 İstatistikler</a>
             <a href="veri-yonetimi.html" class="tab active">⚙️ Veri Yönetimi</a>
         </div>
 

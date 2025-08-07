@@ -159,10 +159,28 @@ function handleHarcamaSubmit(event) {
     harcamalar.push(harcama);
     saveData();
     
+    // Sticky values kaydet
+    if (typeof preserveStickyValues === 'function') {
+        preserveStickyValues();
+    }
+    
     // Form reset
     event.target.reset();
-    document.getElementById('harcamaTarih').value = currentDate;
-    document.getElementById('kart').focus();
+    
+    // Sticky values uygula
+    if (typeof applyStickyValues === 'function') {
+        applyStickyValues();
+    } else {
+        // Fallback - default date
+        document.getElementById('harcamaTarih').value = currentDate;
+    }
+    
+    // Odağı tutar alanına getir
+    const tutarInput = document.getElementById('tutar');
+    if (tutarInput) {
+        tutarInput.focus();
+        tutarInput.select();
+    }
     
     // Update displays
     updateHarcamaTable();

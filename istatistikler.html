@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harcama Listesi - Kredi Kartı Harcama Takip Sistemi</title>
+    <title>İstatistikler - Kredi Kartı Harcama Takip Sistemi</title>
     
     <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
     <meta name="author" content="Harcama Takip Sistemi">
     
-    <meta name="theme-color" content="#007bff">
-    <meta name="msapplication-navbutton-color" content="#007bff">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="msapplication-navbutton-color" content="#6366f1">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
     <meta name="mobile-web-app-capable" content="yes">
@@ -25,7 +25,6 @@
     
     <!-- External Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-    <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="./assets/css/variables.css">
@@ -179,136 +178,83 @@
         <div class="tabs">
             <a href="index.html" class="tab">📊 Gösterge Paneli</a>
             <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-            <a href="harcama-listesi.html" class="tab active">📋 Harcama Listesi</a>
+            <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-            <a href="istatistikler.html" class="tab">📊 İstatistikler</a>
+            <a href="istatistikler.html" class="tab active">📊 İstatistikler</a>
             <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
         </div>
 
         <div class="content">
-            <!-- Harcama Listesi Content -->
+            <!-- İstatistikler Content -->
             <div class="page-content">
-                <h2>Harcama Listesi</h2>
+                <h2>📊 İstatistikler</h2>
                 
-                <div class="filters">
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label for="filtreTarih">📅 Ay/Yıl</label>
-                            <input type="month" id="filtreTarih" onchange="updateHarcamaTable()">
-                        </div>
-                        <div class="filter-group">
-                            <label for="filtreKullanici">👤 Kişi</label>
-                            <select id="filtreKullanici" onchange="updateHarcamaTable()">
-                                <option value="">Tümü</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="filtreKart">💳 Kart</label>
-                            <select id="filtreKart" onchange="updateHarcamaTable()">
-                                <option value="">Tümü</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="minTutar">💰 Min</label>
-                            <input type="number" id="minTutar" placeholder="0 ₺" onchange="updateHarcamaTable()">
-                        </div>
-                        <div class="filter-group">
-                            <label for="maxTutar">💰 Max</label>
-                            <input type="number" id="maxTutar" placeholder="∞ ₺" onchange="updateHarcamaTable()">
-                        </div>
-                        <div class="filter-group">
-                            <label for="siralamaKriteri">📊 Sıralama</label>
-                            <select id="siralamaKriteri" onchange="updateHarcamaTable()">
-                                <option value="tarih-desc">🗓️ Yeni → Eski</option>
-                                <option value="tarih-asc">🗓️ Eski → Yeni</option>
-                                <option value="tutar-desc">💸 Büyük → Küçük</option>
-                                <option value="tutar-asc">💸 Küçük → Büyük</option>
-                                <option value="kullanici-asc">👤 A → Z</option>
-                                <option value="kart-asc">💳 A → Z</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-outline" onclick="clearAllFilters()">🧹 Temizle</button>
-                        </div>
+                <!-- İstatistik Kartları -->
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>📈 Toplam Harcama</h3>
+                        <div class="amount" id="totalExpenses">0 TL</div>
+                        <small id="totalExpensesCount">0 harcama</small>
+                    </div>
+                    <div class="summary-card">
+                        <h3>📅 En Yoğun Ay</h3>
+                        <div class="stat-value" id="busiestMonth">-</div>
+                        <small id="busiestMonthAmount">0 TL</small>
+                    </div>
+                    <div class="summary-card">
+                        <h3>💳 En Çok Kullanılan Kart</h3>
+                        <div class="stat-value" id="mostUsedCard">-</div>
+                        <small id="mostUsedCardCount">0 harcama</small>
+                    </div>
+                    <div class="summary-card">
+                        <h3>👤 En Çok Harcayan</h3>
+                        <div class="stat-value" id="topSpender">-</div>
+                        <small id="topSpenderAmount">0 TL</small>
                     </div>
                 </div>
 
-                <div class="table-container">
-                    <div class="table-header">
-                        <span id="sonucSayisi">Toplam: 0 harcama</span>
+                <!-- Grafik Bölümü -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <div class="summary-card">
+                        <h3>📅 Aylık Harcama Trendi</h3>
+                        <canvas id="monthlyTrendChart" style="max-height: 400px;"></canvas>
                     </div>
-                    <table id="harcamaTable" class="harcama-table">
-                        <thead>
-                            <tr>
-                                <th>Tarih</th>
-                                <th>Kart</th>
-                                <th>Kullanıcı</th>
-                                <th>Açıklama</th>
-                                <th>Taksit</th>
-                                <th>Tutar</th>
-                                <th>İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                    Henüz harcama kaydı yok
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="summary-card">
+                        <h3>💳 Kart Bazlı Dağılım</h3>
+                        <canvas id="cardDistributionChart" style="max-height: 400px;"></canvas>
+                    </div>
                 </div>
-                
-                <!-- Harcama Düzenleme Modal -->
-                <div id="editHarcamaModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg); padding: 24px; border-radius: var(--radius); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
-                        <h3>Harcamayı Düzenle</h3>
-                        <form id="editHarcamaForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="editTarih">Tarih *</label>
-                                    <input type="date" id="editTarih" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editKart">Kart *</label>
-                                    <select id="editKart" required>
-                                        <option value="">Kart Seçin</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editKullanici">Kullanıcı *</label>
-                                    <select id="editKullanici" required>
-                                        <option value="">Kullanıcı Seçin</option>
-                                    </select>
-                                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <div class="summary-card">
+                        <h3>👥 Kullanıcı Bazlı Dağılım</h3>
+                        <canvas id="userDistributionChart" style="max-height: 400px;"></canvas>
+                    </div>
+                    <div class="summary-card">
+                        <h3>📊 Haftalık Ortalama</h3>
+                        <canvas id="weeklyAverageChart" style="max-height: 400px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Detaylı İstatistikler -->
+                <div class="summary-card">
+                    <h3>📋 Detaylı İstatistikler</h3>
+                    <div id="detailedStats">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                            <div>
+                                <h4 style="color: var(--primary); margin-bottom: 8px;">💰 Harcama Analizi</h4>
+                                <div id="expenseAnalysis"></div>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="editAciklama">Açıklama</label>
-                                    <input type="text" id="editAciklama" placeholder="Harcama detayı...">
-                                </div>
-                                <div class="form-group">
-                                    <label for="editTutar">Tutar (TL) *</label>
-                                    <input type="number" id="editTutar" step="0.01" min="0.01" required>
-                                </div>
+                            <div>
+                                <h4 style="color: var(--primary); margin-bottom: 8px;">🏆 Rekorlar</h4>
+                                <div id="recordStats"></div>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="editTaksitNo">Kaçıncı Taksit?</label>
-                                    <input type="number" id="editTaksitNo" min="1" max="99">
-                                </div>
-                                <div class="form-group">
-                                    <label for="editToplamTaksit">Toplam Taksit</label>
-                                    <input type="number" id="editToplamTaksit" min="1" max="99">
-                                </div>
+                            <div>
+                                <h4 style="color: var(--primary); margin-bottom: 8px;">📈 Trendler</h4>
+                                <div id="trendStats"></div>
                             </div>
-                            <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
-                                <button type="button" class="btn btn-outline" onclick="closeEditHarcamaModal()">İptal</button>
-                                <button type="submit" class="btn btn-primary">Güncelle</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -330,6 +276,6 @@
     <script src="./assets/js/utils.js"></script>
 
     <!-- Page Specific Scripts -->
-    <script src="./assets/js/pages/harcama-listesi.js"></script>
+    <script src="./assets/js/pages/istatistikler.js"></script>
 </body>
 </html>
