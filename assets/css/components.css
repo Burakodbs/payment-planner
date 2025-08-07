@@ -126,74 +126,188 @@
 }
 
 /* Tabs */
+/* Figma-Inspired Navigation Tabs */
 .tabs {
     display: flex;
     background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    padding: 0 8px;
-    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .tab {
-    flex: 1;
-    padding: 16px 24px;
-    text-align: center;
-    cursor: pointer;
+    position: relative;
+    padding: 14px 20px;
     background: transparent;
     border: none;
-    font-size: 14px;
-    font-weight: 500;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     color: var(--text-secondary);
-    transition: all var(--transition);
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    margin: 0 2px;
-    position: relative;
     text-decoration: none;
+    white-space: nowrap;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: fit-content;
+    backdrop-filter: blur(10px);
 }
 
 .tab:hover {
-    background: var(--hover);
+    background: rgba(255, 255, 255, 0.8);
     color: var(--text);
     text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 }
 
 .tab.active {
-    background: var(--primary-alpha);
-    color: var(--primary);
-    border-bottom: 2px solid var(--primary);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text);
     text-decoration: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-bottom: 3px solid var(--accent);
+    backdrop-filter: blur(20px);
 }
 
 .tab.active::after {
     content: '';
     position: absolute;
     bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border-radius: 2px 2px 0 0;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+    transition: all var(--transition);
 }
 
 .tab:hover:not(.active) {
-    background: var(--secondary);
+    background: rgba(255, 255, 255, 0.7);
     color: var(--text);
+}
+
+/* Modern Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    line-height: 1.4;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.btn:focus {
+    outline: none;
+    box-shadow: var(--focus-shadow);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #333333 0%, #555555 100%);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: var(--bg);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.btn-outline:hover {
+    background: var(--hover);
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow);
     transform: translateY(-1px);
-    box-shadow: var(--shadow-soft);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-color: var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--hover);
+    color: var(--text);
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: var(--text-xs);
+}
+
+.btn-lg {
+    padding: 14px 24px;
+    font-size: var(--text-lg);
 }
 
 /* Tab Content */
 .content {
-    padding: 32px;
+    padding: 0;
+}
+
+.tab-container {
+    background: var(--bg);
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
 }
 
 .tab-content {
     display: none;
-    animation: fadeIn 0.3s ease;
+    padding: 32px;
+    animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tab-content.active {
     display: block;
+}
+
+@media (max-width: 768px) {
+    .tabs {
+        padding: 0 8px;
+        gap: 2px;
+    }
+    
+    .tab {
+        padding: 12px 16px;
+        font-size: var(--text-xs);
+        min-width: auto;
+        flex: 1;
+    }
+    
+    .tab-content {
+        padding: 20px;
+    }
 }
 
 /* Forms */
@@ -504,28 +618,48 @@ tr:hover {
 }
 
 .quick-info {
-    background: linear-gradient(135deg, var(--primary-light) 0%, #ddd6fe 100%);
-    padding: 20px;
-    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 24px;
+    border-radius: 12px;
     margin-bottom: 32px;
-    border-left: 4px solid var(--primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .quick-info {
+    background: rgba(26, 26, 26, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .shortcut-info {
+    background: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--accent);
 }
 
 .quick-info h3 {
-    margin: 0 0 8px 0;
+    margin: 0 0 12px 0;
     color: var(--text);
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
+    letter-spacing: -0.01em;
 }
 
 .quick-info p {
-    margin: 4px 0;
+    margin: 6px 0;
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 15px;
+    line-height: 1.5;
 }
 
 .shortcut-info {
-    color: var(--primary);
-    font-weight: 600;
+    color: var(--text);
+    font-weight: 500;
     font-size: 14px;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-top: 8px;
+    border-left: 3px solid var(--accent);
 }

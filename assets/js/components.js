@@ -61,24 +61,27 @@ function removeThemeButtons() {
 }
 
 // Header Component
-function renderHeader(currentPageTitle = 'Kredi Kartı Harcama Takip Sistemi') {
+function renderHeader(currentPageTitle = 'Harcama Takip') {
     return `
         <div class="header">
-            <div class="header-left">
+            <div class="header-content">
+                <a href="index.html" class="header-brand">
+                    <div class="header-icon">💳</div>
+                    <div>
+                        <h1>Harcama Takip</h1>
+                        <div class="header-subtitle">Kredi kartı harcamalarınızı profesyonelce yönetin</div>
+                    </div>
+                </a>
             </div>
             
-            <div class="header-center">
-                <h1>Kredi Kartı Harcama Takip Sistemi</h1>
-                <p>Kredi kartı harcamalarınızı takip edin ve kimin ne kadar ödeyeceğini hesaplayın</p>
-            </div>
-            
-            <div class="header-right">
-                <div class="user-info">
-                    <span class="user-name">👤 <span id="currentUserInfo">Kullanıcı</span></span>
-                    <button class="btn btn-outline btn-sm" onclick="authSystem.logout()" title="Çıkış Yap">
-                        🚪 Çıkış
-                    </button>
+            <div class="header-actions">
+                <div class="header-user">
+                    <span>👤</span>
+                    <span id="currentUserInfo">Kullanıcı</span>
                 </div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
+                    🌙
+                </button>
             </div>
         </div>
     `;
