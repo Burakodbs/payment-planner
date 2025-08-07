@@ -1,6 +1,6 @@
 // Harcama Listesi sayfasına özel JavaScript kodları
 
-console.log('Harcama listesi sayfası yüklendi');
+// console.log('Harcama listesi sayfası yüklendi');
 
 // Mevcut ayı filtre olarak ayarla
 function setCurrentMonthFilter() {
@@ -9,7 +9,7 @@ function setCurrentMonthFilter() {
         const currentDate = new Date();
         const currentMonth = currentDate.toISOString().slice(0, 7); // YYYY-MM format
         filtreTarih.value = currentMonth;
-        console.log('Varsayılan ay filtresi ayarlandı:', currentMonth);
+        // console.log('Varsayılan ay filtresi ayarlandı:', currentMonth);
     }
 }
 
@@ -26,6 +26,11 @@ function clearAllFilters() {
 
 // Sayfa yüklendiğinde mevcut ayı ayarla
 document.addEventListener('DOMContentLoaded', function() {
+    // Ortak component'leri initialize et
+    if (typeof initializePage === 'function') {
+        initializePage('harcama-listesi');
+    }
+    
     // Kısa bir gecikme ile mevcut ayı ayarla
     setTimeout(setCurrentMonthFilter, 200);
     

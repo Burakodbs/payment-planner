@@ -8,7 +8,10 @@
       "Bash(node:*)",
       "Bash(mkdir:*)",
       "Bash(find:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(mv:*)",
+      "WebFetch(domain:www.figma.com)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

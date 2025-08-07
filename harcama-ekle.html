@@ -9,8 +9,8 @@
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
     <meta name="author" content="Harcama Takip Sistemi">
     
-    <meta name="theme-color" content="#007bff">
-    <meta name="msapplication-navbutton-color" content="#007bff">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="msapplication-navbutton-color" content="#6366f1">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
     <meta name="mobile-web-app-capable" content="yes">
@@ -28,12 +28,12 @@
     <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
-    <link rel="stylesheet" href="./assets/css/variables.css?v=17">
-    <link rel="stylesheet" href="./assets/css/base.css?v=17">
-    <link rel="stylesheet" href="./assets/css/layout.css?v=17">
-    <link rel="stylesheet" href="./assets/css/components.css?v=17">
-    <link rel="stylesheet" href="./assets/css/utilities.css?v=17">
-    <link rel="stylesheet" href="./assets/css/auth.css?v=17">
+    <link rel="stylesheet" href="./assets/css/variables.css">
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/layout.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+    <link rel="stylesheet" href="./assets/css/auth.css">
 </head>
 <body>
     <!-- Authentication Container -->
@@ -156,24 +156,26 @@
     <div id="mainApp" style="display: none;">
     <div class="container">
         <div class="header">
-            <div class="header-left">
+    <div class="header-content">
+        <a href="index.html" class="header-brand">
+            <div class="header-icon">💳</div>
+            <div>
+                <h1>Harcama Takip</h1>
+                <div class="header-subtitle">Kredi kartı harcamalarınızı profesyonelce yönetin</div>
             </div>
-            
-            <div class="header-center">
-                <h1>Kredi Kartı Harcama Takip Sistemi</h1>
-                <p>Kredi kartı harcamalarınızı takip edin ve kimin ne kadar ödeyeceğini hesaplayın</p>
-            </div>
-            
-            <div class="header-right">
-                <div class="user-info">
-                    <span class="user-name">👤 <span id="currentUserInfo">Kullanıcı</span></span>
-                    <button class="btn btn-outline btn-sm" onclick="authSystem.logout()" title="Çıkış Yap">
-                        🚪 Çıkış
-                    </button>
-                </div>
-            </div>
+        </a>
+    </div>
+    
+    <div class="header-actions">
+        <div class="header-user">
+            <span>👤</span>
+            <span id="currentUserInfo">Kullanıcı</span>
         </div>
-
+        <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
+            🌙
+        </button>
+    </div>
+</div>
         <div class="tabs">
             <a href="index.html" class="tab">📊 Gösterge Paneli</a>
             <a href="harcama-ekle.html" class="tab active">➕ Harcama Ekle</a>
@@ -186,12 +188,19 @@
         <div class="content">
             <!-- Harcama Ekleme Content -->
             <div class="page-content">
-                <h2>Yeni Harcama Ekle</h2>
-                <div class="quick-info">
-                    <h3>Hızlı Ekleme</h3>
-                    <p>Sadece zorunlu alanları doldurun, Tab tuşuyla hızlıca geçiş yapın ve Enter'a basarak ekleyin.</p>
-                    <p class="shortcut-info" id="kisayolBilgi">Kısayollar: Kullanıcılar yükleniyor...</p>
+                <div class="page-tabs">
+                    <button class="page-tab active" onclick="showPageTab('harcama')">💳 Harcama Ekle</button>
+                    <button class="page-tab" onclick="showPageTab('duzenli')">🔄 Düzenli Ödemeler</button>
                 </div>
+
+                <!-- Harcama Ekleme Tab -->
+                <div id="harcamaTab" class="tab-content active">
+                    <h2>Yeni Harcama Ekle</h2>
+                    <div class="quick-info">
+                        <h3>Hızlı Ekleme</h3>
+                        <p>Sadece zorunlu alanları doldurun, Tab tuşuyla hızlıca geçiş yapın ve Enter'a basarak ekleyin.</p>
+                        <p class="shortcut-info" id="kisayolBilgi">Kısayollar: Kullanıcılar yükleniyor...</p>
+                    </div>
 
                 <form id="harcamaForm" onsubmit="handleHarcamaSubmit(event)">
                     <div class="form-row">
@@ -239,21 +248,87 @@
                     </div>
                     <button type="submit" class="btn">Harcama Ekle</button>
                 </form>
+                </div>
+
+                <!-- Düzenli Ödemeler Tab -->
+                <div id="duzenliTab" class="tab-content">
+                    <h2>Düzenli Ödemeler</h2>
+                    <div class="quick-info">
+                        <h3>Otomatik Ödeme Yönetimi</h3>
+                        <p>Elektrik, su, internet gibi düzenli ödemelerinizi tanımlayın ve otomatik olarak takip edin.</p>
+                    </div>
+
+                    <div class="data-management-grid">
+                        <!-- Düzenli Ödemeler Listesi -->
+                        <div class="data-management-card">
+                            <h3>📋 Mevcut Düzenli Ödemeler</h3>
+                            <div id="duzenliOdemelerListesi">
+                                <p class="text-muted">Henüz düzenli ödeme tanımlanmamış.</p>
+                            </div>
+                        </div>
+
+                        <!-- Yeni Düzenli Ödeme Ekleme -->
+                        <div class="data-management-card">
+                            <h3>➕ Yeni Düzenli Ödeme</h3>
+                            <form id="duzenliOdemeForm" onsubmit="handleDuzenliOdemeSubmit(event)">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="duzenliAciklama">Açıklama *</label>
+                                        <input type="text" id="duzenliAciklama" placeholder="Elektrik faturası" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="duzenliTutar">Tutar (TL) *</label>
+                                        <input type="number" id="duzenliTutar" step="0.01" min="0.01" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="duzenliKart">Kart *</label>
+                                        <select id="duzenliKart" required>
+                                            <option value="">Kart Seçin</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="duzenliKullanici">Kullanıcı *</label>
+                                        <select id="duzenliKullanici" required>
+                                            <option value="">Kullanıcı Seçin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="duzenliBaslangic">Başlangıç Tarihi *</label>
+                                        <input type="date" id="duzenliBaslangic" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="duzenliKategori">Kategori</label>
+                                        <input type="text" id="duzenliKategori" value="Düzenli Ödeme" readonly>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn">Düzenli Ödeme Ekle</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     </div>
 
+    <!-- Cache Manager (must be first) -->
+    <script src="./assets/js/cache-manager.js"></script>
+    
     <!-- JavaScript Files -->
-    <script src="./assets/js/auth.js?v=17"></script>
-    <script src="./assets/js/auth-ui.js?v=17"></script>
-    <script src="./assets/js/app.js?v=17"></script>
-    <script src="./assets/js/data-manager.js?v=17"></script>
-    <script src="./assets/js/calculations.js?v=17"></script>
-    <script src="./assets/js/chart-manager.js?v=17"></script>
-    <script src="./assets/js/utils.js?v=17"></script>
+    <script src="./assets/js/components.js"></script>
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/auth-ui.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/data-manager.js"></script>
+    <script src="./assets/js/calculations.js"></script>
+    <script src="./assets/js/chart-manager.js"></script>
+    <script src="./assets/js/utils.js"></script>
 
     <!-- Page Specific Scripts -->
-    <script src="./assets/js/pages/harcama-ekle.js?v=1"></script>
+    <script src="./assets/js/pages/harcama-ekle.js"></script>
 </body>
 </html>

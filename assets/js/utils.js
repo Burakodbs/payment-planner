@@ -2,7 +2,7 @@
 
 // Data Migration Functions
 function migrateDuzenliOdemeData() {
-    console.log('Düzenli ödeme migration başlatılıyor...');
+    // console.log('Düzenli ödeme migration başlatılıyor...');
     
     let migrationCount = 0;
     harcamalar.forEach(harcama => {
@@ -21,7 +21,7 @@ function migrateDuzenliOdemeData() {
     });
     
     if (migrationCount > 0) {
-        console.log(`${migrationCount} düzenli ödeme migration yapıldı`);
+        // console.log(`${migrationCount} düzenli ödeme migration yapıldı`);
         // Verileri kaydet
         if (typeof saveData === 'function') {
             saveData();
@@ -56,7 +56,7 @@ function updateDashboardStats() {
     const totalFuturePaymentsElement = document.getElementById('totalFuturePayments');
     
     if (!thisMonthElement || !totalCurrentDebtElement || !totalFuturePaymentsElement) {
-        console.log('Dashboard stat elements not found, skipping update');
+        // console.log('Dashboard stat elements not found, skipping update');
         return;
     }
     
@@ -82,7 +82,7 @@ function updateDashboardStats() {
 function updateDashboardRecentExpenses() {
     const recentExpensesElement = document.getElementById('recentExpensesList');
     if (!recentExpensesElement) {
-        console.log('Recent expenses element not found, skipping update');
+        // console.log('Recent expenses element not found, skipping update');
         return;
     }
 
@@ -112,7 +112,7 @@ function updateDashboardRecentExpenses() {
 function updateDashboardUpcomingInstallments() {
     const upcomingInstallmentsElement = document.getElementById('upcomingInstallmentsList');
     if (!upcomingInstallmentsElement) {
-        console.log('Upcoming installments element not found, skipping update');
+        // console.log('Upcoming installments element not found, skipping update');
         return;
     }
 
@@ -642,12 +642,12 @@ function permanentDeleteDuzenliOdeme(id) {
 function syncDataAfterDuzenliOdemeUpdate(oldOdeme, newOdeme) {
     // Düzenli ödeme güncellendiğinde harcama listesindeki ilgili kayıtları da güncelle
     // Bu özellik şu anda sadece tarihi günceller, kart/kullanıcı değişiklikleri için ayrı fonksiyon gerekli
-    console.log('Düzenli ödeme güncellendi, global sync tetiklendi');
+    // console.log('Düzenli ödeme güncellendi, global sync tetiklendi');
 }
 
 function syncAllDataAfterNameChange(type, oldName, newName) {
     // type: 'kart' veya 'kullanici'
-    console.log(`Global sync: ${type} adı değiştirildi: ${oldName} -> ${newName}`);
+    // console.log(`Global sync: ${type} adı değiştirildi: ${oldName} -> ${newName}`);
     
     let updateCount = 0;
     
@@ -958,7 +958,7 @@ function processDuzenliOdemeler() {
     const currentMonth = today.toISOString().slice(0, 7); // YYYY-MM
     const currentDay = today.getDate(); // Ayın kaçıncı günü
     
-    console.log('Düzenli ödeme kontrolü başlıyor...', currentMonth);
+    // console.log('Düzenli ödeme kontrolü başlıyor...', currentMonth);
     
     duzenliOdemeler.forEach(odeme => {
         // Sadece aktif ödemeleri kontrol et
@@ -984,7 +984,7 @@ function processDuzenliOdemeler() {
             
             // Ödeme günü geldi mi kontrol et
             if (currentDay >= odemeGunu) {
-                console.log(`Düzenli ödeme oluşturuluyor: ${odeme.aciklama} - ${currentMonth}`);
+                // console.log(`Düzenli ödeme oluşturuluyor: ${odeme.aciklama} - ${currentMonth}`);
                 
                 // Yeni harcama kaydı oluştur
                 const yeniHarcama = {
@@ -1041,9 +1041,9 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js')
             .then(function(registration) {
-                console.log('ServiceWorker registration successful');
+                // console.log('ServiceWorker registration successful');
             }, function(err) {
-                console.log('ServiceWorker registration failed: ', err);
+                // console.log('ServiceWorker registration failed: ', err);
             });
             
         // Düzenli ödeme kontrolünü başlat

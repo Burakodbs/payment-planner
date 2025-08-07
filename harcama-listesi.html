@@ -28,12 +28,12 @@
     <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
-    <link rel="stylesheet" href="./assets/css/variables.css?v=20">
-    <link rel="stylesheet" href="./assets/css/base.css?v=20">
-    <link rel="stylesheet" href="./assets/css/layout.css?v=20">
-    <link rel="stylesheet" href="./assets/css/components.css?v=20">
-    <link rel="stylesheet" href="./assets/css/utilities.css?v=20">
-    <link rel="stylesheet" href="./assets/css/auth.css?v=20">
+    <link rel="stylesheet" href="./assets/css/variables.css">
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/layout.css">
+    <link rel="stylesheet" href="./assets/css/components.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+    <link rel="stylesheet" href="./assets/css/auth.css">
 </head>
 <body>
     <!-- Authentication Container -->
@@ -156,24 +156,26 @@
     <div id="mainApp" style="display: none;">
     <div class="container">
         <div class="header">
-            <div class="header-left">
+    <div class="header-content">
+        <a href="index.html" class="header-brand">
+            <div class="header-icon">💳</div>
+            <div>
+                <h1>Harcama Takip</h1>
+                <div class="header-subtitle">Kredi kartı harcamalarınızı profesyonelce yönetin</div>
             </div>
-            
-            <div class="header-center">
-                <h1>Kredi Kartı Harcama Takip Sistemi</h1>
-                <p>Kredi kartı harcamalarınızı takip edin ve kimin ne kadar ödeyeceğini hesaplayın</p>
-            </div>
-            
-            <div class="header-right">
-                <div class="user-info">
-                    <span class="user-name">👤 <span id="currentUserInfo">Kullanıcı</span></span>
-                    <button class="btn btn-outline btn-sm" onclick="authSystem.logout()" title="Çıkış Yap">
-                        🚪 Çıkış
-                    </button>
-                </div>
-            </div>
+        </a>
+    </div>
+    
+    <div class="header-actions">
+        <div class="header-user">
+            <span>👤</span>
+            <span id="currentUserInfo">Kullanıcı</span>
         </div>
-
+        <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
+            🌙
+        </button>
+    </div>
+</div>
         <div class="tabs">
             <a href="index.html" class="tab">📊 Gösterge Paneli</a>
             <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
@@ -313,16 +315,20 @@
     </div>
     </div>
 
+    <!-- Cache Manager (must be first) -->
+    <script src="./assets/js/cache-manager.js"></script>
+    
     <!-- JavaScript Files -->
-    <script src="./assets/js/auth.js?v=20"></script>
-    <script src="./assets/js/auth-ui.js?v=20"></script>
-    <script src="./assets/js/app.js?v=20"></script>
-    <script src="./assets/js/data-manager.js?v=22"></script>
-    <script src="./assets/js/calculations.js?v=20"></script>
-    <script src="./assets/js/chart-manager.js?v=20"></script>
-    <script src="./assets/js/utils.js?v=22"></script>
+    <script src="./assets/js/components.js"></script>
+    <script src="./assets/js/auth.js"></script>
+    <script src="./assets/js/auth-ui.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/data-manager.js"></script>
+    <script src="./assets/js/calculations.js"></script>
+    <script src="./assets/js/chart-manager.js"></script>
+    <script src="./assets/js/utils.js"></script>
 
     <!-- Page Specific Scripts -->
-    <script src="./assets/js/pages/harcama-listesi.js?v=1"></script>
+    <script src="./assets/js/pages/harcama-listesi.js"></script>
 </body>
 </html>

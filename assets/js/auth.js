@@ -155,14 +155,11 @@ class AuthSystem {
 
     // Sayfa-özel güncellemeleri tetikle
     triggerPageUpdates() {
-        console.log('📋 Sayfa güncellemeleri başlıyor...');
         
         // Data migration işlemi
         if (typeof migrateDuzenliOdemeData === 'function') {
-            console.log('🔄 Veri migration kontrol ediliyor...');
             try {
                 migrateDuzenliOdemeData();
-                console.log('✅ Migration tamamlandı');
             } catch (error) {
                 console.error('❌ Migration hatası:', error);
             }
@@ -170,10 +167,8 @@ class AuthSystem {
         
         // Dashboard güncellemeleri
         if (typeof updateDashboard === 'function') {
-            console.log('📊 Dashboard güncelleniyor...');
             try {
                 updateDashboard();
-                console.log('✅ Dashboard güncellendi');
             } catch (error) {
                 console.error('❌ Dashboard güncelleme hatası:', error);
             }
@@ -181,29 +176,16 @@ class AuthSystem {
         
         // Harcama tablosu güncellemeleri
         if (typeof updateHarcamaTable === 'function') {
-            console.log('📋 Harcama tablosu güncelleniyor...');
-            try {
-                updateHarcamaTable();
-                console.log('✅ Harcama tablosu güncellendi');
-            } catch (error) {
-                console.error('❌ Harcama tablosu güncelleme hatası:', error);
-            }
+            updateHarcamaTable();
         }
         
         // Hesaplar güncellemeleri
         if (typeof updateHesaplar === 'function') {
-            console.log('💰 Hesaplar güncelleniyor...');
-            try {
-                updateHesaplar();
-                console.log('✅ Hesaplar güncellendi');
-            } catch (error) {
-                console.error('❌ Hesaplar güncelleme hatası:', error);
-            }
+            updateHesaplar();
         }
         
         // Aylık özet güncellemeleri
         if (typeof updateAylikOzet === 'function') {
-            console.log('📅 Aylık özet güncelleniyor...');
             try {
                 const ozetTarih = document.getElementById('ozet_tarih');
                 if (ozetTarih && !ozetTarih.value) {
@@ -211,52 +193,28 @@ class AuthSystem {
                     ozetTarih.value = currentMonth;
                 }
                 updateAylikOzet();
-                console.log('✅ Aylık özet güncellendi');
             } catch (error) {
                 console.error('❌ Aylık özet güncelleme hatası:', error);
             }
         }
         
-        // Veri yönetimi güncellemeleri
-        if (typeof updateDataStats === 'function') {
-            console.log('⚙️ Veri istatistikleri güncelleniyor...');
-            try {
-                updateDataStats();
-                console.log('✅ Veri istatistikleri güncellendi');
-            } catch (error) {
-                console.error('❌ Veri istatistikleri güncelleme hatası:', error);
-            }
-        }
+        // Veri yönetimi güncellemeleri (istatistikler kaldırıldı)
         if (typeof updateDuzenliOdemelerListesi === 'function') {
-            console.log('📋 Düzenli ödemeler güncelleniyor...');
             try {
                 updateDuzenliOdemelerListesi();
-                console.log('✅ Düzenli ödemeler güncellendi');
             } catch (error) {
                 console.error('❌ Düzenli ödemeler güncelleme hatası:', error);
             }
         }
         if (typeof updateCardAndUserManagement === 'function') {
-            console.log('👥 Kart ve kullanıcı yönetimi güncelleniyor...');
             try {
                 updateCardAndUserManagement();
-                console.log('✅ Kart ve kullanıcı yönetimi güncellendi');
             } catch (error) {
                 console.error('❌ Kart ve kullanıcı yönetimi güncelleme hatası:', error);
             }
         }
 
-        // Console log for debugging
-        console.log('📊 Auth sistem veri durumu:', {
-            harcamalar: harcamalar.length,
-            kredikartlari: kredikartlari.length,
-            kisiler: kisiler.length,
-            duzenliOdemeler: duzenliOdemeler.length,
-            currentUser: this.currentUser,
-            currentPage: window.location.pathname
-        });
         
-        console.log('✅ Tüm sayfa güncellemeleri tamamlandı!');
     }
 
     // Auth ekranını göster
