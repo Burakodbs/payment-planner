@@ -5,6 +5,15 @@ let chartInstances = {};
 function updateDashboardCharts() {
     const chartInstances = window.chartInstances || {};
 
+    // Canvas elementlerini kontrol et
+    const trendCanvas = document.getElementById('dashboardTrendChart');
+    const userCanvas = document.getElementById('dashboardUserChart');
+    
+    if (!trendCanvas || !userCanvas) {
+        // console.log('Dashboard chart canvas elements not found');
+        return;
+    }
+
     const currentDate = new Date();
     const months = [];
     const monthlyTotals = [];
@@ -16,14 +25,14 @@ function updateDashboardCharts() {
         const monthStr = `${year}-${month}`;
         const monthName = date.toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' });
         
-        const monthExpenses = harcamalar.filter(h => h.tarih.startsWith(monthStr));
-        const monthTotal = monthExpenses.reduce((sum, h) => sum + h.tutar, 0);
+        const monthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(monthStr));
+        const monthTotal = monthExpenses.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
         
         months.push(monthName);
         monthlyTotals.push(monthTotal);
     }
 
-    const trendCtx = document.getElementById('dashboardTrendChart').getContext('2d');
+    const trendCtx = trendCanvas.getContext('2d');
     if (chartInstances.dashboardTrend) {
         chartInstances.dashboardTrend.destroy();
     }
@@ -58,14 +67,16 @@ function updateDashboardCharts() {
     });
 
     const currentMonth = new Date().toISOString().slice(0, 7);
-    const thisMonthExpenses = harcamalar.filter(h => h.tarih.startsWith(currentMonth));
+    const thisMonthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(currentMonth));
     
     const userTotals = {};
     thisMonthExpenses.forEach(h => {
-        userTotals[h.kullanici] = (userTotals[h.kullanici] || 0) + h.tutar;
+        if (h.kullanici) {
+            userTotals[h.kullanici] = (userTotals[h.kullanici] || 0) + (parseFloat(h.tutar) || 0);
+        }
     });
 
-    const userCtx = document.getElementById('dashboardUserChart').getContext('2d');
+    const userCtx = userCanvas.getContext('2d');
     if (chartInstances.dashboardUser) {
         chartInstances.dashboardUser.destroy();
     }

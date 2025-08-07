@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kredi Kartı Harcama Takip Sistemi</title>
+    <title>İstatistikler - Kredi Kartı Harcama Takip Sistemi</title>
     
     <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
@@ -25,7 +25,6 @@
     
     <!-- External Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-    <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="./assets/css/variables.css">
@@ -177,54 +176,85 @@
     </div>
 </div>
         <div class="tabs">
-            <a href="index.html" class="tab active">📊 Gösterge Paneli</a>
+            <a href="index.html" class="tab">📊 Gösterge Paneli</a>
             <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-            <a href="istatistikler.html" class="tab">📊 İstatistikler</a>
+            <a href="istatistikler.html" class="tab active">📊 İstatistikler</a>
             <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
         </div>
 
         <div class="content">
-            <!-- Dashboard Content -->
+            <!-- İstatistikler Content -->
             <div class="page-content">
-                <h2>📊 Gösterge Paneli</h2>
+                <h2>📊 İstatistikler</h2>
                 
+                <!-- İstatistik Kartları -->
                 <div class="summary-cards">
                     <div class="summary-card">
-                        <h3>💰 Bu Ay Toplam Harcama</h3>
-                        <div class="amount" id="thisMonthTotal">0 TL</div>
+                        <h3>📈 Toplam Harcama</h3>
+                        <div class="amount" id="totalExpenses">0 TL</div>
+                        <small id="totalExpensesCount">0 harcama</small>
                     </div>
                     <div class="summary-card">
-                        <h3>📊 Toplam Borç</h3>
-                        <div class="amount" id="totalCurrentDebt">0 TL</div>
+                        <h3>📅 En Yoğun Ay</h3>
+                        <div class="stat-value" id="busiestMonth">-</div>
+                        <small id="busiestMonthAmount">0 TL</small>
                     </div>
                     <div class="summary-card">
-                        <h3>⏳ Gelecek Taksitler</h3>
-                        <div class="amount" id="totalFuturePayments">0 TL</div>
+                        <h3>💳 En Çok Kullanılan Kart</h3>
+                        <div class="stat-value" id="mostUsedCard">-</div>
+                        <small id="mostUsedCardCount">0 harcama</small>
+                    </div>
+                    <div class="summary-card">
+                        <h3>👤 En Çok Harcayan</h3>
+                        <div class="stat-value" id="topSpender">-</div>
+                        <small id="topSpenderAmount">0 TL</small>
+                    </div>
+                </div>
+
+                <!-- Grafik Bölümü -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <div class="summary-card">
+                        <h3>📅 Aylık Harcama Trendi</h3>
+                        <canvas id="monthlyTrendChart" style="max-height: 400px;"></canvas>
+                    </div>
+                    <div class="summary-card">
+                        <h3>💳 Kart Bazlı Dağılım</h3>
+                        <canvas id="cardDistributionChart" style="max-height: 400px;"></canvas>
                     </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
                     <div class="summary-card">
-                        <h3>📊 Son 6 Ay Trend</h3>
-                        <canvas id="dashboardTrendChart"></canvas>
+                        <h3>👥 Kullanıcı Bazlı Dağılım</h3>
+                        <canvas id="userDistributionChart" style="max-height: 400px;"></canvas>
                     </div>
                     <div class="summary-card">
-                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
-                        <canvas id="dashboardUserChart"></canvas>
+                        <h3>📊 Haftalık Ortalama</h3>
+                        <canvas id="weeklyAverageChart" style="max-height: 400px;"></canvas>
                     </div>
                 </div>
 
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>📋 Son Harcamalar</h3>
-                        <div id="recentExpensesList"></div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>🔔 Yaklaşan Taksitler</h3>
-                        <div id="upcomingInstallmentsList"></div>
+                <!-- Detaylı İstatistikler -->
+                <div class="summary-card">
+                    <h3>📋 Detaylı İstatistikler</h3>
+                    <div id="detailedStats">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                            <div>
+                                <h4 style="color: var(--primary); margin-bottom: 8px;">💰 Harcama Analizi</h4>
+                                <div id="expenseAnalysis"></div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--primary); margin-bottom: 8px;">🏆 Rekorlar</h4>
+                                <div id="recordStats"></div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--primary); margin-bottom: 8px;">📈 Trendler</h4>
+                                <div id="trendStats"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,6 +276,6 @@
     <script src="./assets/js/utils.js"></script>
 
     <!-- Page Specific Scripts -->
-    <script src="./assets/js/pages/dashboard.js"></script>
+    <script src="./assets/js/pages/istatistikler.js"></script>
 </body>
 </html>
