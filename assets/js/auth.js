@@ -1,24 +1,32 @@
 // Kullanıcı Yetkilendirme Sistemi
 class AuthSystem {
     constructor() {
+        console.log('AuthSystem: Initializing...');
         this.currentUser = null;
         this.users = JSON.parse(localStorage.getItem('app_users') || '{}');
         this.isFirstTime = !localStorage.getItem('app_initialized');
         this.init();
+        console.log('AuthSystem: Constructor completed');
     }
 
     init() {
+        console.log('AuthSystem: init() called');
         this.checkAuth();
     }
 
     // Oturum kontrolü
     checkAuth() {
+        console.log('AuthSystem: checkAuth() called');
         const savedUser = localStorage.getItem('current_user');
+        console.log('AuthSystem: savedUser =', savedUser);
+        
         if (savedUser && this.users[savedUser]) {
+            console.log('AuthSystem: Found saved user, loading main app');
             this.currentUser = savedUser;
             this.loadUserData();
             this.showMainApp();
         } else {
+            console.log('AuthSystem: No saved user, showing auth screen');
             this.showAuth();
         }
     }
@@ -124,8 +132,67 @@ class AuthSystem {
 
     // Ana uygulamayı göster
     showMainApp() {
-        document.getElementById('authContainer').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
+        console.log('AuthSystem: showMainApp() called');
+        
+        // Hangi sayfada olduğumuzu kontrol et
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        console.log('AuthSystem: Current page =', currentPage);
+        
+        // Sadece ana sayfa (index.html) için dashboard içeriği oluştur
+        if (currentPage === 'index.html' || currentPage === '') {
+            const dashboardContent = `
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>💳 Toplam Harcama</h3>
+                        <div class="amount" id="totalExpense">0 TL</div>
+                        <div class="sub-info">Toplam kredi kartı harcaması</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>📅 Bu Ay</h3>
+                        <div class="amount" id="thisMonthExpense">0 TL</div>
+                        <div class="sub-info">Bu ayın toplam harcaması</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>⏳ Gelecek Taksitler</h3>
+                        <div class="amount" id="totalFuturePayments">0 TL</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <div class="summary-card">
+                        <h3>📊 Son 6 Ay Trend</h3>
+                        <canvas id="dashboardTrendChart"></canvas>
+                    </div>
+                    <div class="summary-card">
+                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
+                        <canvas id="dashboardUserChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>📋 Son Harcamalar</h3>
+                        <div id="recentExpensesList"></div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>🔔 Yaklaşan Taksitler</h3>
+                        <div id="upcomingInstallmentsList"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Component sistemi ile layout oluştur
+            if (typeof initializeCommonComponents === 'function') {
+                console.log('AuthSystem: Using component system for dashboard');
+                initializeCommonComponents('dashboard', dashboardContent);
+            }
+        }
+        
+        const authContainer = document.getElementById('authContainer');
+        const mainApp = document.getElementById('mainApp');
+        
+        if (authContainer) authContainer.style.display = 'none';
+        if (mainApp) mainApp.style.display = 'block';
         
         // Kullanıcı bilgisini göster
         const userInfo = document.getElementById('currentUserInfo');
@@ -213,15 +280,28 @@ class AuthSystem {
                 console.error('❌ Kart ve kullanıcı yönetimi güncelleme hatası:', error);
             }
         }
+        
+        // İstatistikler güncellemeleri
+        if (typeof updateStatistics === 'function') {
+            try {
+                updateStatistics();
+            } catch (error) {
+                console.error('❌ İstatistikler güncelleme hatası:', error);
+            }
+        }
 
         
     }
 
     // Auth ekranını göster
     showAuth() {
-        document.getElementById('authContainer').style.display = 'block';
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('setupWizard').style.display = 'none';
+        const authContainer = document.getElementById('authContainer');
+        const mainApp = document.getElementById('mainApp');
+        const setupWizard = document.getElementById('setupWizard');
+        
+        if (authContainer) authContainer.style.display = 'block';
+        if (mainApp) mainApp.style.display = 'none';
+        if (setupWizard) setupWizard.style.display = 'none';
     }
 
     // İlk kez kullanıcı kontrolü
@@ -234,8 +314,11 @@ class AuthSystem {
 
     // Setup wizard'ı göster
     showSetupWizard() {
-        document.getElementById('setupWizard').style.display = 'block';
-        document.getElementById('mainApp').style.display = 'none';
+        const setupWizard = document.getElementById('setupWizard');
+        const mainApp = document.getElementById('mainApp');
+        
+        if (setupWizard) setupWizard.style.display = 'block';
+        if (mainApp) mainApp.style.display = 'none';
     }
 
     // Setup'ı tamamla
@@ -251,8 +334,11 @@ class AuthSystem {
         this.saveUserData();
         localStorage.setItem('app_initialized', 'true');
         
-        document.getElementById('setupWizard').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
+        const setupWizard = document.getElementById('setupWizard');
+        const mainApp = document.getElementById('mainApp');
+        
+        if (setupWizard) setupWizard.style.display = 'none';
+        if (mainApp) mainApp.style.display = 'block';
         
         // UI'ları güncelle
         updateCardOptions();
@@ -279,8 +365,10 @@ let authSystem;
 
 // Sayfa yüklendiğinde auth sistemini başlat
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Auth.js: DOM loaded, starting auth system...');
     authSystem = new AuthSystem();
     authSystem.startAutoSave();
+    console.log('Auth.js: Auth system started');
 });
 
 // Sayfa kapanmadan önce verileri kaydet

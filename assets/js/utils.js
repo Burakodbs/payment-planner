@@ -51,32 +51,33 @@ function updateDashboard() {
 
 function updateDashboardStats() {
     // Dashboard elementlerini kontrol et - sadece dashboard sayfasında mevcut
-    const thisMonthElement = document.getElementById('thisMonthTotal');
-    const totalCurrentDebtElement = document.getElementById('totalCurrentDebt');
+    const totalExpenseElement = document.getElementById('totalExpense');
+    const thisMonthExpenseElement = document.getElementById('thisMonthExpense');
     const totalFuturePaymentsElement = document.getElementById('totalFuturePayments');
     
-    if (!thisMonthElement || !totalCurrentDebtElement || !totalFuturePaymentsElement) {
-        // console.log('Dashboard stat elements not found, skipping update');
+    if (!totalExpenseElement || !thisMonthExpenseElement || !totalFuturePaymentsElement) {
+        console.log('Dashboard stat elements not found, skipping update');
         return;
     }
     
+    // Toplam harcama
+    const totalExpense = harcamalar.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
+    
+    // Bu ayın harcaması
     const thisMonth = new Date().toISOString().slice(0, 7);
     const thisMonthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(thisMonth));
     const thisMonthTotal = thisMonthExpenses.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
     
-    const lastMonth = new Date();
-    lastMonth.setMonth(lastMonth.getMonth() - 1);
-    const lastMonthStr = lastMonth.toISOString().slice(0, 7);
-    const lastMonthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(lastMonthStr));
-    const lastMonthTotal = lastMonthExpenses.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
-    
-    const { hesaplar, gelecekTaksitler } = calculateDebts();
-    const totalCurrentDebt = Object.values(hesaplar).reduce((sum, debt) => sum + debt, 0);
+    // Gelecek taksitler
+    const { gelecekTaksitler } = calculateDebts();
     const totalFuturePayments = Object.values(gelecekTaksitler).reduce((sum, debt) => sum + debt, 0);
     
-    thisMonthElement.textContent = thisMonthTotal.toFixed(2) + ' TL';
-    totalCurrentDebtElement.textContent = totalCurrentDebt.toFixed(2) + ' TL';
-    totalFuturePaymentsElement.textContent = totalFuturePayments.toFixed(2) + ' TL';
+    // Elementleri güncelle
+    totalExpenseElement.textContent = totalExpense.toLocaleString() + ' TL';
+    thisMonthExpenseElement.textContent = thisMonthTotal.toLocaleString() + ' TL';
+    totalFuturePaymentsElement.textContent = totalFuturePayments.toLocaleString() + ' TL';
+    
+    console.log('Dashboard stats updated:', {totalExpense, thisMonthTotal, totalFuturePayments});
 }
 
 function updateDashboardRecentExpenses() {

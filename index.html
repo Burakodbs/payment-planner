@@ -25,7 +25,6 @@
     
     <!-- External Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-    <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="./assets/css/variables.css">
@@ -36,203 +35,8 @@
     <link rel="stylesheet" href="./assets/css/auth.css">
 </head>
 <body>
-    <!-- Authentication Container -->
-    <div id="authContainer" style="display: none;">
-        <div class="auth-wrapper">
-            <div class="auth-container">
-                <div class="auth-header">
-                    <h1>💳 Harcama Takip Sistemi</h1>
-                    <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
-                </div>
-
-                <!-- Login Form -->
-                <div id="loginForm" class="auth-form">
-                    <h2>Giriş Yap</h2>
-                    <form onsubmit="handleLogin(event)">
-                        <div class="form-group">
-                            <label for="loginUsername">Kullanıcı Adı</label>
-                            <input type="text" id="loginUsername" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Şifre</label>
-                            <input type="password" id="loginPassword" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Giriş Yap</button>
-                    </form>
-                    <p class="auth-switch">
-                        Hesabınız yok mu? <a href="#" onclick="showRegister()">Kayıt olun</a>
-                    </p>
-                </div>
-
-                <!-- Register Form -->
-                <div id="registerForm" class="auth-form" style="display: none;">
-                    <h2>Kayıt Ol</h2>
-                    <form onsubmit="handleRegister(event)">
-                        <div class="form-group">
-                            <label for="registerUsername">Kullanıcı Adı</label>
-                            <input type="text" id="registerUsername" required minlength="3">
-                            <small>En az 3 karakter</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerEmail">E-posta (Opsiyonel)</label>
-                            <input type="email" id="registerEmail">
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Şifre</label>
-                            <input type="password" id="registerPassword" required minlength="6">
-                            <small>En az 6 karakter</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Şifre Tekrar</label>
-                            <input type="password" id="confirmPassword" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Kayıt Ol</button>
-                    </form>
-                    <p class="auth-switch">
-                        Zaten hesabınız var mı? <a href="#" onclick="showLogin()">Giriş yapın</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Setup Wizard -->
-    <div id="setupWizard" style="display: none;">
-        <div class="setup-wrapper">
-            <div class="setup-container">
-                <div class="setup-header">
-                    <h1>🎉 Hoş Geldiniz!</h1>
-                    <p>Harcama takip sisteminizi kişiselleştirmek için birkaç ayar yapalım</p>
-                </div>
-
-                <div class="setup-steps">
-                    <!-- Step 1: Kart Ekleme -->
-                    <div id="setupStep1" class="setup-step active">
-                        <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                        <p>Takip etmek istediğiniz kredi kartlarını ekleyin</p>
-                        
-                        <div class="setup-form">
-                            <div class="form-group">
-                                <label for="newCardName">Kart Adı</label>
-                                <input type="text" id="newCardName" placeholder="örn: Axess, Maksimum, World...">
-                            </div>
-                            <button type="button" class="btn btn-secondary" onclick="addCard()">Kart Ekle</button>
-                            
-                            <div id="cardsList" class="setup-list">
-                                <p class="setup-help">Henüz kart eklenmedi. En az bir kart eklemeniz önerilir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Kişi Ekleme -->
-                    <div id="setupStep2" class="setup-step">
-                        <h2>2. Kullanıcıları Ekleyin</h2>
-                        <p>Harcama yapabilecek kişileri tanımlayın</p>
-                        
-                        <div class="setup-form">
-                            <div class="form-group">
-                                <label for="newUserName">Kişi Adı</label>
-                                <input type="text" id="newUserName" placeholder="örn: Ben, Eşim, Çocuğum...">
-                            </div>
-                            <button type="button" class="btn btn-secondary" onclick="addUser()">Kişi Ekle</button>
-                            
-                            <div id="usersList" class="setup-list">
-                                <p class="setup-help">Henüz kişi eklenmedi. En az bir kişi eklemeniz önerilir.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="setup-navigation">
-                    <button id="prevStep" class="btn btn-outline" onclick="previousStep()" style="display: none;">Önceki</button>
-                    <button id="nextStep" class="btn btn-primary" onclick="nextStep()">Sonraki</button>
-                    <button id="finishSetup" class="btn btn-success" onclick="finishSetup()" style="display: none;">Kurulumu Tamamla</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Application -->
-    <div id="mainApp" style="display: none;">
-    <div class="container">
-        <div class="header">
-    <div class="header-content">
-        <a href="index.html" class="header-brand">
-            <div class="header-icon">💳</div>
-            <div>
-                <h1>Harcama Takip</h1>
-                <div class="header-subtitle">Kredi kartı harcamalarınızı profesyonelce yönetin</div>
-            </div>
-        </a>
-    </div>
-    
-    <div class="header-actions">
-        <div class="header-user">
-            <span>👤</span>
-            <span id="currentUserInfo">Kullanıcı</span>
-        </div>
-        <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
-            🌙
-        </button>
-    </div>
-</div>
-        <div class="tabs">
-            <a href="index.html" class="tab active">📊 Gösterge Paneli</a>
-            <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-            <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
-            <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-            <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-            <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
-        </div>
-
-        <div class="content">
-            <!-- Dashboard Content -->
-            <div class="page-content">
-                <h2>📊 Gösterge Paneli</h2>
-                
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>💰 Bu Ay Toplam Harcama</h3>
-                        <div class="amount" id="thisMonthTotal">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>📊 Toplam Borç</h3>
-                        <div class="amount" id="totalCurrentDebt">0 TL</div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>⏳ Gelecek Taksitler</h3>
-                        <div class="amount" id="totalFuturePayments">0 TL</div>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px;">
-                    <div class="summary-card">
-                        <h3>📊 Son 6 Ay Trend</h3>
-                        <canvas id="dashboardTrendChart"></canvas>
-                    </div>
-                    <div class="summary-card">
-                        <h3>👥 Bu Ay Kişi Bazında Harcamalar</h3>
-                        <canvas id="dashboardUserChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <h3>📋 Son Harcamalar</h3>
-                        <div id="recentExpensesList"></div>
-                    </div>
-                    <div class="summary-card">
-                        <h3>🔔 Yaklaşan Taksitler</h3>
-                        <div id="upcomingInstallmentsList"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
-
     <!-- Cache Manager (must be first) -->
-    <script src="./assets/js/cache-manager.js"></script>
+    <!-- <script src="./assets/js/cache-manager.js"></script> -->
     
     <!-- JavaScript Files -->
     <script src="./assets/js/components.js"></script>
@@ -246,5 +50,10 @@
 
     <!-- Page Specific Scripts -->
     <script src="./assets/js/pages/dashboard.js"></script>
+    
+    <script>
+        // Auth sistem layout'u yönetecek, burada müdahale etmiyoruz
+        console.log('Index.html loaded, auth system will handle layout');
+    </script>
 </body>
 </html>

@@ -79,9 +79,6 @@ function renderHeader(currentPageTitle = 'Harcama Takip') {
                     <span>👤</span>
                     <span id="currentUserInfo">Kullanıcı</span>
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
-                    🌙
-                </button>
             </div>
         </div>
     `;
@@ -95,6 +92,7 @@ function renderNavigation(activePage = '') {
         { href: 'harcama-listesi.html', icon: '📋', text: 'Harcama Listesi', id: 'harcama-listesi' },
         { href: 'hesaplar.html', icon: '💰', text: 'Hesaplar', id: 'hesaplar' },
         { href: 'aylik-ozet.html', icon: '📅', text: 'Aylık Özet', id: 'aylik-ozet' },
+        { href: 'istatistikler.html', icon: '📈', text: 'İstatistikler', id: 'istatistikler' },
         { href: 'veri-yonetimi.html', icon: '⚙️', text: 'Veri Yönetimi', id: 'veri-yonetimi' }
     ];
 
@@ -128,11 +126,11 @@ function renderAuthContainer() {
                         <form onsubmit="handleLogin(event)">
                             <div class="form-group">
                                 <label for="loginUsername">Kullanıcı Adı</label>
-                                <input type="text" id="loginUsername" required>
+                                <input type="text" id="loginUsername" required autocomplete="username">
                             </div>
                             <div class="form-group">
                                 <label for="loginPassword">Şifre</label>
-                                <input type="password" id="loginPassword" required>
+                                <input type="password" id="loginPassword" required autocomplete="current-password">
                             </div>
                             <button type="submit" class="btn btn-primary">Giriş Yap</button>
                         </form>
@@ -147,21 +145,21 @@ function renderAuthContainer() {
                         <form onsubmit="handleRegister(event)">
                             <div class="form-group">
                                 <label for="registerUsername">Kullanıcı Adı</label>
-                                <input type="text" id="registerUsername" required minlength="3">
+                                <input type="text" id="registerUsername" required minlength="3" autocomplete="username">
                                 <small>En az 3 karakter</small>
                             </div>
                             <div class="form-group">
                                 <label for="registerEmail">E-posta (Opsiyonel)</label>
-                                <input type="email" id="registerEmail">
+                                <input type="email" id="registerEmail" autocomplete="email">
                             </div>
                             <div class="form-group">
                                 <label for="registerPassword">Şifre</label>
-                                <input type="password" id="registerPassword" required minlength="6">
+                                <input type="password" id="registerPassword" required minlength="6" autocomplete="new-password">
                                 <small>En az 6 karakter</small>
                             </div>
                             <div class="form-group">
                                 <label for="confirmPassword">Şifre Tekrar</label>
-                                <input type="password" id="confirmPassword" required>
+                                <input type="password" id="confirmPassword" required autocomplete="new-password">
                             </div>
                             <button type="submit" class="btn btn-primary">Kayıt Ol</button>
                         </form>
@@ -261,26 +259,7 @@ function initializeCommonComponents(pageId, pageContent) {
     // Body'ye ana layout'u ekle
     document.body.innerHTML = renderAppLayout(pageId, pageContent);
     
-    // Common scripts'leri yükle
-    loadCommonScripts();
-}
-
-function loadCommonScripts() {
-    const scripts = [
-        './assets/js/auth.js',
-        './assets/js/auth-ui.js', 
-        './assets/js/app.js',
-        './assets/js/data-manager.js',
-        './assets/js/calculations.js',
-        './assets/js/chart-manager.js',
-        './assets/js/utils.js'
-    ];
-    
-    scripts.forEach(src => {
-        const script = document.createElement('script');
-        script.src = src + '?v=' + Date.now();
-        document.head.appendChild(script);
-    });
+    // Scripts zaten HTML'de yüklenmiş, tekrar yüklemeye gerek yok
 }
 
 // Export functions for global use

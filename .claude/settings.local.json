@@ -11,7 +11,11 @@
       "Bash(npm run dev:*)",
       "Bash(mv:*)",
       "WebFetch(domain:www.figma.com)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(grep:*)",
+      "Bash(start http://localhost:8000)",
+      "Bash(dir:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

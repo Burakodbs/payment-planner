@@ -171,9 +171,7 @@
             <span>👤</span>
             <span id="currentUserInfo">Kullanıcı</span>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
             🌙
-        </button>
     </div>
 </div>
         <div class="tabs">
@@ -182,6 +180,7 @@
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
+            <a href="istatistikler.html" class="tab">📈 İstatistikler</a>
             <a href="veri-yonetimi.html" class="tab active">⚙️ Veri Yönetimi</a>
         </div>
 
@@ -202,7 +201,6 @@
                             <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">Tüm verilerinizi JSON formatında kaydedin</p>
                             <button class="btn btn-primary" onclick="exportData()" style="width: 100%;">
                                 <span>💾</span> Yedek Dosyası Oluştur
-                            </button>
                         </div>
 
                         <!-- İçe Aktarma Bölümü -->
@@ -214,7 +212,6 @@
                             </div>
                             <button class="btn btn-secondary" onclick="importData()" style="width: 100%;">
                                 <span>📂</span> Yedeği Geri Yükle
-                            </button>
                         </div>
                     </div>
 
@@ -251,10 +248,8 @@
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <button class="btn btn-danger" onclick="clearAllData()" style="font-weight: 600;">
                                 <span>🗑️</span> Tüm Verileri Sil
-                            </button>
                             <button class="btn btn-danger" onclick="clearExpenseData()" style="font-weight: 600;">
                                 <span>💸</span> Sadece Harcamaları Sil
-                            </button>
                         </div>
                     </div>
                 </div>

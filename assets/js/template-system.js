@@ -97,7 +97,6 @@ class TemplateSystem {
                         <span>👤</span>
                         <span id="currentUserInfo">Kullanıcı</span>
                     </div>
-                    <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
                         🌙
                     </button>
                 </div>

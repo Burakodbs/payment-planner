@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harcama Ekle - Kredi Kartı Harcama Takip Sistemi</title>
+    <title>İstatistikler - Kredi Kartı Harcama Takip Sistemi</title>
     
     <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
     <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
@@ -25,7 +25,6 @@
     
     <!-- External Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-    <!-- Date-fns removed - not needed -->
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="./assets/css/variables.css">
@@ -176,136 +175,130 @@
 </div>
         <div class="tabs">
             <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-            <a href="harcama-ekle.html" class="tab active">➕ Harcama Ekle</a>
+            <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
             <a href="harcama-listesi.html" class="tab">📋 Harcama Listesi</a>
             <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
             <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-            <a href="istatistikler.html" class="tab">📈 İstatistikler</a>
+            <a href="istatistikler.html" class="tab active">📈 İstatistikler</a>
             <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
         </div>
 
         <div class="content">
-            <!-- Harcama Ekleme Content -->
+            <!-- İstatistikler Content -->
             <div class="page-content">
-                <div class="page-tabs">
-                    <button class="page-tab active" onclick="showPageTab('harcama')">💳 Harcama Ekle</button>
-                    <button class="page-tab" onclick="showPageTab('duzenli')">🔄 Düzenli Ödemeler</button>
+                <h2>📈 Detaylı İstatistikler</h2>
+                
+                <!-- Özet Kartları -->
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <div class="stat-icon">💳</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalExpenses">0</div>
+                            <div class="stat-label">Toplam Harcama</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalAmount">0 ₺</div>
+                            <div class="stat-label">Toplam Tutar</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="avgExpense">0 ₺</div>
+                            <div class="stat-label">Ortalama Harcama</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🗓️</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="thisMonthAmount">0 ₺</div>
+                            <div class="stat-label">Bu Ay</div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Harcama Ekleme Tab -->
-                <div id="harcamaTab" class="tab-content active">
-                    <h2>Yeni Harcama Ekle</h2>
-                    <div class="quick-info">
-                        <h3>Hızlı Ekleme</h3>
-                        <p>Sadece zorunlu alanları doldurun, Tab tuşuyla hızlıca geçiş yapın ve Enter'a basarak ekleyin.</p>
-                        <p class="shortcut-info" id="kisayolBilgi">Kısayollar: Kullanıcılar yükleniyor...</p>
+                <!-- Grafik Grid -->
+                <div class="charts-grid">
+                    <!-- Kart Dağılımı -->
+                    <div class="chart-card">
+                        <h3>💳 Kart Bazında Dağılım</h3>
+                        <div class="chart-container">
+                            <canvas id="cardDistributionChart"></canvas>
+                        </div>
                     </div>
 
-                <form id="harcamaForm" onsubmit="handleHarcamaSubmit(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="kart">Kredi Kartı *</label>
-                            <select name="kart" id="kart" required>
-                                <option value="">Kart Seçin</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="harcamaTarih">Hangi Tarih? *</label>
-                            <input type="date" name="tarih" id="harcamaTarih" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="tutar">Tutar (TL) *</label>
-                            <input type="number" name="tutar" id="tutar" step="0.01" min="0.01" required>
+                    <!-- Kullanıcı Dağılımı -->
+                    <div class="chart-card">
+                        <h3>👥 Kullanıcı Bazında Dağılım</h3>
+                        <div class="chart-container">
+                            <canvas id="userDistributionChart"></canvas>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="kullanici">Kim Harcadı? *</label>
-                            <select name="kullanici" id="kullanici" required>
-                                <option value="">Kullanıcı Seçin</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="taksitNo">Kaçıncı Taksit?</label>
-                            <input type="number" name="taksitNo" id="taksitNo" min="1" max="99">
-                        </div>
-                        <div class="form-group">
-                            <label for="toplamTaksit">Toplam Taksit</label>
-                            <input type="number" name="toplamTaksit" id="toplamTaksit" min="1" max="99">
+
+                    <!-- Aylık Trend -->
+                    <div class="chart-card chart-wide">
+                        <h3>📈 Aylık Harcama Trendi</h3>
+                        <div class="chart-container">
+                            <canvas id="monthlyTrendChart"></canvas>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="aciklama">Açıklama</label>
-                            <input type="text" name="aciklama" id="aciklama" placeholder="Harcama detayı...">
-                        </div>
-                        <div class="form-group">
-                            <input type="hidden" name="kategori" value="Diğer">
-                        </div>
-                        <div class="form-group">
+
+                    <!-- Haftalık Dağılım -->
+                    <div class="chart-card">
+                        <h3>📅 Haftalık Dağılım</h3>
+                        <div class="chart-container">
+                            <canvas id="weeklyDistributionChart"></canvas>
                         </div>
                     </div>
-                    <button type="submit" class="btn">Harcama Ekle</button>
-                </form>
+
+                    <!-- Taksit Durumu -->
+                    <div class="chart-card">
+                        <h3>🔄 Taksit Durumu</h3>
+                        <div class="chart-container">
+                            <canvas id="installmentChart"></canvas>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Düzenli Ödemeler Tab -->
-                <div id="duzenliTab" class="tab-content">
-                    <h2>Düzenli Ödemeler</h2>
-                    <div class="quick-info">
-                        <h3>Otomatik Ödeme Yönetimi</h3>
-                        <p>Elektrik, su, internet gibi düzenli ödemelerinizi tanımlayın ve otomatik olarak takip edin.</p>
+                <!-- Detaylı Tablolar -->
+                <div class="detailed-tables">
+                    <!-- En Yüksek Harcamalar -->
+                    <div class="table-card">
+                        <h3>🔝 En Yüksek Harcamalar</h3>
+                        <div class="table-container">
+                            <table id="topExpensesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>Açıklama</th>
+                                        <th>Tutar</th>
+                                        <th>Kart</th>
+                                        <th>Kullanıcı</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <div class="data-management-grid">
-                        <!-- Düzenli Ödemeler Listesi -->
-                        <div class="data-management-card">
-                            <h3>📋 Mevcut Düzenli Ödemeler</h3>
-                            <div id="duzenliOdemelerListesi">
-                                <p class="text-muted">Henüz düzenli ödeme tanımlanmamış.</p>
-                            </div>
-                        </div>
-
-                        <!-- Yeni Düzenli Ödeme Ekleme -->
-                        <div class="data-management-card">
-                            <h3>➕ Yeni Düzenli Ödeme</h3>
-                            <form id="duzenliOdemeForm" onsubmit="handleDuzenliOdemeSubmit(event)">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="duzenliAciklama">Açıklama *</label>
-                                        <input type="text" id="duzenliAciklama" placeholder="Elektrik faturası" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="duzenliTutar">Tutar (TL) *</label>
-                                        <input type="number" id="duzenliTutar" step="0.01" min="0.01" required>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="duzenliKart">Kart *</label>
-                                        <select id="duzenliKart" required>
-                                            <option value="">Kart Seçin</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="duzenliKullanici">Kullanıcı *</label>
-                                        <select id="duzenliKullanici" required>
-                                            <option value="">Kullanıcı Seçin</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="duzenliBaslangic">Başlangıç Tarihi *</label>
-                                        <input type="date" id="duzenliBaslangic" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="duzenliKategori">Kategori</label>
-                                        <input type="text" id="duzenliKategori" value="Düzenli Ödeme" readonly>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn">Düzenli Ödeme Ekle</button>
-                            </form>
+                    <!-- Aylık Özet -->
+                    <div class="table-card">
+                        <h3>📊 Aylık Özet</h3>
+                        <div class="table-container">
+                            <table id="monthlySummaryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Ay</th>
+                                        <th>Harcama Sayısı</th>
+                                        <th>Toplam Tutar</th>
+                                        <th>Ortalama</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -328,6 +321,6 @@
     <script src="./assets/js/utils.js"></script>
 
     <!-- Page Specific Scripts -->
-    <script src="./assets/js/pages/harcama-ekle.js"></script>
+    <script src="./assets/js/pages/istatistikler.js"></script>
 </body>
 </html>
