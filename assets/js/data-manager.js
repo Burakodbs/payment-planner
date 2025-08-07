@@ -12,7 +12,7 @@ function updateHarcamaTable() {
     
     // Check if table exists (only on harcama-listesi page)
     if (!tbody) {
-        console.log('Harcama table not found, skipping table update');
+        // console.log('Harcama table not found, skipping table update');
         return;
     }
     
@@ -22,9 +22,9 @@ function updateHarcamaTable() {
     
     tbody.innerHTML = '';
     
-    console.log('Filtrelenmiş harcama sayısı:', filteredHarcamalar.length);
-    console.log('İlk 5 harcama:', filteredHarcamalar.slice(0, 5));
-    console.log('Tüm harcamalar:', harcamalar.length);
+    // console.log('Filtrelenmiş harcama sayısı:', filteredHarcamalar.length);
+    // console.log('İlk 5 harcama:', filteredHarcamalar.slice(0, 5));
+    // console.log('Tüm harcamalar:', harcamalar.length);
     
     filteredHarcamalar.forEach((harcama, index) => {
         const row = tbody.insertRow();
@@ -144,9 +144,9 @@ function getDuzenliOdemelerAsHarcamalar() {
 }
 
 function applyAllFilters() {
-    console.log('--- FILTRE BAŞLANGICI ---');
-    console.log('Toplam harcama sayısı:', harcamalar.length);
-    console.log('Düzenli ödeme sayısı:', duzenliOdemeler.length);
+    // console.log('--- FILTRE BAŞLANGICI ---');
+    // console.log('Toplam harcama sayısı:', harcamalar.length);
+    // console.log('Düzenli ödeme sayısı:', duzenliOdemeler.length);
     
     // Harcamaları ve düzenli ödemeleri birleştir
     let filtered = [...harcamalar];
@@ -154,46 +154,46 @@ function applyAllFilters() {
     // Check if filter elements exist (only on harcama-listesi page)
     const filtreTarihElement = document.getElementById('filtreTarih');
     if (!filtreTarihElement) {
-        console.log('Filter elements not found, skipping filtering');
+        // console.log('Filter elements not found, skipping filtering');
         return filtered;
     }
     
     const selectedMonth = filtreTarihElement.value;
-    console.log('Seçilen ay:', selectedMonth);
+    // console.log('Seçilen ay:', selectedMonth);
     
     if (selectedMonth) {
         const monthFiltered = filtered.filter(harcama => harcama.tarih.startsWith(selectedMonth));
-        console.log('Ay filtresinden sonra:', monthFiltered.length);
+        // console.log('Ay filtresinden sonra:', monthFiltered.length);
         
         const futureTaksits = getFutureTaksits(selectedMonth);
         const recurringPayments = getRecurringPaymentsForMonth(selectedMonth);
-        console.log('Gelecek taksit sayısı:', futureTaksits.length);
-        console.log('Düzenli ödeme sayısı:', recurringPayments.length);
+        // console.log('Gelecek taksit sayısı:', futureTaksits.length);
+        // console.log('Düzenli ödeme sayısı:', recurringPayments.length);
         
         filtered = [...monthFiltered, ...futureTaksits, ...recurringPayments];
     } else {
         filtered = [...harcamalar];
-        console.log('Tarih filtresi yok, tüm harcamalar:', filtered.length);
+        // console.log('Tarih filtresi yok, tüm harcamalar:', filtered.length);
     }
     
-    console.log('Tarih filtresinden sonra toplam:', filtered.length);
+    // console.log('Tarih filtresinden sonra toplam:', filtered.length);
     
     const filtreKullaniciElement = document.getElementById('filtreKullanici');
     const selectedUser = filtreKullaniciElement ? filtreKullaniciElement.value : '';
-    console.log('Seçilen kullanıcı:', selectedUser);
+    // console.log('Seçilen kullanıcı:', selectedUser);
     if (selectedUser) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(harcama => harcama.kullanici === selectedUser);
-        console.log(`Kullanıcı filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        // console.log(`Kullanıcı filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
     
     const filtreKartElement = document.getElementById('filtreKart');
     const selectedCard = filtreKartElement ? filtreKartElement.value : '';
-    console.log('Seçilen kart:', selectedCard);
+    // console.log('Seçilen kart:', selectedCard);
     if (selectedCard) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(harcama => harcama.kart === selectedCard);
-        console.log(`Kart filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        // console.log(`Kart filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
     
     const minTutarElement = document.getElementById('minTutar');
@@ -203,19 +203,19 @@ function applyAllFilters() {
     const minTutar = minTutarValue ? parseFloat(minTutarValue) : 0;
     const maxTutar = maxTutarValue ? parseFloat(maxTutarValue) : Infinity;
     
-    console.log('Tutar aralığı:', minTutar, '-', maxTutar);
+    // console.log('Tutar aralığı:', minTutar, '-', maxTutar);
     if (minTutarValue || maxTutarValue) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(harcama => harcama.tutar >= minTutar && harcama.tutar <= maxTutar);
-        console.log(`Tutar filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        // console.log(`Tutar filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
     
-    console.log('Sıralama öncesi kayıt sayısı:', filtered.length);
+    // console.log('Sıralama öncesi kayıt sayısı:', filtered.length);
     
     const siralamaKriteriElement = document.getElementById('siralamaKriteri');
     const sortCriteria = siralamaKriteriElement ? siralamaKriteriElement.value : 'tarih-desc';
     const [field, direction] = sortCriteria.split('-');
-    console.log('Sıralama kriteri:', field, direction);
+    // console.log('Sıralama kriteri:', field, direction);
     
     try {
         const beforeSort = filtered.length;
@@ -255,14 +255,14 @@ function applyAllFilters() {
                 return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
             }
         });
-        console.log(`Sıralama sonrası: ${beforeSort} -> ${filtered.length}`);
+        // console.log(`Sıralama sonrası: ${beforeSort} -> ${filtered.length}`);
     } catch (e) {
         console.error('Sıralama hatası:', e);
     }
     
-    console.log('--- FINAL SONUÇ ---');
-    console.log('Döndürülen kayıt sayısı:', filtered.length);
-    console.log('İlk 3 kayıt:', filtered.slice(0, 3));
+    // console.log('--- FINAL SONUÇ ---');
+    // console.log('Döndürülen kayıt sayısı:', filtered.length);
+    // console.log('İlk 3 kayıt:', filtered.slice(0, 3));
     
     return filtered;
 }

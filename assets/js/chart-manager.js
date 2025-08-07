@@ -10,7 +10,7 @@ function updateDashboardCharts() {
     const userCanvas = document.getElementById('dashboardUserChart');
     
     if (!trendCanvas || !userCanvas) {
-        console.log('Dashboard chart canvas elements not found');
+        // console.log('Dashboard chart canvas elements not found');
         return;
     }
 

@@ -89,16 +89,16 @@ class ResourceLoader {
             './assets/js/utils.js'
         ];
         
-        console.log('📦 Loading app resources...');
+        // console.log('📦 Loading app resources...');
         
         try {
             // Load CSS first
             await this.loadResources(commonCSS);
-            console.log('✅ CSS loaded');
+            // console.log('✅ CSS loaded');
             
             // Then load JS
             await this.loadResources(commonJS);
-            console.log('✅ JavaScript loaded');
+            // console.log('✅ JavaScript loaded');
             
         } catch (error) {
             console.error('❌ Failed to load app resources:', error);

@@ -6,7 +6,7 @@ class CacheManager {
         this.cacheStrategy = this.isDevMode ? 'no-cache' : 'smart-cache';
         this.version = this.generateVersion();
         
-        console.log(`🔧 Cache Manager initialized: ${this.cacheStrategy} mode`);
+        // console.log(`🔧 Cache Manager initialized: ${this.cacheStrategy} mode`);
     }
     
     // Development mode detection
@@ -76,7 +76,7 @@ class CacheManager {
                     const promises = registrations.map(registration => registration.unregister());
                     return Promise.all(promises);
                 }).then(() => {
-                    console.log('🧹 Service Workers unregistered');
+                    // console.log('🧹 Service Workers unregistered');
                 });
             }
             
@@ -85,7 +85,7 @@ class CacheManager {
                     const promises = cacheNames.map(cacheName => caches.delete(cacheName));
                     return Promise.all(promises);
                 }).then(() => {
-                    console.log('🧹 All caches cleared');
+                    // console.log('🧹 All caches cleared');
                     resolve();
                 });
             } else {
@@ -132,7 +132,7 @@ class CacheManager {
             }
         });
         
-        console.log('🔄 Resource URLs updated with fresh cache params');
+        // console.log('🔄 Resource URLs updated with fresh cache params');
     }
     
     // Check for updates (for production)
@@ -144,7 +144,7 @@ class CacheManager {
             .then(data => {
                 const currentVersion = localStorage.getItem('app_version');
                 if (currentVersion && currentVersion !== data.version) {
-                    console.log('🆕 New version detected, clearing cache...');
+                    // console.log('🆕 New version detected, clearing cache...');
                     this.clearAllCache().then(() => {
                         localStorage.setItem('app_version', data.version);
                         window.location.reload();
@@ -154,16 +154,16 @@ class CacheManager {
                 }
             })
             .catch(() => {
-                console.log('📦 Version check skipped (no version.json)');
+                // console.log('📦 Version check skipped (no version.json)');
             });
     }
     
     // Initialize cache strategy
     init() {
-        console.log(`🚀 Cache strategy: ${this.cacheStrategy}`);
+        // console.log(`🚀 Cache strategy: ${this.cacheStrategy}`);
         
         if (this.isDevMode) {
-            console.log('🔧 Development mode: Cache disabled');
+            // console.log('🔧 Development mode: Cache disabled');
             // In dev, add cache prevention headers
             const meta = document.createElement('meta');
             meta.httpEquiv = 'Cache-Control';

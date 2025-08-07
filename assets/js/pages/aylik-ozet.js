@@ -1,6 +1,6 @@
 // Aylık Özet sayfasına özel JavaScript kodları
 
-console.log('Aylık özet sayfası yüklendi');
+// console.log('Aylık özet sayfası yüklendi');
 
 // Sayfa yüklendiğinde mevcut ayı varsayılan olarak ayarla
 document.addEventListener('DOMContentLoaded', function() {

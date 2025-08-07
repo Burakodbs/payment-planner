@@ -81,7 +81,7 @@ function getFutureTaksits(selectedMonth) {
             
             const kalanTaksit = harcama.toplamTaksit - harcama.taksitNo;
             
-            console.log(`Harcama: ${harcama.aciklama}, Taksit: ${harcama.taksitNo}/${harcama.toplamTaksit}, Kalan: ${kalanTaksit}`);
+            // console.log(`Harcama: ${harcama.aciklama}, Taksit: ${harcama.taksitNo}/${harcama.toplamTaksit}, Kalan: ${kalanTaksit}`);
             
             for (let i = 1; i <= kalanTaksit; i++) {
                 let taksitYear = harcamaYear;
@@ -92,10 +92,10 @@ function getFutureTaksits(selectedMonth) {
                     taksitYear += 1;
                 }
                 
-                console.log(`Taksit ${i}: ${taksitYear}-${taksitMonth}, Aranan: ${selectedYear}-${selectedMonthNum}`);
+                // console.log(`Taksit ${i}: ${taksitYear}-${taksitMonth}, Aranan: ${selectedYear}-${selectedMonthNum}`);
                 
                 if (taksitYear === selectedYear && taksitMonth === selectedMonthNum) {
-                    console.log(`Eşleşti! Taksit ekleniyor: ${harcama.taksitNo + i}/${harcama.toplamTaksit}`);
+                    // console.log(`Eşleşti! Taksit ekleniyor: ${harcama.taksitNo + i}/${harcama.toplamTaksit}`);
                     futureTaksits.push({
                         ...harcama,
                         taksitNo: harcama.taksitNo + i,
@@ -107,7 +107,7 @@ function getFutureTaksits(selectedMonth) {
         }
     });
     
-    console.log(`${selectedMonth} için bulunan gelecek taksit sayısı:`, futureTaksits.length);
+    // console.log(`${selectedMonth} için bulunan gelecek taksit sayısı:`, futureTaksits.length);
     return futureTaksits;
 }
 

@@ -1,6 +1,6 @@
 // Hesaplar sayfasına özel JavaScript kodları
 
-console.log('Hesaplar sayfası yüklendi');
+// console.log('Hesaplar sayfası yüklendi');
 
 // Hesaplar sayfasına özel fonksiyonlar ve event listener'lar
 document.addEventListener('DOMContentLoaded', function() {

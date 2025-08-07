@@ -3,7 +3,7 @@
 // Sayfa başlatma fonksiyonu
 function initializePage(pageId) {
     // Ortak başlatma işlemleri
-    console.log(`Sayfa başlatılıyor: ${pageId}`);
+    // // console.log(`Sayfa başlatılıyor: ${pageId}`);
     
     // Header'ı güncelle
     updateHeader();

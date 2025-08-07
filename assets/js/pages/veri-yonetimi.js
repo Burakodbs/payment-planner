@@ -1,6 +1,5 @@
 // Veri Yönetimi sayfasına özel JavaScript kodları
 
-console.log('Veri yönetimi sayfası yüklendi');
 
 // Sayfa yüklendiğinde ortak component'leri initialize et
 document.addEventListener('DOMContentLoaded', function() {
@@ -11,12 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function updateDataStats() {
-    document.getElementById('totalExpenses').textContent = harcamalar.length;
-    const totalAmount = harcamalar.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
-    document.getElementById('totalAmount').textContent = totalAmount.toFixed(2) + ' TL';
-    document.getElementById('totalCards').textContent = kredikartlari.length;
-    document.getElementById('totalUsers').textContent = kisiler.length;
-    document.getElementById('totalRegularPayments').textContent = duzenliOdemeler.length;
+    // İstatistikler kartı kaldırıldı, fonksiyon geriye uyumluluk için boş bırakıldı
 }
 
 function updateCardAndUserManagement() {
@@ -89,7 +83,6 @@ function addNewCard() {
         authSystem.saveUserData();
         updateCardOptions();
         updateCardAndUserManagement();
-        updateDataStats();
         input.value = '';
         showToast('Kart başarıyla eklendi', 'success');
     }
@@ -103,7 +96,6 @@ function addNewUser() {
         authSystem.saveUserData();
         updateUserOptions();
         updateCardAndUserManagement();
-        updateDataStats();
         input.value = '';
         showToast('Kullanıcı başarıyla eklendi', 'success');
     }
@@ -115,7 +107,6 @@ function removeCard(cardName) {
         authSystem.saveUserData();
         updateCardOptions();
         updateCardAndUserManagement();
-        updateDataStats();
         showToast('Kart silindi', 'success');
     }
 }
@@ -126,7 +117,6 @@ function removeUser(userName) {
         authSystem.saveUserData();
         updateUserOptions();
         updateCardAndUserManagement();
-        updateDataStats();
         showToast('Kullanıcı silindi', 'success');
     }
 }
@@ -135,7 +125,6 @@ function removeUser(userName) {
 function runManualMigration() {
     if (typeof migrateDuzenliOdemeData === 'function') {
         migrateDuzenliOdemeData();
-        updateDataStats();
     } else {
         showToast('Migration fonksiyonu bulunamadı', 'error');
     }
