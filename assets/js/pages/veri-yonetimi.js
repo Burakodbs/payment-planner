@@ -2,7 +2,7 @@
 
 
 // Sayfa yüklendiğinde ortak component'leri initialize et
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Ortak component'leri initialize et
     if (typeof initializePage === 'function') {
         initializePage('veri-yonetimi');
@@ -45,12 +45,12 @@ function updateCardAndUserManagement() {
     // Düzenli ödeme form seçeneklerini güncelle
     const duzenliKartSelect = document.getElementById('duzenliKart');
     const duzenliKullaniciSelect = document.getElementById('duzenliKullanici');
-    
+
     if (duzenliKartSelect) {
         // Mevcut seçenekleri temizle (ilk option hariç)
         const options = duzenliKartSelect.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
-        
+
         // Yeni seçenekleri ekle
         kredikartlari.forEach(kart => {
             const option = document.createElement('option');
@@ -59,12 +59,12 @@ function updateCardAndUserManagement() {
             duzenliKartSelect.appendChild(option);
         });
     }
-    
+
     if (duzenliKullaniciSelect) {
         // Mevcut seçenekleri temizle (ilk option hariç)
         const options = duzenliKullaniciSelect.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
-        
+
         // Yeni seçenekleri ekle
         kisiler.forEach(kisi => {
             const option = document.createElement('option');

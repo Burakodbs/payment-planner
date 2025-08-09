@@ -17,7 +17,7 @@ function initializeTheme() {
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
+
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     updateThemeIcon();
@@ -26,7 +26,7 @@ function toggleTheme() {
 function updateThemeIcon() {
     const themeButtons = document.querySelectorAll('.theme-toggle');
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    
+
     themeButtons.forEach(button => {
         if (currentTheme === 'dark') {
             button.innerHTML = '☀️';
@@ -71,23 +71,23 @@ function showTab(tabName) {
 }
 
 // Uygulama Başlatma
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Tema sistemini hemen başlat
     initializeTheme();
-    
+
     // Auth sistemi başlatılana kadar bekle
     setTimeout(() => {
         if (authSystem && authSystem.currentUser) {
             // Kart ve kullanıcı seçeneklerini initialize et
             updateCardOptions();
             updateUserOptions();
-            
+
             // Form başlangıç değerleri
             const ozetTarih = document.getElementById('ozet_tarih');
             const harcamaTarih = document.getElementById('harcamaTarih');
             const duzenliBaslangic = document.getElementById('duzenliBaslangic');
             const kart = document.getElementById('kart');
-            
+
             if (ozetTarih) ozetTarih.value = currentMonth;
             if (harcamaTarih) harcamaTarih.value = currentDate;
             if (duzenliBaslangic) duzenliBaslangic.value = currentMonth;

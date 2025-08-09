@@ -4,13 +4,13 @@
 function initializePage(pageId) {
     // Ortak başlatma işlemleri
     // // console.log(`Sayfa başlatılıyor: ${pageId}`);
-    
+
     // Header'ı güncelle
     updateHeader();
-    
+
     // Navigation'ı güncelle  
     updateNavigation(pageId);
-    
+
     // Tema butonlarını kaldır (eğer varsa)
     removeThemeButtons();
 }
@@ -24,7 +24,7 @@ function updateHeader() {
         if (themeSwitcher) {
             themeSwitcher.remove();
         }
-        
+
         // Header-left'i boş bırak
         headerLeft.innerHTML = '';
     }
@@ -36,12 +36,12 @@ function updateNavigation(activePageId) {
     tabs.forEach(tab => {
         // Alt çizgiyi kaldır
         tab.style.textDecoration = 'none';
-        
+
         // Aktif sayfayı işaretle
         const href = tab.getAttribute('href');
         if (href) {
             const fileName = href.split('/').pop().split('.')[0];
-            if (fileName === activePageId || 
+            if (fileName === activePageId ||
                 (fileName === 'index' && activePageId === 'dashboard')) {
                 tab.classList.add('active');
             } else {
@@ -55,8 +55,8 @@ function updateNavigation(activePageId) {
 function removeThemeButtons() {
     const themeSwitchers = document.querySelectorAll('.theme-switcher');
     themeSwitchers.forEach(switcher => switcher.remove());
-    
-    const themeButtons = document.querySelectorAll('.theme-btn');  
+
+    const themeButtons = document.querySelectorAll('.theme-btn');
     themeButtons.forEach(btn => btn.remove());
 }
 
@@ -260,7 +260,7 @@ function renderAppLayout(pageId, pageContent) {
 function initializeCommonComponents(pageId, pageContent) {
     // Body'ye ana layout'u ekle
     document.body.innerHTML = renderAppLayout(pageId, pageContent);
-    
+
     // Common scripts'leri yükle
     loadCommonScripts();
 }
@@ -268,14 +268,14 @@ function initializeCommonComponents(pageId, pageContent) {
 function loadCommonScripts() {
     const scripts = [
         './assets/js/auth.js',
-        './assets/js/auth-ui.js', 
+        './assets/js/auth-ui.js',
         './assets/js/app.js',
         './assets/js/data-manager.js',
         './assets/js/calculations.js',
         './assets/js/chart-manager.js',
         './assets/js/utils.js'
     ];
-    
+
     scripts.forEach(src => {
         const script = document.createElement('script');
         script.src = src + '?v=' + Date.now();

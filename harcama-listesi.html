@@ -1,335 +1,413 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harcama Listesi - Kredi Kartı Harcama Takip Sistemi</title>
-    
-    <meta name="description" content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
-    <meta name="keywords" content="kredi kartı, harcama takip, fatura, ödeme, finans">
-    <meta name="author" content="Harcama Takip Sistemi">
-    
-    <meta name="theme-color" content="#007bff">
-    <meta name="msapplication-navbutton-color" content="#007bff">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Harcama Takip">
-    
-    <link rel="manifest" href="./manifest.json">
-    
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iNDgiIGZpbGw9IiM2MzY2ZjEiLz4KPGNpcmNsZSBjeD0iOTYiIGN5PSI2NCIgcj0iMTYiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjQ4IiB5PSI5NiIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iNDgiIHk9IjEyOCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==">
-    
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiM2MzY2ZjEiLz4KPHA+PGNpcmNsZSBjeD0iMjQiIGN5PSIxNiIgcj0iNCIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTIiIHk9IjI0IiB3aWR0aD0iMjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjEyIiB5PSIzMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjQiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
-    
-    <!-- External Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-    <!-- Date-fns removed - not needed -->
-    
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="./assets/css/variables.css">
-    <link rel="stylesheet" href="./assets/css/base.css">
-    <link rel="stylesheet" href="./assets/css/layout.css">
-    <link rel="stylesheet" href="./assets/css/components.css">
-    <link rel="stylesheet" href="./assets/css/utilities.css">
-    <link rel="stylesheet" href="./assets/css/auth.css">
-</head>
-<body>
-    <!-- Authentication Container -->
-    <div id="authContainer" style="display: none;">
-        <div class="auth-wrapper">
-            <div class="auth-container">
-                <div class="auth-header">
-                    <h1>💳 Harcama Takip Sistemi</h1>
-                    <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
-                </div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Harcama Listesi - Kredi Kartı Harcama Takip Sistemi</title>
 
-                <!-- Login Form -->
-                <div id="loginForm" class="auth-form">
-                    <h2>Giriş Yap</h2>
-                    <form onsubmit="handleLogin(event)">
-                        <div class="form-group">
-                            <label for="loginUsername">Kullanıcı Adı</label>
-                            <input type="text" id="loginUsername" required autocomplete="username">
-                        </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Şifre</label>
-                            <input type="password" id="loginPassword" required autocomplete="current-password">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Giriş Yap</button>
-                    </form>
-                    <p class="auth-switch">
-                        Hesabınız yok mu? <a href="#" onclick="showRegister()">Kayıt olun</a>
-                    </p>
-                </div>
+        <meta name="description"
+            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+        <meta name="keywords"
+            content="kredi kartı, harcama takip, fatura, ödeme, finans">
+        <meta name="author" content="Harcama Takip Sistemi">
 
-                <!-- Register Form -->
-                <div id="registerForm" class="auth-form" style="display: none;">
-                    <h2>Kayıt Ol</h2>
-                    <form onsubmit="handleRegister(event)">
-                        <div class="form-group">
-                            <label for="registerUsername">Kullanıcı Adı</label>
-                            <input type="text" id="registerUsername" required minlength="3" autocomplete="username">
-                            <small>En az 3 karakter</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerEmail">E-posta (Opsiyonel)</label>
-                            <input type="email" id="registerEmail" autocomplete="email">
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Şifre</label>
-                            <input type="password" id="registerPassword" required minlength="6" autocomplete="new-password">
-                            <small>En az 6 karakter</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Şifre Tekrar</label>
-                            <input type="password" id="confirmPassword" required autocomplete="new-password">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Kayıt Ol</button>
-                    </form>
-                    <p class="auth-switch">
-                        Zaten hesabınız var mı? <a href="#" onclick="showLogin()">Giriş yapın</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
+        <meta name="theme-color" content="#007bff">
+        <meta name="msapplication-navbutton-color" content="#007bff">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-    <!-- Setup Wizard -->
-    <div id="setupWizard" style="display: none;">
-        <div class="setup-wrapper">
-            <div class="setup-container">
-                <div class="setup-header">
-                    <h1>🎉 Hoş Geldiniz!</h1>
-                    <p>Harcama takip sisteminizi kişiselleştirmek için birkaç ayar yapalım</p>
-                </div>
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="Harcama Takip">
 
-                <div class="setup-steps">
-                    <!-- Step 1: Kart Ekleme -->
-                    <div id="setupStep1" class="setup-step active">
-                        <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                        <p>Takip etmek istediğiniz kredi kartlarını ekleyin</p>
-                        
-                        <div class="setup-form">
+        <link rel="manifest" href="./manifest.json">
+
+        <link rel="apple-touch-icon"
+            href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iNDgiIGZpbGw9IiM2MzY2ZjEiLz4KPGNpcmNsZSBjeD0iOTYiIGN5PSI2NCIgcj0iMTYiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjQ4IiB5PSI5NiIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iNDgiIHk9IjEyOCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==">
+
+        <link rel="icon" type="image/svg+xml"
+            href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiM2MzY2ZjEiLz4KPHA+PGNpcmNsZSBjeD0iMjQiIGN5PSIxNiIgcj0iNCIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTIiIHk9IjI0IiB3aWR0aD0iMjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjEyIiB5PSIzMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjQiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+
+        <!-- External Dependencies -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+        <!-- Date-fns removed - not needed -->
+
+        <!-- CSS Files -->
+        <link rel="stylesheet" href="./assets/css/variables.css">
+        <link rel="stylesheet" href="./assets/css/base.css">
+        <link rel="stylesheet" href="./assets/css/layout.css">
+        <link rel="stylesheet" href="./assets/css/components.css">
+        <link rel="stylesheet" href="./assets/css/utilities.css">
+        <link rel="stylesheet" href="./assets/css/auth.css">
+    </head>
+    <body>
+        <!-- Authentication Container -->
+        <div id="authContainer" style="display: none;">
+            <div class="auth-wrapper">
+                <div class="auth-container">
+                    <div class="auth-header">
+                        <h1>💳 Harcama Takip Sistemi</h1>
+                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <div id="loginForm" class="auth-form">
+                        <h2>Giriş Yap</h2>
+                        <form onsubmit="handleLogin(event)">
                             <div class="form-group">
-                                <label for="newCardName">Kart Adı</label>
-                                <input type="text" id="newCardName" placeholder="örn: Axess, Maksimum, World...">
+                                <label for="loginUsername">Kullanıcı Adı</label>
+                                <input type="text" id="loginUsername" required
+                                    autocomplete="username">
                             </div>
-                            <button type="button" class="btn btn-secondary" onclick="addCard()">Kart Ekle</button>
-                            
-                            <div id="cardsList" class="setup-list">
-                                <p class="setup-help">Henüz kart eklenmedi. En az bir kart eklemeniz önerilir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Kişi Ekleme -->
-                    <div id="setupStep2" class="setup-step">
-                        <h2>2. Kullanıcıları Ekleyin</h2>
-                        <p>Harcama yapabilecek kişileri tanımlayın</p>
-                        
-                        <div class="setup-form">
                             <div class="form-group">
-                                <label for="newUserName">Kişi Adı</label>
-                                <input type="text" id="newUserName" placeholder="örn: Ben, Eşim, Çocuğum...">
+                                <label for="loginPassword">Şifre</label>
+                                <input type="password" id="loginPassword"
+                                    required autocomplete="current-password">
                             </div>
-                            <button type="button" class="btn btn-secondary" onclick="addUser()">Kişi Ekle</button>
-                            
-                            <div id="usersList" class="setup-list">
-                                <p class="setup-help">Henüz kişi eklenmedi. En az bir kişi eklemeniz önerilir.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="setup-navigation">
-                    <button id="prevStep" class="btn btn-outline" onclick="previousStep()" style="display: none;">Önceki</button>
-                    <button id="nextStep" class="btn btn-primary" onclick="nextStep()">Sonraki</button>
-                    <button id="finishSetup" class="btn btn-success" onclick="finishSetup()" style="display: none;">Kurulumu Tamamla</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Application -->
-    <div id="mainApp" style="display: none;">
-    <div class="container">
-        <div class="header">
-    <div class="header-content">
-        <a href="index.html" class="header-brand">
-            <div class="header-icon">💳</div>
-            <div>
-                <h1>Harcama Takip</h1>
-                <div class="header-subtitle">Kredi kartı harcamalarınızı profesyonelce yönetin</div>
-            </div>
-        </a>
-    </div>
-    
-    <div class="header-actions">
-        <div class="header-user">
-            <span>👤</span>
-            <span id="currentUserInfo">Kullanıcı</span>
-        </div>
-        <button class="theme-toggle" onclick="toggleTheme()" title="Tema Değiştir">
-            🌙
-        </button>
-    </div>
-</div>
-        <div class="tabs">
-            <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-            <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-            <a href="harcama-listesi.html" class="tab active">📋 Harcama Listesi</a>
-            <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-            <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-            <a href="istatistikler.html" class="tab">📊 İstatistikler</a>
-            <a href="veri-yonetimi.html" class="tab">⚙️ Veri Yönetimi</a>
-        </div>
-
-        <div class="content">
-            <!-- Harcama Listesi Content -->
-            <div class="page-content">
-                <h2>Harcama Listesi</h2>
-                
-                <div class="filters">
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label for="filtreTarih">📅 Ay/Yıl</label>
-                            <input type="month" id="filtreTarih" onchange="updateHarcamaTable()">
-                        </div>
-                        <div class="filter-group">
-                            <label for="filtreKullanici">👤 Kişi</label>
-                            <select id="filtreKullanici" onchange="updateHarcamaTable()">
-                                <option value="">Tümü</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="filtreKart">💳 Kart</label>
-                            <select id="filtreKart" onchange="updateHarcamaTable()">
-                                <option value="">Tümü</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="minTutar">💰 Min</label>
-                            <input type="number" id="minTutar" placeholder="0 ₺" onchange="updateHarcamaTable()">
-                        </div>
-                        <div class="filter-group">
-                            <label for="maxTutar">💰 Max</label>
-                            <input type="number" id="maxTutar" placeholder="∞ ₺" onchange="updateHarcamaTable()">
-                        </div>
-                        <div class="filter-group">
-                            <label for="siralamaKriteri">📊 Sıralama</label>
-                            <select id="siralamaKriteri" onchange="updateHarcamaTable()">
-                                <option value="tarih-desc">🗓️ Yeni → Eski</option>
-                                <option value="tarih-asc">🗓️ Eski → Yeni</option>
-                                <option value="tutar-desc">💸 Büyük → Küçük</option>
-                                <option value="tutar-asc">💸 Küçük → Büyük</option>
-                                <option value="kullanici-asc">👤 A → Z</option>
-                                <option value="kart-asc">💳 A → Z</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-outline" onclick="clearAllFilters()">🧹 Temizle</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <div class="table-header">
-                        <span id="sonucSayisi">Toplam: 0 harcama</span>
-                    </div>
-                    <table id="harcamaTable" class="harcama-table">
-                        <thead>
-                            <tr>
-                                <th>Tarih</th>
-                                <th>Kart</th>
-                                <th>Kullanıcı</th>
-                                <th>Açıklama</th>
-                                <th>Taksit</th>
-                                <th>Tutar</th>
-                                <th>İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                    Henüz harcama kaydı yok
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Harcama Düzenleme Modal -->
-                <div id="editHarcamaModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg); padding: 24px; border-radius: var(--radius); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
-                        <h3>Harcamayı Düzenle</h3>
-                        <form id="editHarcamaForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="editTarih">Tarih *</label>
-                                    <input type="date" id="editTarih" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editKart">Kart *</label>
-                                    <select id="editKart" required>
-                                        <option value="">Kart Seçin</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editKullanici">Kullanıcı *</label>
-                                    <select id="editKullanici" required>
-                                        <option value="">Kullanıcı Seçin</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="editAciklama">Açıklama</label>
-                                    <input type="text" id="editAciklama" placeholder="Harcama detayı...">
-                                </div>
-                                <div class="form-group">
-                                    <label for="editTutar">Tutar (TL) *</label>
-                                    <input type="number" id="editTutar" step="0.01" min="0.01" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="editTaksitNo">Kaçıncı Taksit?</label>
-                                    <input type="number" id="editTaksitNo" min="1" max="99">
-                                </div>
-                                <div class="form-group">
-                                    <label for="editToplamTaksit">Toplam Taksit</label>
-                                    <input type="number" id="editToplamTaksit" min="1" max="99">
-                                </div>
-                            </div>
-                            <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
-                                <button type="button" class="btn btn-outline" onclick="closeEditHarcamaModal()">İptal</button>
-                                <button type="submit" class="btn btn-primary">Güncelle</button>
-                            </div>
+                            <button type="submit" class="btn btn-primary">Giriş
+                                Yap</button>
                         </form>
+                        <p class="auth-switch">
+                            Hesabınız yok mu? <a href="#"
+                                onclick="showRegister()">Kayıt olun</a>
+                        </p>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="registerForm" class="auth-form"
+                        style="display: none;">
+                        <h2>Kayıt Ol</h2>
+                        <form onsubmit="handleRegister(event)">
+                            <div class="form-group">
+                                <label for="registerUsername">Kullanıcı
+                                    Adı</label>
+                                <input type="text" id="registerUsername"
+                                    required minlength="3"
+                                    autocomplete="username">
+                                <small>En az 3 karakter</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerEmail">E-posta
+                                    (Opsiyonel)</label>
+                                <input type="email" id="registerEmail"
+                                    autocomplete="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="registerPassword">Şifre</label>
+                                <input type="password" id="registerPassword"
+                                    required minlength="6"
+                                    autocomplete="new-password">
+                                <small>En az 6 karakter</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Şifre
+                                    Tekrar</label>
+                                <input type="password" id="confirmPassword"
+                                    required autocomplete="new-password">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Kayıt
+                                Ol</button>
+                        </form>
+                        <p class="auth-switch">
+                            Zaten hesabınız var mı? <a href="#"
+                                onclick="showLogin()">Giriş yapın</a>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    </div>
 
-    <!-- Cache Manager (must be first) -->
-    <script src="./assets/js/cache-manager.js"></script>
-    
-    <!-- JavaScript Files -->
-    <script src="./assets/js/components.js"></script>
-    <script src="./assets/js/auth.js"></script>
-    <script src="./assets/js/auth-ui.js"></script>
-    <script src="./assets/js/app.js"></script>
-    <script src="./assets/js/data-manager.js"></script>
-    <script src="./assets/js/calculations.js"></script>
-    <script src="./assets/js/chart-manager.js"></script>
-    <script src="./assets/js/utils.js"></script>
+        <!-- Setup Wizard -->
+        <div id="setupWizard" style="display: none;">
+            <div class="setup-wrapper">
+                <div class="setup-container">
+                    <div class="setup-header">
+                        <h1>🎉 Hoş Geldiniz!</h1>
+                        <p>Harcama takip sisteminizi kişiselleştirmek için
+                            birkaç ayar yapalım</p>
+                    </div>
 
-    <!-- Page Specific Scripts -->
-    <script src="./assets/js/pages/harcama-listesi.js"></script>
-</body>
+                    <div class="setup-steps">
+                        <!-- Step 1: Kart Ekleme -->
+                        <div id="setupStep1" class="setup-step active">
+                            <h2>1. Kredi Kartlarınızı Ekleyin</h2>
+                            <p>Takip etmek istediğiniz kredi kartlarını
+                                ekleyin</p>
+
+                            <div class="setup-form">
+                                <div class="form-group">
+                                    <label for="newCardName">Kart Adı</label>
+                                    <input type="text" id="newCardName"
+                                        placeholder="örn: Axess, Maksimum, World...">
+                                </div>
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="addCard()">Kart Ekle</button>
+
+                                <div id="cardsList" class="setup-list">
+                                    <p class="setup-help">Henüz kart eklenmedi.
+                                        En az bir kart eklemeniz önerilir.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Kişi Ekleme -->
+                        <div id="setupStep2" class="setup-step">
+                            <h2>2. Kullanıcıları Ekleyin</h2>
+                            <p>Harcama yapabilecek kişileri tanımlayın</p>
+
+                            <div class="setup-form">
+                                <div class="form-group">
+                                    <label for="newUserName">Kişi Adı</label>
+                                    <input type="text" id="newUserName"
+                                        placeholder="örn: Ben, Eşim, Çocuğum...">
+                                </div>
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="addUser()">Kişi Ekle</button>
+
+                                <div id="usersList" class="setup-list">
+                                    <p class="setup-help">Henüz kişi eklenmedi.
+                                        En az bir kişi eklemeniz önerilir.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setup-navigation">
+                        <button id="prevStep" class="btn btn-outline"
+                            onclick="previousStep()"
+                            style="display: none;">Önceki</button>
+                        <button id="nextStep" class="btn btn-primary"
+                            onclick="nextStep()">Sonraki</button>
+                        <button id="finishSetup" class="btn btn-success"
+                            onclick="finishSetup()"
+                            style="display: none;">Kurulumu Tamamla</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="mainApp" style="display: none;">
+            <div class="container">
+                <div class="header">
+                    <div class="header-content">
+                        <a href="index.html" class="header-brand">
+                            <div class="header-icon">💳</div>
+                            <div>
+                                <h1>Harcama Takip</h1>
+                                <div class="header-subtitle">Kredi kartı
+                                    harcamalarınızı profesyonelce yönetin</div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="header-actions">
+                        <div class="header-user">
+                            <span>👤</span>
+                            <span id="currentUserInfo">Kullanıcı</span>
+                        </div>
+                        <button class="theme-toggle" onclick="toggleTheme()"
+                            title="Tema Değiştir">
+                            🌙
+                        </button>
+                    </div>
+                </div>
+                <div class="tabs">
+                    <a href="index.html" class="tab">📊 Gösterge Paneli</a>
+                    <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
+                    <a href="harcama-listesi.html" class="tab active">📋 Harcama
+                        Listesi</a>
+                    <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
+                    <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
+                    <a href="istatistikler.html" class="tab">📊
+                        İstatistikler</a>
+                    <a href="veri-yonetimi.html" class="tab">⚙️ Veri
+                        Yönetimi</a>
+                </div>
+
+                <div class="content">
+                    <!-- Harcama Listesi Content -->
+                    <div class="page-content">
+                        <h2>Harcama Listesi</h2>
+
+                        <div class="filters">
+                            <div class="filter-row">
+                                <div class="filter-group">
+                                    <label for="filtreTarih">📅 Ay/Yıl</label>
+                                    <input type="month" id="filtreTarih"
+                                        onchange="updateHarcamaTable()">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtreKullanici">👤 Kişi</label>
+                                    <select id="filtreKullanici"
+                                        onchange="updateHarcamaTable()">
+                                        <option value>Tümü</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filtreKart">💳 Kart</label>
+                                    <select id="filtreKart"
+                                        onchange="updateHarcamaTable()">
+                                        <option value>Tümü</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="minTutar">💰 Min</label>
+                                    <input type="number" id="minTutar"
+                                        placeholder="0 ₺"
+                                        onchange="updateHarcamaTable()">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="maxTutar">💰 Max</label>
+                                    <input type="number" id="maxTutar"
+                                        placeholder="∞ ₺"
+                                        onchange="updateHarcamaTable()">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="siralamaKriteri">📊
+                                        Sıralama</label>
+                                    <select id="siralamaKriteri"
+                                        onchange="updateHarcamaTable()">
+                                        <option value="tarih-desc">🗓️ Yeni →
+                                            Eski</option>
+                                        <option value="tarih-asc">🗓️ Eski →
+                                            Yeni</option>
+                                        <option value="tutar-desc">💸 Büyük →
+                                            Küçük</option>
+                                        <option value="tutar-asc">💸 Küçük →
+                                            Büyük</option>
+                                        <option value="kullanici-asc">👤 A →
+                                            Z</option>
+                                        <option value="kart-asc">💳 A →
+                                            Z</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label>&nbsp;</label>
+                                    <button class="btn btn-outline"
+                                        onclick="clearAllFilters()">🧹
+                                        Temizle</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <div class="table-header">
+                                <span id="sonucSayisi">Toplam: 0 harcama</span>
+                            </div>
+                            <table id="harcamaTable" class="harcama-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>Kart</th>
+                                        <th>Kullanıcı</th>
+                                        <th>Açıklama</th>
+                                        <th>Taksit</th>
+                                        <th>Tutar</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7"
+                                            style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                            Henüz harcama kaydı yok
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Harcama Düzenleme Modal -->
+                        <div id="editHarcamaModal"
+                            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+                            <div
+                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg); padding: 24px; border-radius: var(--radius); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+                                <h3>Harcamayı Düzenle</h3>
+                                <form id="editHarcamaForm">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="editTarih">Tarih
+                                                *</label>
+                                            <input type="date" id="editTarih"
+                                                required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="editKart">Kart *</label>
+                                            <select id="editKart" required>
+                                                <option value>Kart
+                                                    Seçin</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="editKullanici">Kullanıcı
+                                                *</label>
+                                            <select id="editKullanici" required>
+                                                <option value>Kullanıcı
+                                                    Seçin</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label
+                                                for="editAciklama">Açıklama</label>
+                                            <input type="text" id="editAciklama"
+                                                placeholder="Harcama detayı...">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="editTutar">Tutar (TL)
+                                                *</label>
+                                            <input type="number" id="editTutar"
+                                                step="0.01" min="0.01" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="editTaksitNo">Kaçıncı
+                                                Taksit?</label>
+                                            <input type="number"
+                                                id="editTaksitNo" min="1"
+                                                max="99">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="editToplamTaksit">Toplam
+                                                Taksit</label>
+                                            <input type="number"
+                                                id="editToplamTaksit" min="1"
+                                                max="99">
+                                        </div>
+                                    </div>
+                                    <div
+                                        style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
+                                        <button type="button"
+                                            class="btn btn-outline"
+                                            onclick="closeEditHarcamaModal()">İptal</button>
+                                        <button type="submit"
+                                            class="btn btn-primary">Güncelle</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cache Manager (must be first) -->
+        <script src="./assets/js/cache-manager.js"></script>
+
+        <!-- JavaScript Files -->
+        <script src="./assets/js/components.js"></script>
+        <script src="./assets/js/auth.js"></script>
+        <script src="./assets/js/auth-ui.js"></script>
+        <script src="./assets/js/app.js"></script>
+        <script src="./assets/js/data-manager.js"></script>
+        <script src="./assets/js/calculations.js"></script>
+        <script src="./assets/js/chart-manager.js"></script>
+        <script src="./assets/js/utils.js"></script>
+
+        <!-- Page Specific Scripts -->
+        <script src="./assets/js/pages/harcama-listesi.js"></script>
+    </body>
 </html>

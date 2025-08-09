@@ -3,19 +3,19 @@
 
 async function clearAllCaches() {
     console.log('🧹 Cache temizleniyor...');
-    
+
     try {
         // Service Worker cache'lerini temizle
         const cacheNames = await caches.keys();
         console.log('Bulunan cache\'ler:', cacheNames);
-        
+
         await Promise.all(
             cacheNames.map(cacheName => {
                 console.log('Cache siliniyor:', cacheName);
                 return caches.delete(cacheName);
             })
         );
-        
+
         // Service Worker'ı yeniden kaydet
         if ('serviceWorker' in navigator) {
             const registrations = await navigator.serviceWorker.getRegistrations();
@@ -26,10 +26,10 @@ async function clearAllCaches() {
                 })
             );
         }
-        
+
         console.log('✅ Tüm cache\'ler temizlendi!');
         console.log('🔄 Sayfayı yenileyin (Ctrl+F5)');
-        
+
     } catch (error) {
         console.error('❌ Cache temizleme hatası:', error);
     }

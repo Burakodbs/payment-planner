@@ -25,22 +25,22 @@ function clearAllFilters() {
 }
 
 // Sayfa yüklendiğinde mevcut ayı ayarla
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Ortak component'leri initialize et
     if (typeof initializePage === 'function') {
         initializePage('harcama-listesi');
     }
-    
+
     // Kısa bir gecikme ile mevcut ayı ayarla
     setTimeout(setCurrentMonthFilter, 200);
-    
+
     // Auth sistem veri yükledikten sonra tabloyu güncelle
     setTimeout(() => {
         if (typeof updateHarcamaTable === 'function') {
             updateHarcamaTable();
         }
     }, 1000);
-    
+
     // Edit form event listener
     const editForm = document.getElementById('editHarcamaForm');
     if (editForm) {

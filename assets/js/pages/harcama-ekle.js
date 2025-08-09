@@ -8,21 +8,21 @@ function showPageTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-    
+
     // Tüm tab butonlarının active class'ını kaldır
     document.querySelectorAll('.page-tab').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Seçilen tab'ı göster
     const targetTab = document.getElementById(tabName + 'Tab');
     if (targetTab) {
         targetTab.classList.add('active');
     }
-    
+
     // Seçilen tab butonunu aktif yap
     event.target.classList.add('active');
-    
+
     // Tab'a özel işlemler
     if (tabName === 'duzenli') {
         loadDuzenliOdemeler();
@@ -34,12 +34,12 @@ function showPageTab(tabName) {
 function loadDuzenliOdemeler() {
     const duzenliOdemeler = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
     const container = document.getElementById('duzenliOdemelerListesi');
-    
+
     if (duzenliOdemeler.length === 0) {
         container.innerHTML = '<p class="text-muted">Henüz düzenli ödeme tanımlanmamış.</p>';
         return;
     }
-    
+
     let html = '<div class="duzenli-list">';
     duzenliOdemeler.forEach((odeme, index) => {
         html += `
@@ -67,7 +67,7 @@ function populateDuzenliOdemeForm() {
             kartSelect.innerHTML += `<option value="${kart}">${kart}</option>`;
         });
     }
-    
+
     // Kullanıcıları doldur
     const kullaniciSelect = document.getElementById('duzenliKullanici');
     kullaniciSelect.innerHTML = '<option value="">Kullanıcı Seçin</option>';
@@ -76,7 +76,7 @@ function populateDuzenliOdemeForm() {
             kullaniciSelect.innerHTML += `<option value="${kisi}">${kisi}</option>`;
         });
     }
-    
+
     // Bugünün tarihi
     document.getElementById('duzenliBaslangic').value = new Date().toISOString().split('T')[0];
 }
@@ -84,7 +84,7 @@ function populateDuzenliOdemeForm() {
 // Düzenli ödeme ekle
 function handleDuzenliOdemeSubmit(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const odeme = {
         aciklama: document.getElementById('duzenliAciklama').value,
@@ -95,18 +95,18 @@ function handleDuzenliOdemeSubmit(event) {
         kategori: 'Düzenli Ödeme',
         id: Date.now()
     };
-    
+
     const duzenliOdemeler = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
     duzenliOdemeler.push(odeme);
     localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
-    
+
     // Formu temizle
     event.target.reset();
     document.getElementById('duzenliBaslangic').value = new Date().toISOString().split('T')[0];
-    
+
     // Listeyi güncelle
     loadDuzenliOdemeler();
-    
+
     // Toast mesajı
     if (typeof showToast === 'function') {
         showToast('Düzenli ödeme başarıyla eklendi!', 'success');
@@ -120,7 +120,7 @@ function removeDuzenliOdeme(index) {
         duzenliOdemeler.splice(index, 1);
         localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
         loadDuzenliOdemeler();
-        
+
         if (typeof showToast === 'function') {
             showToast('Düzenli ödeme silindi', 'info');
         }
@@ -135,19 +135,19 @@ function updateKisayolBilgi() {
     }
 
     let kisayolText = 'Kısayollar: ';
-    
+
     // Kullanıcı kısayolları
     if (kisiler && kisiler.length > 0) {
         const kullaniciKisayollari = kisiler.slice(0, 5).map((kisi, index) => `Ctrl+${index + 1}=${kisi}`).join(', ');
         kisayolText += `Kullanıcılar: ${kullaniciKisayollari}`;
     }
-    
+
     // Kart kısayolları (Shift + 1-9)
     if (kredikartlari && kredikartlari.length > 0) {
         const kartKisayollari = kredikartlari.slice(0, 9).map((kart, index) => `Shift+${index + 1}=${kart}`).join(', ');
         kisayolText += (kisiler && kisiler.length > 0) ? ` | Kartlar: ${kartKisayollari}` : `Kartlar: ${kartKisayollari}`;
     }
-    
+
     kisayolElement.textContent = kisayolText;
 }
 
@@ -160,11 +160,11 @@ function handleKeyboardShortcuts(event) {
     // Input alanlarında kısayolları devre dışı bırak
     const activeElement = document.activeElement;
     const isInputField = activeElement && (
-        activeElement.tagName === 'INPUT' || 
-        activeElement.tagName === 'TEXTAREA' || 
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
         activeElement.tagName === 'SELECT'
     );
-    
+
     // Kullanıcı kısayolları (Ctrl + 1-5)
     if (event.ctrlKey && event.key >= '1' && event.key <= '5' && !event.shiftKey && !event.altKey) {
         const userIndex = parseInt(event.key) - 1;
@@ -176,7 +176,7 @@ function handleKeyboardShortcuts(event) {
             }
         }
     }
-    
+
     // Kart kısayolları (Shift + 1-9) - sadece input alanında değilken
     if (event.shiftKey && event.code >= 'Digit1' && event.code <= 'Digit9' && !event.ctrlKey && !event.altKey && !isInputField) {
         const cardIndex = parseInt(event.code.replace('Digit', '')) - 1;
@@ -189,7 +189,7 @@ function handleKeyboardShortcuts(event) {
             }
         }
     }
-    
+
     // Enter tuşu ile form gönderme (sadece form elementlerinde)
     if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.altKey) {
         const activeElement = document.activeElement;
@@ -212,7 +212,7 @@ function applyStickyValues() {
             kartSelect.value = stickyCardValue;
         }
     }
-    
+
     // Tarih değeri sticky ise uygula
     if (stickyDateValue) {
         const tarihInput = document.getElementById('harcamaTarih');
@@ -226,7 +226,7 @@ function applyStickyValues() {
 function preserveStickyValues() {
     const kartSelect = document.getElementById('kart');
     const tarihInput = document.getElementById('harcamaTarih');
-    
+
     // Mevcut değerleri sticky olarak kaydet
     if (kartSelect && kartSelect.value) {
         stickyCardValue = kartSelect.value;
@@ -237,47 +237,47 @@ function preserveStickyValues() {
 }
 
 // Auth sistem yüklendikten sonra kısayol bilgisini güncelle
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Ortak component'leri initialize et
     if (typeof initializePage === 'function') {
         initializePage('harcama-ekle');
     }
-    
+
     // Keyboard shortcuts listener ekle
     document.addEventListener('keydown', handleKeyboardShortcuts);
-    
+
     // Form change listeners ekle
     setTimeout(() => {
         const kartSelect = document.getElementById('kart');
         const tarihInput = document.getElementById('harcamaTarih');
-        
+
         if (kartSelect) {
-            kartSelect.addEventListener('change', function() {
+            kartSelect.addEventListener('change', function () {
                 if (this.value) {
                     stickyCardValue = this.value;
                 }
             });
         }
-        
+
         if (tarihInput) {
-            tarihInput.addEventListener('change', function() {
+            tarihInput.addEventListener('change', function () {
                 if (this.value) {
                     stickyDateValue = this.value;
                 }
             });
         }
-        
+
         // İlk sticky values uygulaması
         applyStickyValues();
     }, 200);
-    
+
     // Kısa bir gecikme ile kısayol bilgisini güncelle
     setTimeout(updateKisayolBilgi, 500);
-    
+
     // Auth sistem data yükledikten sonra da güncelle
     if (typeof authSystem !== 'undefined') {
         const originalTrigger = authSystem.triggerPageUpdates;
-        authSystem.triggerPageUpdates = function() {
+        authSystem.triggerPageUpdates = function () {
             originalTrigger.call(this);
             setTimeout(updateKisayolBilgi, 100);
         };

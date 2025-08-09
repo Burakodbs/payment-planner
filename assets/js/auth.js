@@ -93,7 +93,7 @@ class AuthSystem {
         if (!this.currentUser || !this.users[this.currentUser]) return;
 
         const userData = this.users[this.currentUser].data;
-        
+
         // Global değişkenleri güncelle
         harcamalar = userData.harcamalar || [];
         duzenliOdemeler = userData.duzenliOdemeler || [];
@@ -126,7 +126,7 @@ class AuthSystem {
     showMainApp() {
         document.getElementById('authContainer').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
-        
+
         // Kullanıcı bilgisini göster
         const userInfo = document.getElementById('currentUserInfo');
         if (userInfo) {
@@ -137,7 +137,7 @@ class AuthSystem {
         if (typeof initializeTheme === 'function') {
             initializeTheme();
         }
-        
+
         // UI güncellemeleri
         if (typeof updateCardOptions === 'function') updateCardOptions();
         if (typeof updateUserOptions === 'function') updateUserOptions();
@@ -155,7 +155,7 @@ class AuthSystem {
 
     // Sayfa-özel güncellemeleri tetikle
     triggerPageUpdates() {
-        
+
         // Data migration işlemi
         if (typeof migrateDuzenliOdemeData === 'function') {
             try {
@@ -164,7 +164,7 @@ class AuthSystem {
                 console.error('❌ Migration hatası:', error);
             }
         }
-        
+
         // Dashboard güncellemeleri
         if (typeof updateDashboard === 'function') {
             try {
@@ -173,17 +173,17 @@ class AuthSystem {
                 console.error('❌ Dashboard güncelleme hatası:', error);
             }
         }
-        
+
         // Harcama tablosu güncellemeleri
         if (typeof updateHarcamaTable === 'function') {
             updateHarcamaTable();
         }
-        
+
         // Hesaplar güncellemeleri
         if (typeof updateHesaplar === 'function') {
             updateHesaplar();
         }
-        
+
         // Aylık özet güncellemeleri
         if (typeof updateAylikOzet === 'function') {
             try {
@@ -197,7 +197,7 @@ class AuthSystem {
                 console.error('❌ Aylık özet güncelleme hatası:', error);
             }
         }
-        
+
         // Veri yönetimi güncellemeleri (istatistikler kaldırıldı)
         if (typeof updateDuzenliOdemelerListesi === 'function') {
             try {
@@ -214,7 +214,7 @@ class AuthSystem {
             }
         }
 
-        
+
     }
 
     // Auth ekranını göster
@@ -226,10 +226,10 @@ class AuthSystem {
 
     // İlk kez kullanıcı kontrolü
     isFirstTimeUser() {
-        return this.currentUser && 
-               this.users[this.currentUser] && 
-               this.users[this.currentUser].data.kredikartlari.length === 0 &&
-               this.users[this.currentUser].data.kisiler.length === 0;
+        return this.currentUser &&
+            this.users[this.currentUser] &&
+            this.users[this.currentUser].data.kredikartlari.length === 0 &&
+            this.users[this.currentUser].data.kisiler.length === 0;
     }
 
     // Setup wizard'ı göster
@@ -244,16 +244,16 @@ class AuthSystem {
 
         this.users[this.currentUser].data.kredikartlari = cards;
         this.users[this.currentUser].data.kisiler = users;
-        
+
         kredikartlari = cards;
         kisiler = users;
-        
+
         this.saveUserData();
         localStorage.setItem('app_initialized', 'true');
-        
+
         document.getElementById('setupWizard').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
-        
+
         // UI'ları güncelle
         updateCardOptions();
         updateUserOptions();
@@ -278,13 +278,13 @@ class AuthSystem {
 let authSystem;
 
 // Sayfa yüklendiğinde auth sistemini başlat
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     authSystem = new AuthSystem();
     authSystem.startAutoSave();
 });
 
 // Sayfa kapanmadan önce verileri kaydet
-window.addEventListener('beforeunload', function() {
+window.addEventListener('beforeunload', function () {
     if (authSystem && authSystem.currentUser) {
         authSystem.saveUserData();
     }

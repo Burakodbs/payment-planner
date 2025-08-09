@@ -7,10 +7,10 @@ const CACHE_NAME = `harcama-takip-${CACHE_VERSION}`;
 // Development mode detection
 const isDevMode = () => {
   const hostname = self.location.hostname;
-  return hostname === 'localhost' || 
-         hostname === '127.0.0.1' || 
-         self.location.port === '8000' ||
-         self.location.port === '3000';
+  return hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    self.location.port === '8000' ||
+    self.location.port === '3000';
 };
 
 // Cache strategies
@@ -24,7 +24,7 @@ const STRATEGIES = {
 // Resource categorization with strategies
 const getResourceStrategy = (url) => {
   const pathname = new URL(url).pathname;
-  
+
   // Development mode - always network first for JS/CSS
   if (isDevMode()) {
     if (pathname.endsWith('.js') || pathname.endsWith('.css')) {
@@ -34,7 +34,7 @@ const getResourceStrategy = (url) => {
       return STRATEGIES.NETWORK_FIRST;
     }
   }
-  
+
   // Production strategies
   if (pathname.endsWith('.html') || pathname === '/') {
     return STRATEGIES.NETWORK_FIRST;
@@ -45,7 +45,7 @@ const getResourceStrategy = (url) => {
   } else if (pathname.includes('api') || pathname.includes('data')) {
     return STRATEGIES.NETWORK_FIRST;
   }
-  
+
   return STRATEGIES.NETWORK_FIRST; // Default
 };
 
@@ -54,7 +54,7 @@ const ESSENTIAL_FILES = [
   './',
   './index.html',
   './harcama-ekle.html',
-  './harcama-listesi.html', 
+  './harcama-listesi.html',
   './hesaplar.html',
   './aylik-ozet.html',
   './veri-yonetimi.html',
@@ -71,7 +71,7 @@ const ESSENTIAL_FILES = [
 // Install event
 self.addEventListener('install', event => {
   console.log('🚀 Service Worker installing...');
-  
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -91,7 +91,7 @@ self.addEventListener('install', event => {
 // Activate event - cleanup old caches
 self.addEventListener('activate', event => {
   console.log('🔄 Service Worker activating...');
-  
+
   event.waitUntil(
     Promise.all([
       // Cleanup old caches
@@ -108,9 +108,9 @@ self.addEventListener('activate', event => {
       // Take control of all clients
       self.clients.claim()
     ])
-    .then(() => {
-      console.log('✅ Service Worker activated successfully');
-    })
+      .then(() => {
+        console.log('✅ Service Worker activated successfully');
+      })
   );
 });
 
@@ -120,14 +120,14 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') {
     return;
   }
-  
+
   const url = new URL(event.request.url);
-  
+
   // Skip non-same-origin requests except CDN
   if (url.origin !== location.origin && !url.href.includes('cdn.jsdelivr.net')) {
     return;
   }
-  
+
   const strategy = getResourceStrategy(event.request.url);
   event.respondWith(handleRequest(event.request, strategy));
 });
@@ -135,16 +135,16 @@ self.addEventListener('fetch', event => {
 // Request handling based on strategy
 async function handleRequest(request, strategy) {
   const url = new URL(request.url);
-  
+
   // Check for cache-busting parameters
-  const hasCacheBuster = url.searchParams.has('t') || 
-                        url.searchParams.has('v') || 
-                        url.searchParams.has('_t');
-  
+  const hasCacheBuster = url.searchParams.has('t') ||
+    url.searchParams.has('v') ||
+    url.searchParams.has('_t');
+
   if (hasCacheBuster || isDevMode()) {
     return handleNetworkFirst(request);
   }
-  
+
   switch (strategy) {
     case STRATEGIES.CACHE_FIRST:
       return handleCacheFirst(request);
@@ -166,7 +166,7 @@ async function handleCacheFirst(request) {
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
       const cache = await caches.open(CACHE_NAME);
@@ -191,17 +191,17 @@ async function handleNetworkFirst(request) {
   } catch (error) {
     console.log('Network failed, trying cache:', request.url);
     const cachedResponse = await caches.match(request);
-    
+
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Return offline page for navigation requests
     if (request.mode === 'navigate') {
-      return caches.match('./index.html') || 
-             new Response('Offline - Please check your connection', { status: 503 });
+      return caches.match('./index.html') ||
+        new Response('Offline - Please check your connection', { status: 503 });
     }
-    
+
     return new Response('Offline', { status: 503 });
   }
 }
@@ -219,7 +219,7 @@ async function handleNetworkOnly(request) {
 // Stale-while-revalidate strategy
 async function handleStaleWhileRevalidate(request) {
   const cachedResponse = await caches.match(request);
-  
+
   // Start background fetch
   const fetchPromise = fetch(request).then(networkResponse => {
     if (networkResponse.ok) {
@@ -230,12 +230,12 @@ async function handleStaleWhileRevalidate(request) {
   }).catch(error => {
     console.log('Background fetch failed:', request.url);
   });
-  
+
   // Return cached version immediately if available
   if (cachedResponse) {
     return cachedResponse;
   }
-  
+
   // Wait for network if no cached version
   try {
     return await fetchPromise;
@@ -249,7 +249,7 @@ self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
+
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
       caches.keys().then(cacheNames => {
@@ -266,7 +266,7 @@ self.addEventListener('message', event => {
 // Background sync for offline data
 self.addEventListener('sync', event => {
   console.log('🔄 Background sync triggered:', event.tag);
-  
+
   if (event.tag === 'expense-sync') {
     event.waitUntil(
       // Handle offline expense sync here
