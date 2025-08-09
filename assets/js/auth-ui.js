@@ -13,10 +13,10 @@ function showRegister() {
 
 function handleLogin(event) {
     event.preventDefault();
-    
+
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
-    
+
     try {
         authSystem.login(username, password);
         authSystem.showMainApp();
@@ -28,17 +28,17 @@ function handleLogin(event) {
 
 function handleRegister(event) {
     event.preventDefault();
-    
+
     const username = document.getElementById('registerUsername').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
-    
+
     if (password !== confirmPassword) {
         showToast('Şifreler eşleşmiyor!', 'error');
         return;
     }
-    
+
     try {
         authSystem.register(username, password, email);
         authSystem.login(username, password);
@@ -78,17 +78,17 @@ function previousStep() {
 
 function addCard() {
     const cardName = document.getElementById('newCardName').value.trim();
-    
+
     if (!cardName) {
         showToast('Kart adı boş olamaz!', 'error');
         return;
     }
-    
+
     if (tempCards.includes(cardName)) {
         showToast('Bu kart zaten eklenmiş!', 'error');
         return;
     }
-    
+
     tempCards.push(cardName);
     updateCardsList();
     document.getElementById('newCardName').value = '';
@@ -97,17 +97,17 @@ function addCard() {
 
 function addUser() {
     const userName = document.getElementById('newUserName').value.trim();
-    
+
     if (!userName) {
         showToast('Kişi adı boş olamaz!', 'error');
         return;
     }
-    
+
     if (tempUsers.includes(userName)) {
         showToast('Bu kişi zaten eklenmiş!', 'error');
         return;
     }
-    
+
     tempUsers.push(userName);
     updateUsersList();
     document.getElementById('newUserName').value = '';
@@ -128,7 +128,7 @@ function removeUser(userName) {
 
 function updateCardsList() {
     const cardsList = document.getElementById('cardsList');
-    
+
     if (tempCards.length === 0) {
         cardsList.innerHTML = '<p class="setup-help">Henüz kart eklenmedi. En az bir kart eklemeniz önerilir.</p>';
     } else {
@@ -143,7 +143,7 @@ function updateCardsList() {
 
 function updateUsersList() {
     const usersList = document.getElementById('usersList');
-    
+
     if (tempUsers.length === 0) {
         usersList.innerHTML = '<p class="setup-help">Henüz kişi eklenmedi. En az bir kişi eklemeniz önerilir.</p>';
     } else {
@@ -162,16 +162,16 @@ function finishSetup() {
             return;
         }
     }
-    
+
     if (tempUsers.length === 0) {
         if (!confirm('Henüz kişi eklemediniz. Kişi eklemeden devam etmek istediğinizden emin misiniz?')) {
             return;
         }
     }
-    
+
     authSystem.completeSetup(tempCards, tempUsers);
     showToast('Kurulum tamamlandı! Artık harcama eklemeye başlayabilirsiniz.', 'success');
-    
+
     // Temp arrays'i temizle
     tempCards = [];
     tempUsers = [];
@@ -179,10 +179,10 @@ function finishSetup() {
 }
 
 // Enter tuşu ile form gönderimi
-document.addEventListener('keypress', function(event) {
+document.addEventListener('keypress', function (event) {
     if (event.key === 'Enter') {
         const activeElement = document.activeElement;
-        
+
         // Setup wizard'da enter tuşu kontrolü
         if (document.getElementById('setupWizard').style.display !== 'none') {
             if (activeElement.id === 'newCardName') {

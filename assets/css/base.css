@@ -25,14 +25,19 @@ body {
     color: var(--text);
     min-height: 100vh;
     transition: background var(--transition), color var(--transition);
-    
+
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 /* Typography Scale */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: var(--font-sans);
     font-weight: var(--font-semibold);
     letter-spacing: var(--tracking-tight);
@@ -101,15 +106,15 @@ p {
         font-size: var(--text-sm);
         padding: 16px;
     }
-    
+
     h1 {
         font-size: var(--text-2xl);
     }
-    
+
     h2 {
         font-size: var(--text-xl);
     }
-    
+
     h3 {
         font-size: var(--text-lg);
     }
@@ -119,7 +124,7 @@ p {
     h1 {
         font-size: var(--text-xl);
     }
-    
+
     h2 {
         font-size: var(--text-lg);
     }
@@ -134,11 +139,14 @@ p {
     contain: layout style;
 }
 
-.btn, .tab, .summary-card {
+.btn,
+.tab,
+.summary-card {
     will-change: transform, box-shadow;
 }
 
-.theme-btn, .color-btn {
+.theme-btn,
+.color-btn {
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;

@@ -8,7 +8,7 @@ function updateDashboardCharts() {
     // Canvas elementlerini kontrol et
     const trendCanvas = document.getElementById('dashboardTrendChart');
     const userCanvas = document.getElementById('dashboardUserChart');
-    
+
     if (!trendCanvas || !userCanvas) {
         // console.log('Dashboard chart canvas elements not found');
         return;
@@ -24,10 +24,10 @@ function updateDashboardCharts() {
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const monthStr = `${year}-${month}`;
         const monthName = date.toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' });
-        
+
         const monthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(monthStr));
         const monthTotal = monthExpenses.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
-        
+
         months.push(monthName);
         monthlyTotals.push(monthTotal);
     }
@@ -57,7 +57,7 @@ function updateDashboardCharts() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return value.toLocaleString('tr-TR') + ' TL';
                         }
                     }
@@ -68,7 +68,7 @@ function updateDashboardCharts() {
 
     const currentMonth = new Date().toISOString().slice(0, 7);
     const thisMonthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(currentMonth));
-    
+
     const userTotals = {};
     thisMonthExpenses.forEach(h => {
         if (h.kullanici) {
@@ -107,7 +107,7 @@ function updateDashboardCharts() {
 // Analytics Charts
 function createMonthlyTrendChart(data) {
     const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
-    
+
     if (chartInstances.monthlyTrend) {
         chartInstances.monthlyTrend.destroy();
     }
@@ -138,7 +138,7 @@ function createMonthlyTrendChart(data) {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return value.toLocaleString('tr-TR') + ' TL';
                         }
                     }
@@ -150,7 +150,7 @@ function createMonthlyTrendChart(data) {
 
 function createCardDistributionChart(data) {
     const ctx = document.getElementById('cardDistributionChart').getContext('2d');
-    
+
     if (chartInstances.cardDistribution) {
         chartInstances.cardDistribution.destroy();
     }
@@ -177,7 +177,7 @@ function createCardDistributionChart(data) {
                 legend: { position: 'bottom' },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             return context.label + ': ' + context.parsed.toLocaleString('tr-TR') + ' TL';
                         }
                     }
@@ -189,7 +189,7 @@ function createCardDistributionChart(data) {
 
 function createUserDistributionChart(data) {
     const ctx = document.getElementById('userDistributionChart').getContext('2d');
-    
+
     if (chartInstances.userDistribution) {
         chartInstances.userDistribution.destroy();
     }
@@ -220,7 +220,7 @@ function createUserDistributionChart(data) {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return value.toLocaleString('tr-TR') + ' TL';
                         }
                     }
@@ -232,7 +232,7 @@ function createUserDistributionChart(data) {
 
 function createWeeklyActivityChart(data) {
     const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
-    
+
     if (chartInstances.weeklyActivity) {
         chartInstances.weeklyActivity.destroy();
     }
@@ -263,7 +263,7 @@ function createWeeklyActivityChart(data) {
                 r: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return value.toLocaleString('tr-TR') + ' TL';
                         }
                     }
@@ -275,13 +275,13 @@ function createWeeklyActivityChart(data) {
 
 function createComparisonChart(month1, month2, data1, data2) {
     const ctx = document.getElementById('comparisonChart').getContext('2d');
-    
+
     if (chartInstances.comparison) {
         chartInstances.comparison.destroy();
     }
 
     const allUsers = [...new Set([...Object.keys(data1), ...Object.keys(data2)])];
-    
+
     chartInstances.comparison = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -306,7 +306,7 @@ function createComparisonChart(month1, month2, data1, data2) {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return value.toLocaleString('tr-TR') + ' TL';
                         }
                     }
@@ -315,7 +315,7 @@ function createComparisonChart(month1, month2, data1, data2) {
             plugins: {
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             return context.dataset.label + ': ' + context.parsed.y.toLocaleString('tr-TR') + ' TL';
                         }
                     }

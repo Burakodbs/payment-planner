@@ -155,7 +155,7 @@
     font-size: 1.4rem;
 }
 
-.setup-step > p {
+.setup-step>p {
     color: var(--text-secondary);
     margin-bottom: 24px;
 }
@@ -285,33 +285,34 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+
     .auth-container,
     .setup-container {
         padding: 24px;
         margin: 10px;
     }
-    
+
     .header {
         flex-direction: column;
         text-align: center;
         gap: 16px;
     }
-    
+
     .header-left,
     .header-center,
     .header-right {
         width: 100%;
     }
-    
+
     .user-info {
         justify-content: center;
         flex-wrap: wrap;
     }
-    
+
     .setup-navigation {
         flex-direction: column;
     }
-    
+
     .setup-navigation .btn {
         max-width: none;
     }
@@ -323,6 +324,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

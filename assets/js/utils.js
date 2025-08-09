@@ -3,23 +3,23 @@
 // Data Migration Functions
 function migrateDuzenliOdemeData() {
     // console.log('Düzenli ödeme migration başlatılıyor...');
-    
+
     let migrationCount = 0;
     harcamalar.forEach(harcama => {
         // Eski isDuzenliOtomatik özelliğini isRegular'a çevir
         if (harcama.isDuzenliOtomatik && !harcama.isRegular) {
             harcama.isRegular = true;
             delete harcama.isDuzenliOtomatik;
-            
+
             // "(Otomatik)" yazısını "(Düzenli)" ile değiştir
             if (harcama.aciklama && harcama.aciklama.includes('(Otomatik)')) {
                 harcama.aciklama = harcama.aciklama.replace('(Otomatik)', '(Düzenli)');
             }
-            
+
             migrationCount++;
         }
     });
-    
+
     if (migrationCount > 0) {
         // console.log(`${migrationCount} düzenli ödeme migration yapıldı`);
         // Verileri kaydet
@@ -28,7 +28,7 @@ function migrateDuzenliOdemeData() {
         } else if (authSystem && authSystem.currentUser) {
             authSystem.saveUserData();
         }
-        
+
         // UI güncellemeleri
         if (typeof updateHarcamaTable === 'function') {
             updateHarcamaTable();
@@ -36,7 +36,7 @@ function migrateDuzenliOdemeData() {
         if (typeof updateDashboard === 'function') {
             updateDashboard();
         }
-        
+
         showToast(`${migrationCount} düzenli ödeme güncellendi`, 'success');
     }
 }
@@ -54,26 +54,26 @@ function updateDashboardStats() {
     const thisMonthElement = document.getElementById('thisMonthTotal');
     const totalCurrentDebtElement = document.getElementById('totalCurrentDebt');
     const totalFuturePaymentsElement = document.getElementById('totalFuturePayments');
-    
+
     if (!thisMonthElement || !totalCurrentDebtElement || !totalFuturePaymentsElement) {
         // console.log('Dashboard stat elements not found, skipping update');
         return;
     }
-    
+
     const thisMonth = new Date().toISOString().slice(0, 7);
     const thisMonthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(thisMonth));
     const thisMonthTotal = thisMonthExpenses.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
-    
+
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
     const lastMonthStr = lastMonth.toISOString().slice(0, 7);
     const lastMonthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(lastMonthStr));
     const lastMonthTotal = lastMonthExpenses.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
-    
+
     const { hesaplar, gelecekTaksitler } = calculateDebts();
     const totalCurrentDebt = Object.values(hesaplar).reduce((sum, debt) => sum + debt, 0);
     const totalFuturePayments = Object.values(gelecekTaksitler).reduce((sum, debt) => sum + debt, 0);
-    
+
     thisMonthElement.textContent = thisMonthTotal.toFixed(2) + ' TL';
     totalCurrentDebtElement.textContent = totalCurrentDebt.toFixed(2) + ' TL';
     totalFuturePaymentsElement.textContent = totalFuturePayments.toFixed(2) + ' TL';
@@ -119,9 +119,9 @@ function updateDashboardUpcomingInstallments() {
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     const nextMonthStr = nextMonth.toISOString().slice(0, 7);
-    
+
     const upcomingInstallments = getFutureTaksits(nextMonthStr);
-    
+
     let html = '';
     upcomingInstallments.slice(0, 5).forEach(installment => {
         html += `
@@ -141,7 +141,7 @@ function updateDashboardUpcomingInstallments() {
 // Form Submission Handlers
 function handleHarcamaSubmit(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const harcama = {
         id: Date.now(),
@@ -155,18 +155,18 @@ function handleHarcamaSubmit(event) {
         toplamTaksit: formData.get('toplamTaksit') ? parseInt(formData.get('toplamTaksit')) : null,
         isTaksit: formData.get('taksitNo') && formData.get('toplamTaksit')
     };
-    
+
     harcamalar.push(harcama);
     saveData();
-    
+
     // Sticky values kaydet
     if (typeof preserveStickyValues === 'function') {
         preserveStickyValues();
     }
-    
+
     // Form reset
     event.target.reset();
-    
+
     // Sticky values uygula
     if (typeof applyStickyValues === 'function') {
         applyStickyValues();
@@ -174,18 +174,18 @@ function handleHarcamaSubmit(event) {
         // Fallback - default date
         document.getElementById('harcamaTarih').value = currentDate;
     }
-    
+
     // Odağı tutar alanına getir
     const tutarInput = document.getElementById('tutar');
     if (tutarInput) {
         tutarInput.focus();
         tutarInput.select();
     }
-    
+
     // Update displays
     updateHarcamaTable();
     updateDashboard();
-    
+
     // Success message
     showToast('Harcama başarıyla eklendi!', 'success');
 }
@@ -195,11 +195,11 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
-    
+
     document.body.appendChild(toast);
-    
+
     setTimeout(() => toast.classList.add('show'), 100);
-    
+
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => document.body.removeChild(toast), 300);
@@ -215,17 +215,17 @@ function exportData() {
         kisiler,
         exportDate: new Date().toISOString()
     };
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
+
     const a = document.createElement('a');
     a.href = url;
     a.download = `kredi-karti-verileri-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    
+
     URL.revokeObjectURL(url);
     showToast('Veriler başarıyla dışa aktarıldı!', 'success');
 }
@@ -233,52 +233,52 @@ function exportData() {
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         try {
             const data = JSON.parse(e.target.result);
-            
+
             // Veri kontrolü ve geri yükleme
             if (data.harcamalar && Array.isArray(data.harcamalar)) {
                 harcamalar = data.harcamalar;
                 localStorage.setItem('harcamalar', JSON.stringify(harcamalar));
             }
-            
+
             if (data.duzenliOdemeler && Array.isArray(data.duzenliOdemeler)) {
                 duzenliOdemeler = data.duzenliOdemeler;
                 localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
             }
-            
+
             if (data.kredikartlari && Array.isArray(data.kredikartlari)) {
                 kredikartlari = data.kredikartlari;
                 localStorage.setItem('kredikartlari', JSON.stringify(kredikartlari));
                 updateCardOptions();
             }
-            
+
             if (data.kisiler && Array.isArray(data.kisiler)) {
                 kisiler = data.kisiler;
                 localStorage.setItem('kisiler', JSON.stringify(kisiler));
                 updateUserOptions();
             }
-            
+
             // UI'ları güncelle
             updateHarcamaTable();
             updateDashboard();
             updateHesaplar();
-            
+
             const importCount = {
                 harcamalar: data.harcamalar ? data.harcamalar.length : 0,
                 kredikartlari: data.kredikartlari ? data.kredikartlari.length : 0,
                 kisiler: data.kisiler ? data.kisiler.length : 0
             };
-            
+
             showToast(`Veriler başarıyla içe aktarıldı! ${importCount.harcamalar} harcama, ${importCount.kredikartlari} kart, ${importCount.kisiler} kişi yüklendi.`, 'success');
         } catch (error) {
             showToast('Dosya okuma hatası: ' + error.message, 'error');
         }
     };
-    
+
     reader.readAsText(file);
 }
 
@@ -289,14 +289,14 @@ function updateCardOptions() {
         const currentValue = select.value;
         const options = select.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
-        
+
         kredikartlari.forEach(kart => {
             const option = document.createElement('option');
             option.value = kart;
             option.textContent = kart;
             select.appendChild(option);
         });
-        
+
         select.value = currentValue;
     });
 }
@@ -307,14 +307,14 @@ function updateUserOptions() {
         const currentValue = select.value;
         const options = select.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
-        
+
         kisiler.forEach(kisi => {
             const option = document.createElement('option');
             option.value = kisi;
             option.textContent = kisi;
             select.appendChild(option);
         });
-        
+
         select.value = currentValue;
     });
 }
@@ -361,7 +361,7 @@ function showDuzenliOdemeForm() {
 function cancelDuzenliOdeme() {
     // Düzenleme modunu sıfırla
     editingDuzenliOdemeId = null;
-    
+
     // Form alanlarını temizle
     const form = document.getElementById('duzenliOdemeForm');
     if (form) {
@@ -372,13 +372,13 @@ function cancelDuzenliOdeme() {
         document.getElementById('duzenliKullanici').value = '';
         document.getElementById('duzenliBaslangic').value = '';
     }
-    
+
     // Form başlığını ve butonunu eski haline getir
     const formTitle = document.getElementById('duzenliFormTitle');
     if (formTitle) {
         formTitle.textContent = 'Yeni Düzenli Ödeme';
     }
-    
+
     const submitBtn = document.getElementById('duzenliSubmitBtn');
     if (submitBtn) {
         submitBtn.textContent = 'Ekle';
@@ -423,7 +423,7 @@ function addDuzenliOdeme() {
     updateDuzenliOdemelerListesi();
     cancelDuzenliOdeme();
     showToast('Düzenli ödeme eklendi', 'success');
-    
+
     // Harcama tablosunu da güncelle
     if (typeof updateHarcamaTable === 'function') {
         updateHarcamaTable();
@@ -445,7 +445,7 @@ function updateDuzenliOdemelerListesi() {
         const statusStyle = isActive ? '' : 'opacity: 0.6; background: var(--bg-muted);';
         const statusText = isActive ? '' : ' (Durduruldu)';
         const bitisTarihi = odeme.birisTarihi ? ` - Bitiş: ${odeme.birisTarihi}` : '';
-        
+
         html += `
             <div style="background: var(--bg-secondary); padding: 12px; border-radius: var(--radius); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; ${statusStyle}">
                 <div>
@@ -481,23 +481,23 @@ function editDuzenliOdeme(id) {
 
     // Formu düzenleme moduna al
     editingDuzenliOdemeId = id;
-    
+
     // Formu göster
     document.getElementById('duzenliOdemeForm').style.display = 'block';
-    
+
     // Form alanlarını doldur
     document.getElementById('duzenliAciklama').value = odeme.aciklama;
     document.getElementById('duzenliTutar').value = odeme.tutar;
     document.getElementById('duzenliKart').value = odeme.kart;
     document.getElementById('duzenliKullanici').value = odeme.kullanici;
     document.getElementById('duzenliBaslangic').value = odeme.baslangicTarihi;
-    
+
     // Form başlığını güncelle
     const formTitle = document.getElementById('duzenliFormTitle');
     if (formTitle) {
         formTitle.textContent = 'Düzenli Ödemeyi Düzenle';
     }
-    
+
     // Submit butonunu güncelle
     const submitBtn = document.getElementById('duzenliSubmitBtn');
     if (submitBtn) {
@@ -524,7 +524,7 @@ function updateDuzenliOdeme() {
     const odemeIndex = duzenliOdemeler.findIndex(o => o.id === editingDuzenliOdemeId);
     if (odemeIndex !== -1) {
         const oldOdeme = { ...duzenliOdemeler[odemeIndex] };
-        
+
         duzenliOdemeler[odemeIndex] = {
             ...duzenliOdemeler[odemeIndex],
             aciklama,
@@ -544,7 +544,7 @@ function updateDuzenliOdeme() {
         updateDuzenliOdemelerListesi();
         cancelDuzenliOdeme();
         showToast('Düzenli ödeme güncellendi', 'success');
-        
+
         // Harcama tablosunu da güncelle
         if (typeof updateHarcamaTable === 'function') {
             updateHarcamaTable();
@@ -558,28 +558,28 @@ function deleteDuzenliOdeme(id) {
         showToast('Düzenli ödeme bulunamadı', 'error');
         return;
     }
-    
+
     if (confirm(`"${odeme.aciklama}" düzenli ödemeyi silmek istediğinizden emin misiniz?\n\nNot: Geçmişteki ödemeler korunacak, sadece gelecekteki otomatik kayıtlar durdurulacak.`)) {
         // Silme tarihini kaydet (bugünün tarihi)
         const today = new Date().toISOString().slice(0, 10);
-        
+
         // Geçmiş kayıtları korumak için düzenli ödemeye bitiş tarihi ekle
         const odemeIndex = duzenliOdemeler.findIndex(o => o.id === id);
         if (odemeIndex !== -1) {
             duzenliOdemeler[odemeIndex].birisTarihi = today;
             duzenliOdemeler[odemeIndex].aktif = false;
         }
-        
+
         // Alternatif olarak tamamen silmek istiyorsanız:
         // duzenliOdemeler = duzenliOdemeler.filter(o => o.id !== id);
-        
+
         if (authSystem && authSystem.currentUser) {
             authSystem.saveUserData();
         }
-        
+
         updateDuzenliOdemelerListesi();
         showToast(`Düzenli ödeme durduruldu. Geçmiş kayıtlar korundu.`, 'success');
-        
+
         // Harcama tablosunu da güncelle
         if (typeof updateHarcamaTable === 'function') {
             updateHarcamaTable();
@@ -594,25 +594,25 @@ function reactivateDuzenliOdeme(id) {
         showToast('Düzenli ödeme bulunamadı', 'error');
         return;
     }
-    
+
     if (confirm(`"${odeme.aciklama}" düzenli ödemeyi yeniden başlatmak istediğinizden emin misiniz?`)) {
         const odemeIndex = duzenliOdemeler.findIndex(o => o.id === id);
         if (odemeIndex !== -1) {
             // Aktif duruma getir ve bitiş tarihini kaldır
             duzenliOdemeler[odemeIndex].aktif = true;
             delete duzenliOdemeler[odemeIndex].birisTarihi;
-            
+
             // Yeni başlangıç tarihi olarak bugünü ayarla
             duzenliOdemeler[odemeIndex].baslangicTarihi = new Date().toISOString().slice(0, 10);
         }
-        
+
         if (authSystem && authSystem.currentUser) {
             authSystem.saveUserData();
         }
-        
+
         updateDuzenliOdemelerListesi();
         showToast('Düzenli ödeme yeniden başlatıldı', 'success');
-        
+
         // Harcama tablosunu da güncelle
         if (typeof updateHarcamaTable === 'function') {
             updateHarcamaTable();
@@ -627,12 +627,12 @@ function permanentDeleteDuzenliOdeme(id) {
         showToast('Düzenli ödeme bulunamadı', 'error');
         return;
     }
-    
+
     if (confirm(`"${odeme.aciklama}" düzenli ödemeyi tamamen silmek istediğinizden emin misiniz?\n\nUYARI: Bu işlem geri alınamaz ve tüm geçmiş kayıtlar da silinecek!`)) {
         if (confirm('Bu işlem GERİ ALINAMAZ! Emin misiniz?')) {
             // Düzenli ödemeyi tamamen sil
             duzenliOdemeler = duzenliOdemeler.filter(o => o.id !== id);
-            
+
             // Bu düzenli ödemeye ait olan harcamaları da sil
             harcamalar = harcamalar.filter(h => {
                 if (h.isDuzenli && h.id && h.id.toString().includes(`duzenli_${id}_`)) {
@@ -640,14 +640,14 @@ function permanentDeleteDuzenliOdeme(id) {
                 }
                 return true; // Diğer kayıtları koru
             });
-            
+
             if (authSystem && authSystem.currentUser) {
                 authSystem.saveUserData();
             }
-            
+
             updateDuzenliOdemelerListesi();
             showToast('Düzenli ödeme ve tüm kayıtları tamamen silindi', 'success');
-            
+
             // Harcama tablosunu da güncelle
             if (typeof updateHarcamaTable === 'function') {
                 updateHarcamaTable();
@@ -666,9 +666,9 @@ function syncDataAfterDuzenliOdemeUpdate(oldOdeme, newOdeme) {
 function syncAllDataAfterNameChange(type, oldName, newName) {
     // type: 'kart' veya 'kullanici'
     // console.log(`Global sync: ${type} adı değiştirildi: ${oldName} -> ${newName}`);
-    
+
     let updateCount = 0;
-    
+
     // Harcamalardaki isimleri güncelle
     harcamalar.forEach(harcama => {
         if (type === 'kart' && harcama.kart === oldName) {
@@ -679,7 +679,7 @@ function syncAllDataAfterNameChange(type, oldName, newName) {
             updateCount++;
         }
     });
-    
+
     // Düzenli ödemelerdeki isimleri güncelle
     duzenliOdemeler.forEach(odeme => {
         if (type === 'kart' && odeme.kart === oldName) {
@@ -690,13 +690,13 @@ function syncAllDataAfterNameChange(type, oldName, newName) {
             updateCount++;
         }
     });
-    
+
     if (updateCount > 0) {
         // Verileri kaydet
         if (authSystem && authSystem.currentUser) {
             authSystem.saveUserData();
         }
-        
+
         // Tüm tabloları güncelle
         if (typeof updateHarcamaTable === 'function') {
             updateHarcamaTable();
@@ -707,7 +707,7 @@ function syncAllDataAfterNameChange(type, oldName, newName) {
         if (typeof updateDashboard === 'function') {
             updateDashboard();
         }
-        
+
         showToast(`${updateCount} kayıt güncellendi: ${oldName} -> ${newName}`, 'success');
     }
 }
@@ -719,7 +719,7 @@ function importFromFile() {
         showToast('Lütfen bir dosya seçin', 'error');
         return;
     }
-    
+
     importData({ target: { files: fileInput.files } });
 }
 
@@ -730,37 +730,37 @@ function importData() {
         showToast('Lütfen bir dosya seçin', 'error');
         return;
     }
-    
+
     const file = fileInput.files[0];
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         try {
             const data = JSON.parse(e.target.result);
-            
+
             // Veri kontrolü ve geri yükleme
             if (data.harcamalar && Array.isArray(data.harcamalar)) {
                 harcamalar = data.harcamalar;
             }
-            
+
             if (data.duzenliOdemeler && Array.isArray(data.duzenliOdemeler)) {
                 duzenliOdemeler = data.duzenliOdemeler;
             }
-            
+
             if (data.kredikartlari && Array.isArray(data.kredikartlari)) {
                 kredikartlari = data.kredikartlari;
                 updateCardOptions();
             }
-            
+
             if (data.kisiler && Array.isArray(data.kisiler)) {
                 kisiler = data.kisiler;
                 updateUserOptions();
             }
-            
+
             // Auth sistemi üzerinden kaydet
             if (authSystem && authSystem.currentUser) {
                 authSystem.saveUserData();
             }
-            
+
             // UI'ları güncelle
             if (typeof updateHarcamaTable === 'function') updateHarcamaTable();
             if (typeof updateDashboard === 'function') updateDashboard();
@@ -768,22 +768,22 @@ function importData() {
             if (typeof updateDuzenliOdemelerListesi === 'function') updateDuzenliOdemelerListesi();
             if (typeof updateDataStats === 'function') updateDataStats();
             if (typeof updateCardAndUserManagement === 'function') updateCardAndUserManagement();
-            
+
             const importCount = {
                 harcamalar: data.harcamalar ? data.harcamalar.length : 0,
                 kredikartlari: data.kredikartlari ? data.kredikartlari.length : 0,
                 kisiler: data.kisiler ? data.kisiler.length : 0
             };
-            
+
             showToast(`Veriler başarıyla içe aktarıldı! ${importCount.harcamalar} harcama, ${importCount.kredikartlari} kart, ${importCount.kisiler} kişi yüklendi.`, 'success');
-            
+
             // Dosya input'unu temizle
             fileInput.value = '';
         } catch (error) {
             showToast('Dosya okuma hatası: ' + error.message, 'error');
         }
     };
-    
+
     reader.readAsText(file);
 }
 
@@ -798,24 +798,24 @@ function editHarcama(id) {
     }
 
     editingHarcamaId = id;
-    
+
     // Modal alanlarını doldur
     document.getElementById('editTarih').value = harcama.tarih;
     document.getElementById('editAciklama').value = harcama.aciklama || '';
     document.getElementById('editTutar').value = harcama.tutar;
     document.getElementById('editTaksitNo').value = harcama.taksitNo || '';
     document.getElementById('editToplamTaksit').value = harcama.toplamTaksit || '';
-    
+
     // Kart ve kullanıcı seçeneklerini doldur
     populateEditModalSelects();
-    
+
     // Değerleri ayarla
     document.getElementById('editKart').value = harcama.kart;
     document.getElementById('editKullanici').value = harcama.kullanici;
-    
+
     // Modal'ı göster
     document.getElementById('editHarcamaModal').style.display = 'block';
-    
+
     showToast('Düzenleme modu aktif', 'info');
 }
 
@@ -825,7 +825,7 @@ function populateEditModalSelects() {
     if (kartSelect) {
         const options = kartSelect.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
-        
+
         kredikartlari.forEach(kart => {
             const option = document.createElement('option');
             option.value = kart;
@@ -833,13 +833,13 @@ function populateEditModalSelects() {
             kartSelect.appendChild(option);
         });
     }
-    
+
     // Kullanıcı seçenekleri
     const kullaniciSelect = document.getElementById('editKullanici');
     if (kullaniciSelect) {
         const options = kullaniciSelect.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
-        
+
         kisiler.forEach(kisi => {
             const option = document.createElement('option');
             option.value = kisi;
@@ -856,18 +856,18 @@ function closeEditHarcamaModal() {
 
 function handleEditHarcamaSubmit(event) {
     event.preventDefault();
-    
+
     if (!editingHarcamaId) {
         showToast('Düzenlenecek harcama bulunamadı', 'error');
         return;
     }
-    
+
     const harcamaIndex = harcamalar.findIndex(h => h.id === editingHarcamaId);
     if (harcamaIndex === -1) {
         showToast('Harcama bulunamadı', 'error');
         return;
     }
-    
+
     // Form verilerini al
     const tarih = document.getElementById('editTarih').value;
     const kart = document.getElementById('editKart').value;
@@ -876,12 +876,12 @@ function handleEditHarcamaSubmit(event) {
     const tutar = document.getElementById('editTutar').value;
     const taksitNo = document.getElementById('editTaksitNo').value;
     const toplamTaksit = document.getElementById('editToplamTaksit').value;
-    
+
     if (!tarih || !kart || !kullanici || !tutar) {
         showToast('Lütfen tüm zorunlu alanları doldurun', 'error');
         return;
     }
-    
+
     // Harcamayı güncelle
     harcamalar[harcamaIndex] = {
         ...harcamalar[harcamaIndex],
@@ -894,12 +894,12 @@ function handleEditHarcamaSubmit(event) {
         toplamTaksit: toplamTaksit ? parseInt(toplamTaksit) : null,
         isTaksit: taksitNo && toplamTaksit
     };
-    
+
     // Veriyi kaydet
     if (authSystem && authSystem.currentUser) {
         authSystem.saveUserData();
     }
-    
+
     // UI'ları güncelle
     if (typeof updateHarcamaTable === 'function') {
         updateHarcamaTable();
@@ -907,7 +907,7 @@ function handleEditHarcamaSubmit(event) {
     if (typeof updateDashboard === 'function') {
         updateDashboard();
     }
-    
+
     closeEditHarcamaModal();
     showToast('Harcama güncellendi', 'success');
 }
@@ -917,26 +917,26 @@ function editCard(oldCardName) {
     const newCardName = prompt(`"${oldCardName}" kartının yeni adını girin:`, oldCardName);
     if (newCardName && newCardName.trim() && newCardName.trim() !== oldCardName) {
         const newName = newCardName.trim();
-        
+
         if (kredikartlari.includes(newName)) {
             showToast('Bu kart adı zaten mevcut', 'error');
             return;
         }
-        
+
         // Kart adını güncelle
         const cardIndex = kredikartlari.indexOf(oldCardName);
         if (cardIndex !== -1) {
             kredikartlari[cardIndex] = newName;
         }
-        
+
         // Global sync - tüm harcamalarda ve düzenli ödemelerde bu kart adını güncelle
         syncAllDataAfterNameChange('kart', oldCardName, newName);
-        
+
         // UI'ları güncelle
         updateCardOptions();
         updateCardAndUserManagement();
         updateDataStats();
-        
+
         showToast(`Kart adı güncellendi: ${oldCardName} → ${newName}`, 'success');
     }
 }
@@ -946,26 +946,26 @@ function editUser(oldUserName) {
     const newUserName = prompt(`"${oldUserName}" kullanıcısının yeni adını girin:`, oldUserName);
     if (newUserName && newUserName.trim() && newUserName.trim() !== oldUserName) {
         const newName = newUserName.trim();
-        
+
         if (kisiler.includes(newName)) {
             showToast('Bu kullanıcı adı zaten mevcut', 'error');
             return;
         }
-        
+
         // Kullanıcı adını güncelle
         const userIndex = kisiler.indexOf(oldUserName);
         if (userIndex !== -1) {
             kisiler[userIndex] = newName;
         }
-        
+
         // Global sync - tüm harcamalarda ve düzenli ödemelerde bu kullanıcı adını güncelle
         syncAllDataAfterNameChange('kullanici', oldUserName, newName);
-        
+
         // UI'ları güncelle
         updateUserOptions();
         updateCardAndUserManagement();
         updateDataStats();
-        
+
         showToast(`Kullanıcı adı güncellendi: ${oldUserName} → ${newName}`, 'success');
     }
 }
@@ -975,23 +975,23 @@ function processDuzenliOdemeler() {
     const today = new Date();
     const currentMonth = today.toISOString().slice(0, 7); // YYYY-MM
     const currentDay = today.getDate(); // Ayın kaçıncı günü
-    
+
     // console.log('Düzenli ödeme kontrolü başlıyor...', currentMonth);
-    
+
     duzenliOdemeler.forEach(odeme => {
         // Sadece aktif ödemeleri kontrol et
         if (odeme.aktif === false) return;
-        
+
         // Bitiş tarihi geçmişse skip
         if (odeme.birisTarihi && odeme.birisTarihi <= today.toISOString().slice(0, 10)) return;
-        
+
         // Başlangıç tarihi gelecekteyse skip
         if (odeme.baslangicTarihi && odeme.baslangicTarihi > today.toISOString().slice(0, 10)) return;
-        
+
         // Bu ay için ödeme zaten yapılmış mı kontrol et
         const aylikOdemeId = `duzenli_${odeme.id}_${currentMonth}`;
         const mevcutHarcama = harcamalar.find(h => h.id === aylikOdemeId);
-        
+
         if (!mevcutHarcama) {
             // Ödeme gününü belirle (varsayılan 15, veya başlangıç tarihinden al)
             let odemeGunu = 15; // Varsayılan
@@ -999,11 +999,11 @@ function processDuzenliOdemeler() {
                 const baslangicGun = new Date(odeme.baslangicTarihi).getDate();
                 odemeGunu = baslangicGun;
             }
-            
+
             // Ödeme günü geldi mi kontrol et
             if (currentDay >= odemeGunu) {
                 // console.log(`Düzenli ödeme oluşturuluyor: ${odeme.aciklama} - ${currentMonth}`);
-                
+
                 // Yeni harcama kaydı oluştur
                 const yeniHarcama = {
                     id: aylikOdemeId,
@@ -1019,14 +1019,14 @@ function processDuzenliOdemeler() {
                     isRegular: true, // Bu otomatik oluşturulan düzenli ödeme
                     duzenliOdemeId: odeme.id // Hangi düzenli ödemeden geldiğini takip et
                 };
-                
+
                 harcamalar.push(yeniHarcama);
-                
+
                 // Veri kaydet
                 if (authSystem && authSystem.currentUser) {
                     authSystem.saveUserData();
                 }
-                
+
                 showToast(`Düzenli ödeme eklendi: ${odeme.aciklama}`, 'info');
             }
         }
@@ -1037,16 +1037,16 @@ function processDuzenliOdemeler() {
 function initDuzenliOdemeCheck() {
     // Sayfa yüklendiğinde kontrol et
     processDuzenliOdemeler();
-    
+
     // Her 10 dakikada bir kontrol et (demo için, production'da daha uzun olabilir)
     setInterval(processDuzenliOdemeler, 10 * 60 * 1000); // 10 dakika
-    
+
     // Gece yarısı kontrolü için timer ayarla
     const now = new Date();
     const midnight = new Date(now);
     midnight.setHours(24, 0, 0, 0); // Gece yarısı
     const msUntilMidnight = midnight - now;
-    
+
     setTimeout(() => {
         processDuzenliOdemeler();
         // Sonrasında her gün gece yarısı kontrol et
@@ -1056,14 +1056,14 @@ function initDuzenliOdemeCheck() {
 
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
         navigator.serviceWorker.register('./sw.js')
-            .then(function(registration) {
+            .then(function (registration) {
                 // console.log('ServiceWorker registration successful');
-            }, function(err) {
+            }, function (err) {
                 // console.log('ServiceWorker registration failed: ', err);
             });
-            
+
         // Düzenli ödeme kontrolünü başlat
         setTimeout(initDuzenliOdemeCheck, 2000); // 2 saniye sonra başlat
     });
