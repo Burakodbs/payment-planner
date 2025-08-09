@@ -2,37 +2,6 @@
 
 Modern, profesyonel ve kullanıcı dostu kredi kartı harcama takip uygulaması.
 
-## ✨ Özellikler
-
-### 🔐 Güvenlik
-- Kullanıcı girişi ve kayıt sistemi
-- Şifreli veri saklama
-- İlk kurulum sihirbazı
-
-### 💰 Harcama Yönetimi
-- Çoklu kredi kartı desteği
-- Taksitli ödeme takibi
-- Düzenli ödeme yönetimi
-- Gelişmiş filtreleme ve sıralama
-
-### 📊 Analiz ve Raporlama
-- Detaylı aylık özetler
-- Kullanıcı bazında hesap durumu
-- Görsel grafikler ve istatistikler
-- Kart ve kullanıcı bazında analiz
-
-### 🔧 Veri Yönetimi
-- JSON formatında veri dışa/içe aktarma
-- Otomatik yedekleme sistemi
-- Kart ve kullanıcı yönetimi
-- Test araçları
-
-### 📱 Modern Teknoloji
-- Progressive Web App (PWA) desteği
-- Mobil uyumlu responsive tasarım
-- Offline çalışma kapasitesi
-- Temiz ve modern arayüz
-
 ## 🏗️ Teknik Yapı
 
 ### Dosya Organizasyonu
@@ -74,51 +43,52 @@ payment-planner/
 ```
 
 ### Teknoloji Stack
+
 - **Frontend**: Vanilla JavaScript, CSS3, HTML5
 - **Charts**: Chart.js v4.4.1
 - **PWA**: Service Worker, Web App Manifest
 - **Development**: Python HTTP Server
 - **Data Storage**: Browser localStorage
 
-### Mimari Prensipleri
-- ✅ **Modüler Yapı**: Her fonksiyon ayrı dosyalarda
-- ✅ **Separation of Concerns**: CSS, JS, HTML ayrımı
-- ✅ **Progressive Enhancement**: Temel özellikler önce
-- ✅ **Mobile First**: Responsive tasarım
-- ✅ **Performance Optimized**: Lazy loading, caching
-
 ## 🚀 Kurulum ve Çalıştırma
 
 ### Gereksinimler
+
 - Node.js (v14+)
 - Modern web tarayıcısı (Chrome, Firefox, Safari, Edge)
 
 ### Kurulum Adımları
 
 1. **Repository'yi klonlayın:**
+
    ```bash
    git clone [repository-url]
    cd payment-planner
    ```
 
 2. **Bağımlılıkları yükleyin:**
+
    ```bash
    npm install
    ```
 
 3. **Geliştirme sunucusunu başlatın:**
+
    ```bash
    npm run dev
    # veya
    npm run serve
    ```
 
+
 4. **Tarayıcıda açın:**
+
    ```
    http://localhost:8000
    ```
 
 ### NPM Komutları
+
 ```bash
 npm run dev        # Geliştirme sunucusunu başlat
 npm run serve      # Sunucuyu başlat (alternatif)
@@ -137,6 +107,7 @@ python -m http.server 8000
 ## 📖 Kullanım Kılavuzu
 
 ### İlk Kurulum
+
 1. Uygulamayı açın ve kayıt olun
 2. Kurulum sihirbazını takip edin:
    - Kredi kartlarınızı ekleyin
@@ -144,52 +115,22 @@ python -m http.server 8000
 3. Kurulumu tamamlayın
 
 ### Harcama Ekleme
+
 - **Hızlı Girdi**: Klavye kısayolları (1-5 tuşları)
 - **Taksitli Ödemeler**: Taksit sayısını belirtin
 - **Düzenli Ödemeler**: Otomatik tekrar eden ödemeler
 
 ### Raporlama
+
 - **Aylık Özet**: Ay seçerek detaylı analiz
 - **Hesap Durumu**: Kişi bazında borç-alacak
 - **Filtreleme**: Tarih, kullanıcı, kart bazında filtreleme
 
 ### Veri Yönetimi
+
 - **Yedekleme**: JSON formatında dışa aktarma
 - **Geri Yükleme**: Yedek dosyalarını içe aktarma
 - **Düzenli Ödemeler**: Elektrik, su, internet faturası
-
-## 🔧 Geliştirici Notları
-
-### Kod Stil Rehberi
-- ES6+ JavaScript kullanın
-- CSS custom properties tercih edin
-- Modüler dosya organizasyonu
-- Semantic HTML yapısı
-
-### Debugging
-- Browser DevTools Console logları
-- Network tab için XHR requests
-- Application tab için localStorage
-
-### Performans İyileştirmeleri
-- Lazy loading implemented
-- CSS containment kullanımı
-- Service Worker caching
-- Debounced input handlers
-
-## 🛡️ Güvenlik
-
-- Şifreler browser'da şifrelenerek saklanır
-- Veriler sadece localStorage'da tutulur
-- No server-side data transmission
-- XSS korumaları mevcuttur
-
-## 📱 PWA Özellikleri
-
-- **Offline Çalışma**: Service Worker ile
-- **Install Edilebilir**: Desktop ve mobile
-- **Push Notifications**: Ödeme hatırlatmaları
-- **Background Sync**: Offline veri senkronizasyonu
 
 ## 🤝 Katkı Sağlama
 
@@ -209,4 +150,4 @@ Sorunlar için GitHub Issues kullanın veya iletişime geçin.
 
 ---
 
-**💡 İpucu**: Bu uygulama tamamen client-side çalışır, hiçbir sunucu kurulumuna ihtiyaç duymaz!
+**💡 İpucu**: Bu uygulama tamamen client-side çalışır
