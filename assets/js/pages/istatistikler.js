@@ -505,7 +505,6 @@ function showEmptyDataMessage() {
 
 // Kişiye Özel İstatistikler
 let personalTrendChart = null;
-let personalCategoryChart = null;
 let personalCardChart = null;
 let personalComparisonChart = null;
 
@@ -518,7 +517,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function loadPersonalStatsInit() {
     const personFilter = document.getElementById('personFilter');
-    if (!personFilter || !kisiler) return;
+    
+    if (!personFilter) return;
+    if (!kisiler || kisiler.length === 0) return;
     
     // Kişiler listesini doldur
     personFilter.innerHTML = '<option value="">Tüm Kişiler</option>';
@@ -539,7 +540,10 @@ function updatePersonalStats() {
     // Seçili kişiye göre harcamaları filtrele
     let filteredHarcamalar = harcamalar;
     if (selectedPerson) {
-        filteredHarcamalar = harcamalar.filter(h => h.kisi === selectedPerson);
+        // Hem kisi hem kullanici alanını kontrol et
+        filteredHarcamalar = harcamalar.filter(h => 
+            h.kisi === selectedPerson || h.kullanici === selectedPerson
+        );
     }
     
     if (filteredHarcamalar.length === 0) {
@@ -583,15 +587,11 @@ function updatePersonalStatsCards(filteredHarcamalar, person) {
 function createPersonalCharts(filteredHarcamalar, person) {
     // Grafikleri temizle
     if (personalTrendChart) personalTrendChart.destroy();
-    if (personalCategoryChart) personalCategoryChart.destroy();
     if (personalCardChart) personalCardChart.destroy();
     if (personalComparisonChart) personalComparisonChart.destroy();
     
     // Kişisel trend grafiği
     createPersonalTrendChart(filteredHarcamalar);
-    
-    // Kategori dağılım grafiği
-    createPersonalCategoryChart(filteredHarcamalar);
     
     // Kart kullanım grafiği
     createPersonalCardChart(filteredHarcamalar);
@@ -641,44 +641,6 @@ function createPersonalTrendChart(filteredHarcamalar) {
                             return formatCurrency(value);
                         }
                     }
-                }
-            }
-        }
-    });
-}
-
-function createPersonalCategoryChart(filteredHarcamalar) {
-    const ctx = document.getElementById('personalCategoryChart');
-    if (!ctx) return;
-    
-    // Kategori verilerini hazırla
-    const categoryData = {};
-    filteredHarcamalar.forEach(h => {
-        const category = h.aciklama.split(' ')[0] || 'Diğer';
-        categoryData[category] = (categoryData[category] || 0) + h.tutar;
-    });
-    
-    const categories = Object.keys(categoryData);
-    const amounts = Object.values(categoryData);
-    const colors = generateColors(categories.length);
-    
-    personalCategoryChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: categories,
-            datasets: [{
-                data: amounts,
-                backgroundColor: colors,
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
                 }
             }
         }

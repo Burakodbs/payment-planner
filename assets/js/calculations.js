@@ -129,8 +129,8 @@ function getRecurringPaymentsForMonth(selectedMonth) {
         }
 
         // Eğer bitiş tarihi varsa ve seçilen ay bitiş tarihinden sonraysa, düzenli ödeme bitmiş
-        if (odeme.birisTarihi) {
-            const bitis = new Date(odeme.birisTarihi);
+        if (odeme.bitisTarihi || odeme.birisTarihi) {
+            const bitis = new Date(odeme.bitisTarihi || odeme.birisTarihi);
             const bitisYear = bitis.getFullYear();
             const bitisMonth = bitis.getMonth() + 1;
 

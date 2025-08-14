@@ -252,11 +252,6 @@
                                     </div>
                                     
                                     <div class="summary-card">
-                                        <h4>🏷️ Kategori Dağılımı</h4>
-                                        <canvas id="personalCategoryChart" style="max-height: 300px;"></canvas>
-                                    </div>
-                                    
-                                    <div class="summary-card">
                                         <h4>💳 Kart Kullanım Oranı</h4>
                                         <canvas id="personalCardChart" style="max-height: 300px;"></canvas>
                                     </div>
@@ -345,13 +340,13 @@
             </div>
         </div>
 
-        <!-- Cache Manager (must be first) -->
-        <script src="./assets/js/cache-manager.js"></script>
-
-        <!-- JavaScript Files -->
+        <!-- JavaScript Files - Refactored -->
+        <script src="./assets/js/notifications.js"></script>
+        <script src="./assets/js/form-handlers.js"></script>
+        <script src="./assets/js/data-operations.js"></script>
+        <script src="./assets/js/expense-editor.js"></script>
         <script src="./assets/js/components.js"></script>
         <script src="./assets/js/auth.js"></script>
-        <script src="./assets/js/auth-ui.js"></script>
         <script src="./assets/js/app.js"></script>
         <script src="./assets/js/data-manager.js"></script>
         <script src="./assets/js/calculations.js"></script>

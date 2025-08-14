@@ -31,30 +31,21 @@ function showPageTab(tabName) {
 }
 
 // Düzenli ödemeleri yükle
+// Yeni sistem: global duzenliOdemeler dizisini ve utils.js içindeki updateDuzenliOdemelerListesi fonksiyonunu kullan.
 function loadDuzenliOdemeler() {
-    const duzenliOdemeler = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
-    const container = document.getElementById('duzenliOdemelerListesi');
-
-    if (duzenliOdemeler.length === 0) {
-        container.innerHTML = '<p class="text-muted">Henüz düzenli ödeme tanımlanmamış.</p>';
-        return;
+    if (typeof updateDuzenliOdemelerListesi === 'function') {
+        updateDuzenliOdemelerListesi();
+    } else {
+        // Fallback – eski localStorage (geçici)
+        const legacy = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
+        const container = document.getElementById('duzenliOdemelerListesi');
+        if (!container) return;
+        if (legacy.length === 0) {
+            container.innerHTML = '<p class="text-muted">Henüz düzenli ödeme tanımlanmamış.</p>';
+            return;
+        }
+        container.innerHTML = legacy.map(o => `<div class="duzenli-item"><div class="duzenli-info"><h4>${o.aciklama}</h4><p>${o.tutar} TL - ${o.kart} - ${o.kullanici}</p><small>Başlangıç: ${(o.baslangicTarihi||o.baslangic||'').toString()}</small></div></div>`).join('');
     }
-
-    let html = '<div class="duzenli-list">';
-    duzenliOdemeler.forEach((odeme, index) => {
-        html += `
-            <div class="duzenli-item">
-                <div class="duzenli-info">
-                    <h4>${odeme.aciklama}</h4>
-                    <p>${odeme.tutar} TL - ${odeme.kart} - ${odeme.kullanici}</p>
-                    <small>Başlangıç: ${new Date(odeme.baslangic).toLocaleDateString('tr-TR')}</small>
-                </div>
-                <button class="remove-btn" onclick="removeDuzenliOdeme(${index})">Sil</button>
-            </div>
-        `;
-    });
-    html += '</div>';
-    container.innerHTML = html;
 }
 
 // Düzenli ödeme formunu doldur
@@ -84,46 +75,22 @@ function populateDuzenliOdemeForm() {
 // Düzenli ödeme ekle
 function handleDuzenliOdemeSubmit(event) {
     event.preventDefault();
-
-    const formData = new FormData(event.target);
-    const odeme = {
-        aciklama: document.getElementById('duzenliAciklama').value,
-        tutar: parseFloat(document.getElementById('duzenliTutar').value),
-        kart: document.getElementById('duzenliKart').value,
-        kullanici: document.getElementById('duzenliKullanici').value,
-        baslangic: document.getElementById('duzenliBaslangic').value,
-        kategori: 'Düzenli Ödeme',
-        id: Date.now()
-    };
-
-    const duzenliOdemeler = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
-    duzenliOdemeler.push(odeme);
-    localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
-
-    // Formu temizle
-    event.target.reset();
-    document.getElementById('duzenliBaslangic').value = new Date().toISOString().split('T')[0];
-
-    // Listeyi güncelle
-    loadDuzenliOdemeler();
-
-    // Toast mesajı
-    if (typeof showToast === 'function') {
-        showToast('Düzenli ödeme başarıyla eklendi!', 'success');
+    // utils.js içindeki addDuzenliOdeme kullanılacak
+    if (typeof addDuzenliOdeme === 'function') {
+        addDuzenliOdeme();
+    } else {
+        showToast('Sistem yüklenmedi (addDuzenliOdeme yok)', 'error');
     }
 }
 
 // Düzenli ödeme sil
 function removeDuzenliOdeme(index) {
-    if (confirm('Bu düzenli ödemeyi silmek istediğinizden emin misiniz?')) {
-        const duzenliOdemeler = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
-        duzenliOdemeler.splice(index, 1);
-        localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
-        loadDuzenliOdemeler();
-
-        if (typeof showToast === 'function') {
-            showToast('Düzenli ödeme silindi', 'info');
-        }
+    // Yeni sistemde index yerine id üzerinden silme tercih ediliyor.
+    if (!Array.isArray(window.duzenliOdemeler)) return;
+    const target = window.duzenliOdemeler[index];
+    if (!target) return;
+    if (typeof deleteDuzenliOdeme === 'function') {
+        deleteDuzenliOdeme(target.id);
     }
 }
 

@@ -1,9 +1,268 @@
-// Veri Kaydetme ve Yükleme
-function saveData() {
-    // Auth sistemi üzerinden kaydet
-    if (authSystem && authSystem.currentUser) {
-        authSystem.saveUserData();
+// Centralized Data Manager
+class DataManager {
+    static save() {
+        if (authSystem && authSystem.currentUser) {
+            authSystem.saveUserData();
+        }
     }
+
+    static getCards() {
+        if (authSystem && authSystem.currentUserData) {
+            return authSystem.currentUserData.kredikartlari || [];
+        }
+        return kredikartlari || [];
+    }
+
+    static getUsers() {
+        if (authSystem && authSystem.currentUserData) {
+            return authSystem.currentUserData.kisiler || [];
+        }
+        return kisiler || [];
+    }
+
+    static updateAllViews() {
+        // Update table if exists
+        if (typeof updateHarcamaTable === 'function') updateHarcamaTable();
+        
+        // Update dashboard if exists
+        if (typeof updateDashboard === 'function') updateDashboard();
+        
+        // Update accounts if exists
+        if (typeof updateHesaplar === 'function') updateHesaplar();
+        
+        // Update regular payments list if exists
+        if (typeof updateDuzenliOdemelerListesi === 'function') updateDuzenliOdemelerListesi();
+        
+        // Update statistics if exists
+        if (typeof updateDataStats === 'function') updateDataStats();
+        
+        // Update card/user management if exists
+        if (typeof updateCardAndUserManagement === 'function') updateCardAndUserManagement();
+    }
+}
+
+// Regular Payments Management - Merged from regular-payments.js
+class RegularPayments {
+    static editingId = null;
+
+    static showForm() {
+        const form = document.getElementById('duzenliOdemeForm');
+        if (!form) return;
+        form.style.display = 'block';
+        const dateField = document.getElementById('duzenliBaslangic');
+        if (dateField) dateField.value = new Date().toISOString().slice(0, 10);
+    }
+
+    static cancel() {
+        this.editingId = null;
+        const form = document.getElementById('duzenliOdemeForm');
+        if (form) {
+            form.style.display = 'none';
+            ['duzenliAciklama', 'duzenliTutar', 'duzenliKart', 'duzenliKullanici', 'duzenliBaslangic'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+        }
+        const formTitle = document.getElementById('duzenliFormTitle');
+        if (formTitle) formTitle.textContent = 'Yeni Düzenli Ödeme';
+        const submitBtn = document.getElementById('duzenliSubmitBtn');
+        if (submitBtn) {
+            submitBtn.textContent = 'Ekle';
+            submitBtn.className = 'btn';
+        }
+    }
+
+    static add() {
+        if (this.editingId) return this.update();
+        
+        const aciklama = document.getElementById('duzenliAciklama')?.value?.trim();
+        const tutarVal = document.getElementById('duzenliTutar')?.value;
+        const kart = document.getElementById('duzenliKart')?.value;
+        const kullanici = document.getElementById('duzenliKullanici')?.value;
+        const baslangic = document.getElementById('duzenliBaslangic')?.value;
+        
+        if (!aciklama || !tutarVal || !kart || !kullanici || !baslangic) {
+            NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
+            return;
+        }
+        
+        const regularPayment = {
+            id: Date.now(),
+            aciklama,
+            tutar: parseFloat(tutarVal),
+            kart,
+            kullanici,
+            baslangicTarihi: baslangic,
+            kategori: 'Düzenli Ödeme',
+            aktif: true
+        };
+        
+        duzenliOdemeler.push(regularPayment);
+        DataManager.save();
+        this.updateList();
+        this.cancel();
+        NotificationService.success('Düzenli ödeme eklendi');
+        DataManager.updateAllViews();
+    }
+
+    static updateList() {
+        const container = document.getElementById('duzenliOdemelerListesi');
+        if (!container) return;
+        
+        if (!duzenliOdemeler.length) {
+            container.innerHTML = '<p style="color: var(--text-muted);">Henüz düzenli ödeme tanımlanmamış</p>';
+            return;
+        }
+        
+        let html = '';
+        duzenliOdemeler.forEach(payment => {
+            const isActive = payment.aktif !== false;
+            const statusStyle = isActive ? '' : 'opacity:0.6; background: var(--bg-muted);';
+            const statusText = isActive ? '' : ' (Durduruldu)';
+            const endDate = payment.bitisTarihi ? ` - Bitiş: ${payment.bitisTarihi}` : '';
+            
+            html += `
+                <div style="background: var(--bg-secondary); padding:12px; border-radius: var(--radius); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; ${statusStyle}">
+                    <div>
+                        <div style="font-weight:600; color:var(--text);">${payment.aciklama}${statusText}</div>
+                        <div style="font-size:12px; color:var(--text-secondary);">${payment.tutar} TL - ${payment.kullanici} - ${payment.kart}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">Başlangıç: ${payment.baslangicTarihi}${endDate}</div>
+                    </div>
+                    <div>
+                        ${isActive ? 
+                            `<button class="btn btn-sm btn-outline" onclick="RegularPayments.edit(${payment.id})" style="margin-right:8px;">Düzenle</button>
+                             <button class="btn btn-sm btn-danger" onclick="RegularPayments.delete(${payment.id})">Durdur</button>` :
+                            `<button class="btn btn-sm btn-success" onclick="RegularPayments.reactivate(${payment.id})" style="margin-right:8px;">Yeniden Başlat</button>
+                             <button class="btn btn-sm btn-danger" onclick="RegularPayments.permanentDelete(${payment.id})">Tamamen Sil</button>`
+                        }
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    static edit(id) {
+        const payment = duzenliOdemeler.find(o => o.id === id);
+        if (!payment) {
+            NotificationService.error('Düzenli ödeme bulunamadı');
+            return;
+        }
+        
+        this.editingId = id;
+        const form = document.getElementById('duzenliOdemeForm');
+        if (form) form.style.display = 'block';
+        
+        document.getElementById('duzenliAciklama').value = payment.aciklama;
+        document.getElementById('duzenliTutar').value = payment.tutar;
+        document.getElementById('duzenliKart').value = payment.kart;
+        document.getElementById('duzenliKullanici').value = payment.kullanici;
+        document.getElementById('duzenliBaslangic').value = payment.baslangicTarihi;
+        
+        const formTitle = document.getElementById('duzenliFormTitle');
+        if (formTitle) formTitle.textContent = 'Düzenli Ödemeyi Düzenle';
+        const submitBtn = document.getElementById('duzenliSubmitBtn');
+        if (submitBtn) {
+            submitBtn.textContent = 'Güncelle';
+            submitBtn.className = 'btn btn-primary';
+        }
+        
+        NotificationService.info('Düzenleme modu aktif');
+    }
+
+    static update() {
+        const aciklama = document.getElementById('duzenliAciklama')?.value?.trim();
+        const tutarVal = document.getElementById('duzenliTutar')?.value;
+        const kart = document.getElementById('duzenliKart')?.value;
+        const kullanici = document.getElementById('duzenliKullanici')?.value;
+        const baslangic = document.getElementById('duzenliBaslangic')?.value;
+        
+        if (!aciklama || !tutarVal || !kart || !kullanici || !baslangic) {
+            NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
+            return;
+        }
+        
+        const idx = duzenliOdemeler.findIndex(o => o.id === this.editingId);
+        if (idx !== -1) {
+            duzenliOdemeler[idx] = {
+                ...duzenliOdemeler[idx],
+                aciklama,
+                tutar: parseFloat(tutarVal),
+                kart,
+                kullanici,
+                baslangicTarihi: baslangic
+            };
+            
+            DataManager.save();
+            this.updateList();
+            this.cancel();
+            NotificationService.success('Düzenli ödeme güncellendi');
+            DataManager.updateAllViews();
+        }
+    }
+
+    static delete(id) {
+        const payment = duzenliOdemeler.find(o => o.id === id);
+        if (!payment) {
+            NotificationService.error('Düzenli ödeme bulunamadı');
+            return;
+        }
+        
+        if (confirm(`"${payment.aciklama}" düzenli ödemeyi durdurmak istediğinizden emin misiniz?\n\nGeçmişteki ödemeler korunacak, sadece gelecekteki otomatik kayıtlar durdurulacak.`)) {
+            const today = new Date().toISOString().slice(0, 10);
+            const idx = duzenliOdemeler.findIndex(o => o.id === id);
+            if (idx !== -1) {
+                duzenliOdemeler[idx].bitisTarihi = today;
+                duzenliOdemeler[idx].aktif = false;
+            }
+            
+            DataManager.save();
+            this.updateList();
+            NotificationService.success('Düzenli ödeme durduruldu. Geçmiş kayıtlar korundu.');
+            DataManager.updateAllViews();
+        }
+    }
+
+    static reactivate(id) {
+        const idx = duzenliOdemeler.findIndex(o => o.id === id);
+        if (idx !== -1) {
+            duzenliOdemeler[idx].aktif = true;
+            delete duzenliOdemeler[idx].bitisTarihi;
+            
+            DataManager.save();
+            this.updateList();
+            NotificationService.success('Düzenli ödeme yeniden başlatıldı');
+        }
+    }
+
+    static permanentDelete(id) {
+        const payment = duzenliOdemeler.find(o => o.id === id);
+        if (!payment) return;
+        
+        if (confirm(`"${payment.aciklama}" düzenli ödemeyi tamamen silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
+            const idx = duzenliOdemeler.findIndex(o => o.id === id);
+            if (idx !== -1) {
+                duzenliOdemeler.splice(idx, 1);
+                DataManager.save();
+                this.updateList();
+                NotificationService.success('Düzenli ödeme tamamen silindi');
+            }
+        }
+    }
+}
+
+// Backward compatibility functions
+function showDuzenliOdemeForm() { RegularPayments.showForm(); }
+function cancelDuzenliOdeme() { RegularPayments.cancel(); }
+function addDuzenliOdeme() { RegularPayments.add(); }
+function updateDuzenliOdemelerListesi() { RegularPayments.updateList(); }
+function editDuzenliOdeme(id) { RegularPayments.edit(id); }
+function deleteDuzenliOdeme(id) { RegularPayments.delete(id); }
+
+// Backward compatibility
+function saveData() {
+    DataManager.save();
 }
 
 // Harcama Tablosu Güncelleme
@@ -114,7 +373,7 @@ function getDuzenliOdemelerAsHarcamalar() {
         }
 
         // Bitiş tarihi varsa ve bugünden önce ise hariç tut
-        if (odeme.birisTarihi && odeme.birisTarihi <= today) {
+    if ((odeme.bitisTarihi || odeme.birisTarihi) && (odeme.bitisTarihi || odeme.birisTarihi) <= today) {
             return false;
         }
 

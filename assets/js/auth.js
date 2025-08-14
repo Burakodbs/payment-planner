@@ -9,6 +9,8 @@ class AuthSystem {
         this.sessionTimeout = 24 * 60 * 60 * 1000; // 24 saat
         this.maxLoginAttempts = 5;
         this.lockoutDuration = 15 * 60 * 1000; // 15 dakika
+    // Global debug bayrağı (window.APP_DEBUG true ise ayrıntılı log açılır)
+    this.debug = !!window.APP_DEBUG;
         this.init();
     }
 
@@ -47,7 +49,7 @@ class AuthSystem {
         const oldCurrentUser = localStorage.getItem('current_user');
         
         if (oldCurrentUser && this.users[oldCurrentUser]) {
-            console.log('🔄 Mevcut kullanıcı verisi bulundu:', oldCurrentUser);
+            // debug: mevcut kullanıcı verisi bulundu
             
             // Eski kullanıcı verisi varsa yeni formata çevir
             const user = this.users[oldCurrentUser];
@@ -55,7 +57,7 @@ class AuthSystem {
             // Eski format kontrolü - role yoksa ekle
             if (!user.role) {
                 user.role = 'user';
-                console.log('✅ Kullanıcıya "user" rolü eklendi');
+                // debug: rol eklendi
             }
             
             // CreatedBy alanını ekle (migration)
@@ -70,9 +72,9 @@ class AuthSystem {
             if (user.password && !user.password.includes('payment_planner_secret_key')) {
                 // Eski btoa formatından yeni güvenli formata geçir
                 // Not: Eski şifre bilinmediği için varsayılan şifre atayacağız
-                console.log('⚠️ Eski şifre formatı tespit edildi. Varsayılan şifre atanıyor.');
+                console.warn('⚠️ Eski şifre formatı tespit edildi. Varsayılan şifre atanıyor.');
                 user.password = this.generateSecureHash('123456', oldCurrentUser);
-                console.log(`🔑 ${oldCurrentUser} kullanıcısı için yeni şifre: 123456`);
+                // debug: default şifre atandı
             }
             
             // Eksik alanları tamamla
@@ -91,7 +93,7 @@ class AuthSystem {
             // Eski current_user kaydını temizle
             localStorage.removeItem('current_user');
             
-            console.log('✅ Kullanıcı verisi başarıyla güncellendi');
+            // debug: kullanıcı verisi güncellendi
             
             // Kullanıcıya bilgi ver
             setTimeout(() => {
@@ -115,12 +117,8 @@ class AuthSystem {
         const globalKredikartlari = JSON.parse(localStorage.getItem('kredikartlari') || '[]');
         const globalKisiler = JSON.parse(localStorage.getItem('kisiler') || '[]');
         
-        console.log('🔍 Migration kontrolü:', {
-            globalHarcamalar: globalHarcamalar.length,
-            globalDuzenliOdemeler: globalDuzenliOdemeler.length,
-            globalKredikartlari: globalKredikartlari.length,
-            globalKisiler: globalKisiler.length
-        });
+    // debug: migration kontrolü
+    // if (this.debug) console.log('migration-check', { globalHarcamalar: globalHarcamalar.length, globalDuzenliOdemeler: globalDuzenliOdemeler.length, globalKredikartlari: globalKredikartlari.length, globalKisiler: globalKisiler.length });
         
         const hasGlobalData = globalHarcamalar.length > 0 || 
                             globalDuzenliOdemeler.length > 0 || 
@@ -128,7 +126,7 @@ class AuthSystem {
                             globalKisiler.length > 0;
         
         if (hasGlobalData) {
-            console.log('📊 Global veriler tespit edildi, migration başlatılıyor...');
+            // debug: global veriler migration başlıyor
             
             // İlk kullanıcı bulunursa ona aktar, yoksa 'migrated_user' oluştur
             let targetUser = Object.keys(this.users).find(u => u !== 'admin');
@@ -149,11 +147,11 @@ class AuthSystem {
                         kisiler: []
                     }
                 };
-                console.log('👤 Yeni migration kullanıcısı oluşturuldu: migrated_user');
+                // debug: migration user oluşturuldu
             }
             
             // Verileri aktar - bütün veriler akıtırılsın
-            console.log('📋 Veri aktarımı başlatılıyor:', targetUser);
+            // debug: veri aktarımı başlıyor
             this.users[targetUser].data = {
                 harcamalar: globalHarcamalar,
                 duzenliOdemeler: globalDuzenliOdemeler,
@@ -161,12 +159,8 @@ class AuthSystem {
                 kisiler: globalKisiler
             };
             
-            console.log('✅ Aktarılan veriler:', {
-                harcamalar: globalHarcamalar.length,
-                duzenliOdemeler: globalDuzenliOdemeler.length,
-                kredikartlari: globalKredikartlari.length,
-                kisiler: globalKisiler.length
-            });
+            // debug: aktarılan veri özeti
+            // if (this.debug) console.log('migration-transfer', { harcamalar: globalHarcamalar.length, duzenliOdemeler: globalDuzenliOdemeler.length, kredikartlari: globalKredikartlari.length, kisiler: globalKisiler.length });
             
             // Global verileri temizle
             localStorage.removeItem('harcamalar');
@@ -180,7 +174,7 @@ class AuthSystem {
             // Harcamalardan kart ve kişi bilgilerini çıkar
             this.extractDataFromHarcamalar(targetUser);
             
-            console.log('✅ Global veriler başarıyla kullanıcı hesabına aktarıldı:', targetUser);
+            // debug: migration tamamlandı
             
             setTimeout(() => {
                 alert(`📊 Mevcut verileriniz "${targetUser}" hesabına aktarıldı!\n\n` +
@@ -188,7 +182,7 @@ class AuthSystem {
                       `Lütfen bu bilgilerle giriş yapın ve şifrenizi değiştirin.`);
             }, 1500);
         } else {
-            console.log('ℹ️ Migration edilecek global veri bulunamadı');
+            // debug: migration yapılacak veri yok
             
             // Global veri yoksa da mevcut kullanıcının harcamalarını kontrol et
             if (this.currentUser) {
@@ -203,7 +197,7 @@ class AuthSystem {
         const userData = JSON.parse(localStorage.getItem(userKey) || '{}');
         
         if (userData.harcamalar && userData.harcamalar.length > 0) {
-            console.log('🔍 Harcamalardan veri çıkarılıyor...', userData.harcamalar.length, 'harcama');
+            // debug: harcama taraması
             
             // Kredi kartlarını çıkar
             const uniqueCards = [...new Set(userData.harcamalar
@@ -215,8 +209,7 @@ class AuthSystem {
                 .filter(h => h.kullanici && h.kullanici.trim() !== '')
                 .map(h => h.kullanici.trim()))];
             
-            console.log('💳 Çıkarılan kartlar:', uniqueCards);
-            console.log('👥 Çıkarılan kişiler:', uniquePeople);
+            // debug: çıkarılan kart/kullanıcı listeleri
             
             // Mevcut verileri güncelle
             if (!userData.kredikartlari || userData.kredikartlari.length === 0) {
@@ -232,7 +225,7 @@ class AuthSystem {
             // Global verileri de güncelle
             if (this.currentUser === username) {
                 this.currentUserData = userData;
-                console.log('✅ Current user data güncellendi');
+                // debug: current user data güncellendi
                 
                 // Dropdown'ları güncelle
                 setTimeout(() => {
@@ -486,12 +479,14 @@ class AuthSystem {
 
         // currentUserData property'sini de güncelle (uyumluluk için)
         this.currentUserData = userData;
-
-        console.log('📊 Kullanıcı verileri yüklendi:', {
-            harcamalar: userData.harcamalar?.length || 0,
-            kredikartlari: userData.kredikartlari?.length || 0,
-            kisiler: userData.kisiler?.length || 0
-        });
+        if (this.debug) {
+            console.log('user-data-loaded', {
+                harcamalar: userData.harcamalar?.length || 0,
+                duzenliOdemeler: userData.duzenliOdemeler?.length || 0,
+                kredikartlari: userData.kredikartlari?.length || 0,
+                kisiler: userData.kisiler?.length || 0
+            });
+        }
 
         // Simple light theme - no theme loading needed
         // Theme management disabled - using simple default theme
@@ -550,7 +545,7 @@ class AuthSystem {
         });
 
         if (added) {
-            console.log('🔄 Harcamalardan yeni kart/kullanıcılar çıkarıldı');
+            // debug: yeni kart/kullanıcı çıkarıldı
             this.saveUserData();
             if (typeof updateCardOptions === 'function') updateCardOptions();
             if (typeof updateUserOptions === 'function') updateUserOptions();
@@ -935,6 +930,179 @@ class AuthSystem {
             this.cleanExpiredSessions();
         }, 60000); // 1 dakikada bir temizle
     }
+}
+
+// Auth UI Handler Functions - Merged from auth-ui.js
+function handleLogin(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        authSystem.login(username, password);
+        
+        if (authSystem.users[username].role === 'admin') {
+            authSystem.showAdminPanel();
+            NotificationService.success('Admin olarak giriş yapıldı!');
+        } else {
+            authSystem.showAuthenticatedContent();
+            NotificationService.success('Başarıyla giriş yapıldı!');
+        }
+    } catch (error) {
+        NotificationService.error(error.message);
+    }
+}
+
+function handleCreateUser(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('newUsername').value.trim();
+    const email = document.getElementById('newUserEmail').value.trim();
+    const password = document.getElementById('newUserPassword').value;
+    const confirmPassword = document.getElementById('confirmNewUserPassword').value;
+
+    if (password !== confirmPassword) {
+        NotificationService.error('Şifreler eşleşmiyor!');
+        return;
+    }
+
+    try {
+        authSystem.createUser(username, password, email, 'user');
+        NotificationService.success('Kullanıcı başarıyla oluşturuldu!');
+        
+        event.target.reset();
+        authSystem.updateUsersList();
+    } catch (error) {
+        NotificationService.error(error.message);
+    }
+}
+
+function toggleAdminForm() {
+    const form = document.getElementById('createUserForm');
+    const button = document.querySelector('[onclick="toggleAdminForm()"]');
+    
+    if (form.style.display === 'none' || !form.style.display) {
+        form.style.display = 'block';
+        button.textContent = 'Formu Gizle';
+    } else {
+        form.style.display = 'none';
+        button.textContent = 'Yeni Kullanıcı Ekle';
+    }
+}
+
+// Setup wizard functions - simplified
+let currentStep = 1;
+let tempCards = [];
+let tempUsers = [];
+
+function nextStep() {
+    if (currentStep === 1) {
+        document.getElementById('setupStep1').classList.remove('active');
+        document.getElementById('setupStep2').classList.add('active');
+        document.getElementById('prevStep').style.display = 'inline-block';
+        document.getElementById('nextStep').style.display = 'none';
+        document.getElementById('finishSetup').style.display = 'inline-block';
+        currentStep = 2;
+    }
+}
+
+function previousStep() {
+    if (currentStep === 2) {
+        document.getElementById('setupStep2').classList.remove('active');
+        document.getElementById('setupStep1').classList.add('active');
+        document.getElementById('prevStep').style.display = 'none';
+        document.getElementById('nextStep').style.display = 'inline-block';
+        document.getElementById('finishSetup').style.display = 'none';
+        currentStep = 1;
+    }
+}
+
+function addCard() {
+    const input = document.getElementById('newCardName');
+    const cardName = input.value.trim();
+    
+    if (cardName && !tempCards.includes(cardName)) {
+        tempCards.push(cardName);
+        updateCardsList();
+        input.value = '';
+    }
+}
+
+function addUser() {
+    const input = document.getElementById('newUserName');
+    const userName = input.value.trim();
+    
+    if (userName && !tempUsers.includes(userName)) {
+        tempUsers.push(userName);
+        updateUsersList();
+        input.value = '';
+    }
+}
+
+function removeCard(cardName) {
+    tempCards = tempCards.filter(card => card !== cardName);
+    updateCardsList();
+}
+
+function removeUser(userName) {
+    tempUsers = tempUsers.filter(user => user !== userName);
+    updateUsersList();
+}
+
+function updateCardsList() {
+    const container = document.getElementById('cardsList');
+    if (!container) return;
+    
+    if (tempCards.length === 0) {
+        container.innerHTML = '<p class="setup-help">En az bir kart eklemeniz önerilir.</p>';
+        return;
+    }
+    
+    container.innerHTML = tempCards.map(card => `
+        <div class="setup-item">
+            <span>${card}</span>
+            <button type="button" onclick="removeCard('${card}')" class="btn btn-sm btn-danger">Sil</button>
+        </div>
+    `).join('');
+}
+
+function updateUsersList() {
+    const container = document.getElementById('usersList');
+    if (!container) return;
+    
+    if (tempUsers.length === 0) {
+        container.innerHTML = '<p class="setup-help">En az bir kişi eklemeniz önerilir.</p>';
+        return;
+    }
+    
+    container.innerHTML = tempUsers.map(user => `
+        <div class="setup-item">
+            <span>${user}</span>
+            <button type="button" onclick="removeUser('${user}')" class="btn btn-sm btn-danger">Sil</button>
+        </div>
+    `).join('');
+}
+
+function finishSetup() {
+    // Temporary data'yı global arrays'e aktar
+    if (tempCards.length > 0) {
+        kredikartlari = [...tempCards];
+    }
+    if (tempUsers.length > 0) {
+        kisiler = [...tempUsers];
+    }
+    
+    // Auth sistem üzerinden kaydet
+    if (authSystem && authSystem.currentUser) {
+        authSystem.saveUserData();
+    }
+    
+    // Setup'ı gizle, ana uygulamayı göster
+    document.getElementById('setupWizard').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    
+    NotificationService.success('Kurulum tamamlandı!');
 }
 
 // Global auth instance

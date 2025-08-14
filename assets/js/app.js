@@ -79,8 +79,8 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         if (authSystem && authSystem.currentUser) {
             // Kart ve kullanıcı seçeneklerini initialize et
-            updateCardOptions();
-            updateUserOptions();
+            FormHandlers.updateCardOptions();
+            FormHandlers.updateUserOptions();
 
             // Form başlangıç değerleri
             const ozetTarih = document.getElementById('ozet_tarih');
