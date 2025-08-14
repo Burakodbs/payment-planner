@@ -1,59 +1,59 @@
-// İstatistikler sayfasına özel JavaScript kodları
+// Statistics page specific JavaScript code
 
-// Chart.js nesneleri
+// Chart.js objects
 let monthlyTrendChart = null;
 let cardDistributionChart = null;
 let userDistributionChart = null;
 let weeklyAverageChart = null;
 
-// Sayfa yüklendiğinde ortak component'leri initialize et
+// Initialize common components when page loads
 document.addEventListener('DOMContentLoaded', function () {
-    // Ortak component'leri initialize et
+    // Initialize common components
     if (typeof initializePage === 'function') {
-        initializePage('istatistikler');
+        initializePage('statistics');
     }
 
-    // İstatistikleri yükle
+    // Load statistics
     loadStatistics();
 });
 
-// Ana istatistik yükleme fonksiyonu
+// Main statistics loading function
 function loadStatistics() {
     try {
-        // Veri kontrolü
-        if (!harcamalar || harcamalar.length === 0) {
+        // Data validation
+        if (!expenses || expenses.length === 0) {
             showEmptyDataMessage();
             return;
         }
 
-        // İstatistik kartlarını güncelle
+        // Update statistics cards
         updateStatisticsCards();
 
-        // Grafikleri oluştur
+        // Create charts
         createMonthlyTrendChart();
         createCardDistributionChart();
         createUserDistributionChart();
         createWeeklyAverageChart();
 
-        // Detaylı istatistikleri güncelle
+        // Update detailed statistics
         updateDetailedStatistics();
 
     } catch (error) {
-        console.error('❌ İstatistik yükleme hatası:', error);
-        showToast('İstatistikler yüklenirken hata oluştu', 'error');
+        console.error('❌ Statistics loading error:', error);
+        showToast('Error loading statistics', 'error');
     }
 }
 
-// İstatistik kartlarını güncelle
+// Update statistics cards
 function updateStatisticsCards() {
-    const totalAmount = harcamalar.reduce((sum, h) => sum + h.tutar, 0);
-    const totalCount = harcamalar.length;
+    const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const totalCount = expenses.length;
 
-    // Toplam harcama
+    // Total expenses
     document.getElementById('totalExpenses').textContent = `${totalAmount.toLocaleString('tr-TR')} TL`;
-    document.getElementById('totalExpensesCount').textContent = `${totalCount} harcama`;
+    document.getElementById('totalExpensesCount').textContent = `${totalCount} expense${totalCount !== 1 ? 's' : ''}`;
 
-    // En yoğun ay
+    // Busiest month
     const monthlyData = getMonthlyData();
     const busiestMonth = Object.entries(monthlyData)
         .sort(([, a], [, b]) => b.total - a.total)[0];
@@ -61,8 +61,8 @@ function updateStatisticsCards() {
     if (busiestMonth) {
         const [monthKey, data] = busiestMonth;
         const [year, month] = monthKey.split('-');
-        const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'];
 
         document.getElementById('busiestMonth').textContent =
             `${monthNames[parseInt(month) - 1]} ${year}`;
@@ -70,7 +70,7 @@ function updateStatisticsCards() {
             `${data.total.toLocaleString('tr-TR')} TL`;
     }
 
-    // En çok kullanılan kart
+    // Most used card
     const cardStats = getCardStatistics();
     const mostUsedCard = Object.entries(cardStats)
         .sort(([, a], [, b]) => b.count - a.count)[0];
@@ -78,10 +78,10 @@ function updateStatisticsCards() {
     if (mostUsedCard) {
         const [cardName, stats] = mostUsedCard;
         document.getElementById('mostUsedCard').textContent = cardName;
-        document.getElementById('mostUsedCardCount').textContent = `${stats.count} harcama`;
+        document.getElementById('mostUsedCardCount').textContent = `${stats.count} expense${stats.count !== 1 ? 's' : ''}`;
     }
 
-    // En çok harcayan
+    // Top spender
     const userStats = getUserStatistics();
     const topSpender = Object.entries(userStats)
         .sort(([, a], [, b]) => b.total - a.total)[0];
@@ -94,12 +94,12 @@ function updateStatisticsCards() {
     }
 }
 
-// Aylık veri analizi
+// Monthly data analysis
 function getMonthlyData() {
     const monthlyData = {};
 
-    harcamalar.forEach(harcama => {
-        const date = new Date(harcama.tarih);
+    expenses.forEach(expense => {
+        const date = new Date(expense.date);
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
         if (!monthlyData[monthKey]) {
@@ -110,70 +110,70 @@ function getMonthlyData() {
             };
         }
 
-        monthlyData[monthKey].total += harcama.tutar;
+        monthlyData[monthKey].total += expense.amount;
         monthlyData[monthKey].count += 1;
-        monthlyData[monthKey].expenses.push(harcama);
+        monthlyData[monthKey].expenses.push(expense);
     });
 
     return monthlyData;
 }
 
-// Kart istatistikleri
+// Card statistics
 function getCardStatistics() {
     const cardStats = {};
 
-    harcamalar.forEach(harcama => {
-        if (!cardStats[harcama.kart]) {
-            cardStats[harcama.kart] = {
+    expenses.forEach(expense => {
+        if (!cardStats[expense.card]) {
+            cardStats[expense.card] = {
                 total: 0,
                 count: 0,
                 expenses: []
             };
         }
 
-        cardStats[harcama.kart].total += harcama.tutar;
-        cardStats[harcama.kart].count += 1;
-        cardStats[harcama.kart].expenses.push(harcama);
+        cardStats[expense.card].total += expense.amount;
+        cardStats[expense.card].count += 1;
+        cardStats[expense.card].expenses.push(expense);
     });
 
     return cardStats;
 }
 
-// Kullanıcı istatistikleri
+// User statistics
 function getUserStatistics() {
     const userStats = {};
 
-    harcamalar.forEach(harcama => {
-        if (!userStats[harcama.kullanici]) {
-            userStats[harcama.kullanici] = {
+    expenses.forEach(expense => {
+        if (!userStats[expense.user]) {
+            userStats[expense.user] = {
                 total: 0,
                 count: 0,
                 expenses: []
             };
         }
 
-        userStats[harcama.kullanici].total += harcama.tutar;
-        userStats[harcama.kullanici].count += 1;
-        userStats[harcama.kullanici].expenses.push(harcama);
+        userStats[expense.user].total += expense.amount;
+        userStats[expense.user].count += 1;
+        userStats[expense.user].expenses.push(expense);
     });
 
     return userStats;
 }
 
-// Aylık trend grafiği
+// Monthly trend chart
 function createMonthlyTrendChart() {
     const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
     const monthlyData = getMonthlyData();
 
-    // Son 12 ayı al
+    // Get last 12 months
     const sortedMonths = Object.keys(monthlyData)
         .sort()
         .slice(-12);
 
     const labels = sortedMonths.map(monthKey => {
         const [year, month] = monthKey.split('-');
-        const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-            'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         return `${monthNames[parseInt(month) - 1]} ${year.slice(-2)}`;
     });
 
@@ -188,7 +188,7 @@ function createMonthlyTrendChart() {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Aylık Harcama (TL)',
+                label: 'Monthly Expenses (TL)',
                 data: data,
                 borderColor: '#6366f1',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -218,7 +218,7 @@ function createMonthlyTrendChart() {
     });
 }
 
-// Kart dağılım grafiği
+// Card distribution chart
 function createCardDistributionChart() {
     const ctx = document.getElementById('cardDistributionChart').getContext('2d');
     const cardStats = getCardStatistics();
@@ -288,7 +288,7 @@ function createUserDistributionChart() {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Toplam Harcama (TL)',
+                label: 'Total Expenses (TL)',
                 data: data,
                 backgroundColor: colors.slice(0, labels.length),
                 borderRadius: 8,
@@ -334,10 +334,10 @@ function createWeeklyAverageChart() {
 
     const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
 
-    harcamalar.forEach(harcama => {
-        const date = new Date(harcama.tarih);
+    expenses.forEach(expense => {
+        const date = new Date(expense.date);
         const dayName = dayNames[date.getDay()];
-        weeklyData[dayName].push(harcama.tutar);
+        weeklyData[dayName].push(expense.amount);
     });
 
     const labels = Object.keys(weeklyData);
@@ -355,7 +355,7 @@ function createWeeklyAverageChart() {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Ortalama Harcama (TL)',
+                label: 'Average Expenses (TL)',
                 data: averages,
                 borderColor: '#f72585',
                 backgroundColor: 'rgba(247, 37, 133, 0.2)',
@@ -386,13 +386,13 @@ function createWeeklyAverageChart() {
     });
 }
 
-// Detaylı istatistikleri güncelle
+// Detaylı statisticsi güncelle
 function updateDetailedStatistics() {
-    // Harcama analizi
+    // Expense analysis
     const expenseAnalysis = document.getElementById('expenseAnalysis');
-    const avgExpense = harcamalar.reduce((sum, h) => sum + h.tutar, 0) / harcamalar.length;
-    const maxExpense = Math.max(...harcamalar.map(h => h.tutar));
-    const minExpense = Math.min(...harcamalar.map(h => h.tutar));
+    const avgExpense = expenses.reduce((sum, h) => sum + h.amount, 0) / expenses.length;
+    const maxExpense = Math.max(...expenses.map(h => h.amount));
+    const minExpense = Math.min(...expenses.map(h => h.amount));
 
     expenseAnalysis.innerHTML = `
         <div style="margin-bottom: 8px;">
@@ -405,11 +405,11 @@ function updateDetailedStatistics() {
             <strong>En Düşük:</strong> ${minExpense.toLocaleString('tr-TR')} TL
         </div>
         <div>
-            <strong>Toplam İşlem:</strong> ${harcamalar.length} adet
+            <strong>Toplam İşlem:</strong> ${expenses.length} adet
         </div>
     `;
 
-    // Rekor istatistikleri
+    // Rekor statisticsi
     const recordStats = document.getElementById('recordStats');
     const monthlyData = getMonthlyData();
     const sortedMonths = Object.entries(monthlyData)
@@ -449,8 +449,8 @@ function updateDetailedStatistics() {
         else trend = `📊 Stabil (${change.toFixed(1)}%)`;
     }
 
-    const installmentCount = harcamalar.filter(h => h.isTaksit).length;
-    const installmentPercentage = ((installmentCount / harcamalar.length) * 100).toFixed(1);
+    const installmentCount = expenses.filter(h => h.isTaksit).length;
+    const installmentPercentage = ((installmentCount / expenses.length) * 100).toFixed(1);
 
     trendStats.innerHTML = `
         <div style="margin-bottom: 8px;">
@@ -463,7 +463,7 @@ function updateDetailedStatistics() {
         </div>
         <div>
             <strong>Ortalama İşlem/Gün:</strong><br>
-            ${(harcamalar.length / getDaysSinceFirstExpense()).toFixed(1)} adet
+            ${(expenses.length / getDaysSinceFirstExpense()).toFixed(1)} adet
         </div>
     `;
 }
@@ -477,9 +477,9 @@ function formatMonth(monthKey) {
 }
 
 function getDaysSinceFirstExpense() {
-    if (harcamalar.length === 0) return 1;
+    if (expenses.length === 0) return 1;
 
-    const firstDate = new Date(Math.min(...harcamalar.map(h => new Date(h.tarih))));
+    const firstDate = new Date(Math.min(...expenses.map(h => new Date(h.date))));
     const today = new Date();
     const diffTime = Math.abs(today - firstDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -493,10 +493,10 @@ function showEmptyDataMessage() {
         pageContent.innerHTML = `
             <h2>📊 İstatistikler</h2>
             <div class="summary-card" style="text-align: center; padding: 48px 24px;">
-                <h3>📈 Henüz Harcama Verisi Yok</h3>
-                <p>İstatistikleri görüntüleyebilmek için önce harcama eklemeniz gerekiyor.</p>
-                <a href="harcama-ekle.html" class="btn btn-primary" style="margin-top: 16px;">
-                    ➕ Harcama Ekle
+                <h3>📈 No Expense Data Yet</h3>
+                <p>İstatistikleri görüntüleyebilmek için önce expense eklemeniz gerekiyor.</p>
+                <a href="add-expense.html" class="btn btn-primary" style="margin-top: 16px;">
+                    ➕ Add Expense
                 </a>
             </div>
         `;
@@ -519,96 +519,96 @@ function loadPersonalStatsInit() {
     const personFilter = document.getElementById('personFilter');
     
     if (!personFilter) return;
-    if (!kisiler || kisiler.length === 0) return;
+    if (!people || people.length === 0) return;
     
     // Kişiler listesini doldur
     personFilter.innerHTML = '<option value="">Tüm Kişiler</option>';
-    kisiler.forEach(kisi => {
+    people.forEach(person => {
         const option = document.createElement('option');
-        option.value = kisi;
-        option.textContent = kisi;
+        option.value = person;
+        option.textContent = person;
         personFilter.appendChild(option);
     });
     
-    // İlk yüklemede tüm kişiler için istatistik göster
+    // İlk yüklemede tüm kişiler için statistic göster
     updatePersonalStats();
 }
 
 function updatePersonalStats() {
     const selectedPerson = document.getElementById('personFilter').value;
     
-    // Seçili kişiye göre harcamaları filtrele
-    let filteredHarcamalar = harcamalar;
+    // Seçili kişiye göre expensesı filtrele
+    let filteredExpenses = expenses;
     if (selectedPerson) {
-        // Hem kisi hem kullanici alanını kontrol et
-        filteredHarcamalar = harcamalar.filter(h => 
-            h.kisi === selectedPerson || h.kullanici === selectedPerson
+        // Hem person hem user alanını kontrol et
+        filteredExpenses = expenses.filter(h => 
+            h.person === selectedPerson || h.user === selectedPerson
         );
     }
     
-    if (filteredHarcamalar.length === 0) {
+    if (filteredExpenses.length === 0) {
         showNoPersonalDataMessage();
         return;
     }
     
-    // Kişisel istatistik kartlarını güncelle
-    updatePersonalStatsCards(filteredHarcamalar, selectedPerson);
+    // Kişisel statistic cardsını güncelle
+    updatePersonalStatsCards(filteredExpenses, selectedPerson);
     
-    // Kişisel grafikleri oluştur
-    createPersonalCharts(filteredHarcamalar, selectedPerson);
+    // Kişisel chartleri oluştur
+    createPersonalCharts(filteredExpenses, selectedPerson);
 }
 
-function updatePersonalStatsCards(filteredHarcamalar, person) {
-    const totalAmount = filteredHarcamalar.reduce((sum, h) => sum + h.tutar, 0);
-    const totalCount = filteredHarcamalar.length;
+function updatePersonalStatsCards(filteredExpenses, person) {
+    const totalAmount = filteredExpenses.reduce((sum, h) => sum + h.amount, 0);
+    const totalCount = filteredExpenses.length;
     const avgAmount = totalCount > 0 ? totalAmount / totalCount : 0;
     
-    // En yüksek harcamayı bul
-    let maxExpense = { tutar: 0, tarih: '-' };
-    if (filteredHarcamalar.length > 0) {
-        maxExpense = filteredHarcamalar.reduce((max, h) => h.tutar > max.tutar ? h : max);
+    // Find highest expense
+    let maxExpense = { amount: 0, date: '-' };
+    if (filteredExpenses.length > 0) {
+        maxExpense = filteredExpenses.reduce((max, h) => h.amount > max.amount ? h : max);
     }
     
-    // Bu ay harcamalarını hesapla
+    // Calculate this month's expenses
     const currentMonth = new Date().toISOString().slice(0, 7);
-    const thisMonthExpenses = filteredHarcamalar.filter(h => h.tarih.startsWith(currentMonth));
-    const thisMonthAmount = thisMonthExpenses.reduce((sum, h) => sum + h.tutar, 0);
+    const thisMonthExpenses = filteredExpenses.filter(h => h.date.startsWith(currentMonth));
+    const thisMonthAmount = thisMonthExpenses.reduce((sum, h) => sum + h.amount, 0);
     
-    // Kartları güncelle
+    // Update cards
     document.getElementById('personalTotalAmount').textContent = formatCurrency(totalAmount);
-    document.getElementById('personalTotalCount').textContent = `${totalCount} harcama`;
+    document.getElementById('personalTotalCount').textContent = `${totalCount} expense`;
     document.getElementById('personalAvgAmount').textContent = formatCurrency(avgAmount);
-    document.getElementById('personalMaxAmount').textContent = formatCurrency(maxExpense.tutar);
-    document.getElementById('personalMaxDate').textContent = formatDate(maxExpense.tarih);
+    document.getElementById('personalMaxAmount').textContent = formatCurrency(maxExpense.amount);
+    document.getElementById('personalMaxDate').textContent = formatDate(maxExpense.date);
     document.getElementById('personalThisMonth').textContent = formatCurrency(thisMonthAmount);
-    document.getElementById('personalThisMonthCount').textContent = `${thisMonthExpenses.length} harcama`;
+    document.getElementById('personalThisMonthCount').textContent = `${thisMonthExpenses.length} expense`;
 }
 
-function createPersonalCharts(filteredHarcamalar, person) {
+function createPersonalCharts(filteredExpenses, person) {
     // Grafikleri temizle
     if (personalTrendChart) personalTrendChart.destroy();
     if (personalCardChart) personalCardChart.destroy();
     if (personalComparisonChart) personalComparisonChart.destroy();
     
-    // Kişisel trend grafiği
-    createPersonalTrendChart(filteredHarcamalar);
+    // Personal trend chart
+    createPersonalTrendChart(filteredExpenses);
     
-    // Kart kullanım grafiği
-    createPersonalCardChart(filteredHarcamalar);
+    // Card usage chart
+    createPersonalCardChart(filteredExpenses);
     
-    // Karşılaştırma grafiği
-    createPersonalComparisonChart(filteredHarcamalar, person);
+    // Comparison chart
+    createPersonalComparisonChart(filteredExpenses, person);
 }
 
-function createPersonalTrendChart(filteredHarcamalar) {
+function createPersonalTrendChart(filteredExpenses) {
     const ctx = document.getElementById('personalTrendChart');
     if (!ctx) return;
     
-    // Aylık verileri hazırla
+    // Aylık dataleri hazırla
     const monthlyData = {};
-    filteredHarcamalar.forEach(h => {
-        const month = h.tarih.slice(0, 7);
-        monthlyData[month] = (monthlyData[month] || 0) + h.tutar;
+    filteredExpenses.forEach(h => {
+        const month = h.date.slice(0, 7);
+        monthlyData[month] = (monthlyData[month] || 0) + h.amount;
     });
     
     const sortedMonths = Object.keys(monthlyData).sort();
@@ -619,7 +619,7 @@ function createPersonalTrendChart(filteredHarcamalar) {
         data: {
             labels: sortedMonths.map(m => formatMonth(m)),
             datasets: [{
-                label: 'Aylık Harcama',
+                label: 'Monthly Expenses',
                 data: amounts,
                 borderColor: '#6366f1',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -647,15 +647,15 @@ function createPersonalTrendChart(filteredHarcamalar) {
     });
 }
 
-function createPersonalCardChart(filteredHarcamalar) {
+function createPersonalCardChart(filteredExpenses) {
     const ctx = document.getElementById('personalCardChart');
     if (!ctx) return;
     
-    // Kart verilerini hazırla
+    // Prepare card data
     const cardData = {};
-    filteredHarcamalar.forEach(h => {
-        const card = h.kart || 'Bilinmeyen';
-        cardData[card] = (cardData[card] || 0) + h.tutar;
+    filteredExpenses.forEach(h => {
+        const card = h.card || 'Unknown';
+        cardData[card] = (cardData[card] || 0) + h.amount;
     });
     
     const cards = Object.keys(cardData);
@@ -685,11 +685,11 @@ function createPersonalCardChart(filteredHarcamalar) {
     });
 }
 
-function createPersonalComparisonChart(filteredHarcamalar, selectedPerson) {
+function createPersonalComparisonChart(filteredExpenses, selectedPerson) {
     const ctx = document.getElementById('personalComparisonChart');
     if (!ctx) return;
     
-    // Son 6 ayın verilerini hazırla
+    // Son 6 ayın datalerini hazırla
     const months = [];
     const personalAmounts = [];
     const totalAmounts = [];
@@ -700,16 +700,16 @@ function createPersonalComparisonChart(filteredHarcamalar, selectedPerson) {
         const monthKey = date.toISOString().slice(0, 7);
         months.push(formatMonth(monthKey));
         
-        // Kişisel harcama
-        const personalAmount = filteredHarcamalar
-            .filter(h => h.tarih.startsWith(monthKey))
-            .reduce((sum, h) => sum + h.tutar, 0);
+        // Kişisel expense
+        const personalAmount = filteredExpenses
+            .filter(h => h.date.startsWith(monthKey))
+            .reduce((sum, h) => sum + h.amount, 0);
         personalAmounts.push(personalAmount);
         
-        // Toplam harcama
-        const totalAmount = harcamalar
-            .filter(h => h.tarih.startsWith(monthKey))
-            .reduce((sum, h) => sum + h.tutar, 0);
+        // Toplam expense
+        const totalAmount = expenses
+            .filter(h => h.date.startsWith(monthKey))
+            .reduce((sum, h) => sum + h.amount, 0);
         totalAmounts.push(totalAmount);
     }
     
@@ -761,8 +761,8 @@ function showNoPersonalDataMessage() {
     if (container) {
         container.innerHTML = `
             <div class="summary-card" style="text-align: center; padding: 48px 24px;">
-                <h3>📊 Bu kişi için veri bulunamadı</h3>
-                <p>Seçili kişi için henüz harcama verisi bulunmuyor.</p>
+                <h3>📊 Bu kişi için data bulunamadı</h3>
+                <p>Seçili kişi için henüz expense datasi bulunmuyor.</p>
             </div>
         `;
     }

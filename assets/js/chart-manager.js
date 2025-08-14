@@ -25,8 +25,8 @@ function updateDashboardCharts() {
         const monthStr = `${year}-${month}`;
         const monthName = date.toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' });
 
-        const monthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(monthStr));
-        const monthTotal = monthExpenses.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
+        const monthExpenses = expenses.filter(h => h.date && h.date.startsWith(monthStr));
+        const monthTotal = monthExpenses.reduce((sum, h) => sum + (parseFloat(h.amount) || 0), 0);
 
         months.push(monthName);
         monthlyTotals.push(monthTotal);
@@ -67,12 +67,12 @@ function updateDashboardCharts() {
     });
 
     const currentMonth = new Date().toISOString().slice(0, 7);
-    const thisMonthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(currentMonth));
+    const thisMonthExpenses = expenses.filter(h => h.date && h.date.startsWith(currentMonth));
 
     const userTotals = {};
     thisMonthExpenses.forEach(h => {
-        if (h.kullanici) {
-            userTotals[h.kullanici] = (userTotals[h.kullanici] || 0) + (parseFloat(h.tutar) || 0);
+        if (h.person) {
+            userTotals[h.person] = (userTotals[h.person] || 0) + (parseFloat(h.amount) || 0);
         }
     });
 

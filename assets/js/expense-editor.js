@@ -3,18 +3,18 @@ class ExpenseEditor {
     static editingId = null;
 
     static edit(id) {
-        const expense = harcamalar.find(h => h.id === id);
+        const expense = expenses.find(h => h.id === id);
         if (!expense) {
-            NotificationService.error('Harcama bulunamadı');
+            NotificationService.error('Expense not found');
             return;
         }
 
         this.editingId = id;
 
         // Fill modal fields
-        document.getElementById('editTarih').value = expense.tarih;
-        document.getElementById('editAciklama').value = expense.aciklama || '';
-        document.getElementById('editTutar').value = expense.tutar;
+        document.getElementById('editDate').value = expense.date;
+        document.getElementById('editDescription').value = expense.description || '';
+        document.getElementById('editAmount').value = expense.amount;
         document.getElementById('editTaksitNo').value = expense.taksitNo || '';
         document.getElementById('editToplamTaksit').value = expense.toplamTaksit || '';
 
@@ -22,46 +22,46 @@ class ExpenseEditor {
         this.populateModalSelects();
 
         // Set values
-        document.getElementById('editKart').value = expense.kart;
-        document.getElementById('editKullanici').value = expense.kullanici;
+        document.getElementById('editCard').value = expense.card;
+        document.getElementById('editUser').value = expense.person;
 
         // Show modal
-        document.getElementById('editHarcamaModal').style.display = 'block';
+        document.getElementById('editExpenseModal').style.display = 'block';
         NotificationService.info('Düzenleme modu aktif');
     }
 
     static populateModalSelects() {
         // Card options
-        const kartSelect = document.getElementById('editKart');
-        if (kartSelect) {
-            const options = kartSelect.querySelectorAll('option:not([value=""])');
+        const cardSelect = document.getElementById('editCard');
+        if (cardSelect) {
+            const options = cardSelect.querySelectorAll('option:not([value=""])');
             options.forEach(option => option.remove());
 
-            DataManager.getCards().forEach(kart => {
+            DataManager.getCards().forEach(card => {
                 const option = document.createElement('option');
-                option.value = kart;
-                option.textContent = kart;
-                kartSelect.appendChild(option);
+                option.value = card;
+                option.textContent = card;
+                cardSelect.appendChild(option);
             });
         }
 
         // User options
-        const kullaniciSelect = document.getElementById('editKullanici');
-        if (kullaniciSelect) {
-            const options = kullaniciSelect.querySelectorAll('option:not([value=""])');
+        const userSelect = document.getElementById('editUser');
+        if (userSelect) {
+            const options = userSelect.querySelectorAll('option:not([value=""])');
             options.forEach(option => option.remove());
 
-            DataManager.getUsers().forEach(kisi => {
+            DataManager.getUsers().forEach(person => {
                 const option = document.createElement('option');
-                option.value = kisi;
-                option.textContent = kisi;
-                kullaniciSelect.appendChild(option);
+                option.value = person;
+                option.textContent = person;
+                userSelect.appendChild(option);
             });
         }
     }
 
     static closeModal() {
-        document.getElementById('editHarcamaModal').style.display = 'none';
+        document.getElementById('editExpenseModal').style.display = 'none';
         this.editingId = null;
     }
 
@@ -69,67 +69,67 @@ class ExpenseEditor {
         event.preventDefault();
 
         if (!this.editingId) {
-            NotificationService.error('Düzenlenecek harcama bulunamadı');
+            NotificationService.error('Düzenlenecek expense bulunamadı');
             return;
         }
 
-        const expenseIndex = harcamalar.findIndex(h => h.id === this.editingId);
+        const expenseIndex = expenses.findIndex(h => h.id === this.editingId);
         if (expenseIndex === -1) {
-            NotificationService.error('Harcama bulunamadı');
+            NotificationService.error('Expense not found');
             return;
         }
 
         // Get form data
-        const tarih = document.getElementById('editTarih').value;
-        const kart = document.getElementById('editKart').value;
-        const kullanici = document.getElementById('editKullanici').value;
-        const aciklama = document.getElementById('editAciklama').value;
-        const tutar = document.getElementById('editTutar').value;
-        const taksitNo = document.getElementById('editTaksitNo').value;
-        const toplamTaksit = document.getElementById('editToplamTaksit').value;
+        const date = document.getElementById('editDate').value;
+        const card = document.getElementById('editCard').value;
+        const user = document.getElementById('editUser').value;
+        const description = document.getElementById('editDescription').value;
+        const amount = document.getElementById('editAmount').value;
+        const installmentNumber = document.getElementById('editInstallmentNumber').value;
+        const totalInstallments = document.getElementById('editTotalInstallments').value;
 
-        if (!tarih || !kart || !kullanici || !tutar) {
+        if (!date || !card || !user || !amount) {
             NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
 
         // Update expense
-        harcamalar[expenseIndex] = {
-            ...harcamalar[expenseIndex],
-            tarih,
-            kart,
-            kullanici,
-            aciklama,
-            tutar: parseFloat(tutar),
-            taksitNo: taksitNo ? parseInt(taksitNo) : null,
-            toplamTaksit: toplamTaksit ? parseInt(toplamTaksit) : null,
-            isTaksit: taksitNo && toplamTaksit
+        expenses[expenseIndex] = {
+            ...expenses[expenseIndex],
+            date,
+            card,
+            user,
+            description,
+            amount: parseFloat(amount),
+            installmentNumber: installmentNumber ? parseInt(installmentNumber) : null,
+            totalInstallments: totalInstallments ? parseInt(totalInstallments) : null,
+            isInstallment: installmentNumber && totalInstallments
         };
 
         DataManager.save();
         DataManager.updateAllViews();
         this.closeModal();
-        NotificationService.success('Harcama güncellendi');
+        NotificationService.success('Expense updated');
     }
 
     static delete(id) {
-        if (confirm('Bu harcamayı silmek istediğinizden emin misiniz?')) {
-            const expenseIndex = harcamalar.findIndex(h => h.id === id);
+        if (confirm('Bu expenseyı silmek istediğinizden emin misiniz?')) {
+            const expenseIndex = expenses.findIndex(h => h.id === id);
             if (expenseIndex !== -1) {
-                harcamalar.splice(expenseIndex, 1);
+                expenses.splice(expenseIndex, 1);
                 DataManager.save();
                 DataManager.updateAllViews();
-                NotificationService.success('Harcama silindi');
+                NotificationService.success('Expense deleted');
             } else {
-                NotificationService.error('Harcama bulunamadı');
+                NotificationService.error('Expense not found');
             }
         }
     }
 }
 
 // Global backward compatibility
-window.editHarcama = (id) => ExpenseEditor.edit(id);
-window.deleteHarcama = (id) => ExpenseEditor.delete(id);
-window.closeEditHarcamaModal = () => ExpenseEditor.closeModal();
-window.handleEditHarcamaSubmit = (event) => ExpenseEditor.handleSubmit(event);
+window.editExpense = (id) => ExpenseEditor.edit(id);
+window.deleteExpense = (id) => ExpenseEditor.delete(id);
+window.closeEditExpenseModal = () => ExpenseEditor.closeModal();
+window.handleEditExpenseSubmit = (event) => ExpenseEditor.handleSubmit(event);
 window.populateEditModalSelects = () => ExpenseEditor.populateModalSelects();

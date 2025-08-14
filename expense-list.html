@@ -6,9 +6,12 @@
         <title>Harcama Listesi - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin"
+            content="Kredi cardı expensesınızı ve düzenli ödeme                                            <label for="editTotalInstallments">Toplam
+                                                Taksit Sayısı</label>
+                                            <input type="number"
+                                                id="editTotalInstallments" min="1"nizi profesyonelce takip edin"
         <meta name="keywords"
-            content="kredi kartı, harcama takip, fatura, ödeme, finans">
+            content="kredi cardı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
 
         <meta name="theme-color" content="#007bff">
@@ -47,7 +50,7 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
                     </div>
 
                     <!-- Login Form Only -->
@@ -92,7 +95,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi kartlarını
+                            <p>Takip etmek istediğiniz kredi cardsını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -105,8 +108,8 @@
                                     onclick="addCard()">Kart Ekle</button>
 
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz kart eklenmedi.
-                                        En az bir kart eklemeniz önerilir.</p>
+                                    <p class="setup-help">Henüz card eklenmedi.
+                                        En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
                         </div>
@@ -156,8 +159,8 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi kartı
-                                    harcamalarınızı profesyonelce yönetin</div>
+                                <div class="header-subtitle">Kredi cardı
+                                    expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
                     </div>
@@ -175,14 +178,14 @@
                 </div>
                 <div class="tabs">
                     <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-                    <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-                    <a href="harcama-listesi.html" class="tab active">📋 Harcama
+                    <a href="add-expense.html" class="tab">➕ Add Expense</a>
+                    <a href="expense-list.html" class="tab active">📋 Harcama
                         Listesi</a>
-                    <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-                    <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-                    <a href="istatistikler.html" class="tab">📊
+                    <a href="accounts.html" class="tab">💰 Hesaplar</a>
+                    <a href="monthly-summary.html" class="tab">📅 Aylık Özet</a>
+                    <a href="statistics.html" class="tab">📊
                         İstatistikler</a>
-                    <a href="veri-yonetimi.html" class="tab">⚙️ Veri
+                    <a href="data-management.html" class="tab">⚙️ Veri
                         Yönetimi</a>
                 </div>
 
@@ -196,50 +199,50 @@
                                 <div class="filter-group">
                                     <label for="filtreTarih">📅 Ay/Yıl</label>
                                     <input type="month" id="filtreTarih"
-                                        onchange="updateHarcamaTable()">
+                                        onchange="updateExpenseTable()">
                                 </div>
                                 <div class="filter-group">
-                                    <label for="filtreKullanici">👤 Kişi</label>
-                                    <select id="filtreKullanici"
-                                        onchange="updateHarcamaTable()">
+                                    <label for="filterUser">👤 Kişi</label>
+                                    <select id="filterUser"
+                                        onchange="updateExpenseTable()">
                                         <option value>Tümü</option>
                                     </select>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="filtreKart">💳 Kart</label>
-                                    <select id="filtreKart"
-                                        onchange="updateHarcamaTable()">
+                                    <label for="filterCard">💳 Kart</label>
+                                    <select id="filterCard"
+                                        onchange="updateExpenseTable()">
                                         <option value>Tümü</option>
                                     </select>
                                 </div>
                                 <div class="filter-group">
-                                    <label for="minTutar">💰 Min</label>
-                                    <input type="number" id="minTutar"
+                                    <label for="minAmount">💰 Min</label>
+                                    <input type="number" id="minAmount"
                                         placeholder="0 ₺"
-                                        onchange="updateHarcamaTable()">
+                                        onchange="updateExpenseTable()">
                                 </div>
                                 <div class="filter-group">
-                                    <label for="maxTutar">💰 Max</label>
-                                    <input type="number" id="maxTutar"
+                                    <label for="maxAmount">💰 Max</label>
+                                    <input type="number" id="maxAmount"
                                         placeholder="∞ ₺"
-                                        onchange="updateHarcamaTable()">
+                                        onchange="updateExpenseTable()">
                                 </div>
                                 <div class="filter-group">
-                                    <label for="siralamaKriteri">📊
+                                    <label for="sortCriteria">📊
                                         Sıralama</label>
-                                    <select id="siralamaKriteri"
-                                        onchange="updateHarcamaTable()">
-                                        <option value="tarih-desc">🗓️ Yeni →
+                                    <select id="sortCriteria"
+                                        onchange="updateExpenseTable()">
+                                        <option value="date-desc">🗓️ Yeni →
                                             Eski</option>
-                                        <option value="tarih-asc">🗓️ Eski →
+                                        <option value="date-asc">🗓️ Eski →
                                             Yeni</option>
-                                        <option value="tutar-desc">💸 Büyük →
+                                        <option value="amount-desc">💸 Büyük →
                                             Küçük</option>
-                                        <option value="tutar-asc">💸 Küçük →
+                                        <option value="amount-asc">💸 Küçük →
                                             Büyük</option>
-                                        <option value="kullanici-asc">👤 A →
+                                        <option value="user-asc">👤 A →
                                             Z</option>
-                                        <option value="kart-asc">💳 A →
+                                        <option value="card-asc">💳 A →
                                             Z</option>
                                     </select>
                                 </div>
@@ -254,9 +257,9 @@
 
                         <div class="table-container">
                             <div class="table-header">
-                                <span id="sonucSayisi">Toplam: 0 harcama</span>
+                                <span id="resultCount">Total: 0 expense</span>
                             </div>
-                            <table id="harcamaTable" class="harcama-table">
+                            <table id="expenseTable" class="expense-table">
                                 <thead>
                                     <tr>
                                         <th>Tarih</th>
@@ -272,7 +275,7 @@
                                     <tr>
                                         <td colspan="7"
                                             style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                            Henüz harcama kaydı yok
+                                            Henüz expense kaydı yok
                                         </td>
                                     </tr>
                                 </tbody>
@@ -280,30 +283,30 @@
                         </div>
 
                         <!-- Harcama Düzenleme Modal -->
-                        <div id="editHarcamaModal"
+                        <div id="editExpenseModal"
                             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
                             <div
                                 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg); padding: 24px; border-radius: var(--radius); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
                                 <h3>Harcamayı Düzenle</h3>
-                                <form id="editHarcamaForm">
+                                <form id="editExpenseForm">
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="editTarih">Tarih
+                                            <label for="editDate">Tarih
                                                 *</label>
-                                            <input type="date" id="editTarih"
+                                            <input type="date" id="editDate"
                                                 required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="editKart">Kart *</label>
-                                            <select id="editKart" required>
+                                            <label for="editCard">Kart *</label>
+                                            <select id="editCard" required>
                                                 <option value>Kart
                                                     Seçin</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="editKullanici">Kullanıcı
+                                            <label for="editUser">Kullanıcı
                                                 *</label>
-                                            <select id="editKullanici" required>
+                                            <select id="editUser" required>
                                                 <option value>Kullanıcı
                                                     Seçin</option>
                                             </select>
@@ -312,23 +315,23 @@
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label
-                                                for="editAciklama">Açıklama</label>
-                                            <input type="text" id="editAciklama"
+                                                for="editDescription">Açıklama</label>
+                                            <input type="text" id="editDescription"
                                                 placeholder="Harcama detayı...">
                                         </div>
                                         <div class="form-group">
-                                            <label for="editTutar">Tutar (TL)
+                                            <label for="editAmount">Tutar (TL)
                                                 *</label>
-                                            <input type="number" id="editTutar"
+                                            <input type="number" id="editAmount"
                                                 step="0.01" min="0.01" required>
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="editTaksitNo">Kaçıncı
+                                            <label for="editInstallmentNumber">Kaçıncı
                                                 Taksit?</label>
                                             <input type="number"
-                                                id="editTaksitNo" min="1"
+                                                id="editInstallmentNumber" min="1"
                                                 max="99">
                                         </div>
                                         <div class="form-group">
@@ -343,7 +346,7 @@
                                         style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
                                         <button type="button"
                                             class="btn btn-outline"
-                                            onclick="closeEditHarcamaModal()">İptal</button>
+                                            onclick="closeEditExpenseModal()">İptal</button>
                                         <button type="submit"
                                             class="btn btn-primary">Güncelle</button>
                                     </div>
@@ -369,6 +372,6 @@
         <script src="./assets/js/utils.js"></script>
 
         <!-- Page Specific Scripts -->
-        <script src="./assets/js/pages/harcama-listesi.js"></script>
+        <script src="./assets/js/pages/expense-list.js"></script>
     </body>
 </html>
