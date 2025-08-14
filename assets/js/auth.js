@@ -495,6 +495,13 @@ class AuthSystem {
 
         // Simple light theme - no theme loading needed
         // Theme management disabled - using simple default theme
+
+        // Mevcut harcamalardan kart ve kullanıcı çıkar (eksikse)
+        try {
+            this.ensureCardUserExtraction();
+        } catch (e) {
+            console.warn('Kart/kullanıcı çıkarma hatası:', e);
+        }
     }
 
     // Kullanıcı verilerini kaydet
@@ -513,6 +520,42 @@ class AuthSystem {
         };
 
         localStorage.setItem('app_users', JSON.stringify(this.users));
+    }
+
+    // Harcamalardan eksik kart ve kullanıcıları otomatik çıkar
+    ensureCardUserExtraction() {
+        if (!Array.isArray(harcamalar)) return;
+
+        const existingCards = new Set(kredikartlari || []);
+        const existingUsers = new Set(kisiler || []);
+        let added = false;
+
+        harcamalar.forEach(h => {
+            if (h && h.kart) {
+                const k = String(h.kart).trim();
+                if (k && k !== 'Nakit' && !existingCards.has(k)) {
+                    existingCards.add(k);
+                    kredikartlari.push(k);
+                    added = true;
+                }
+            }
+            if (h && h.kullanici) {
+                const u = String(h.kullanici).trim();
+                if (u && !existingUsers.has(u)) {
+                    existingUsers.add(u);
+                    kisiler.push(u);
+                    added = true;
+                }
+            }
+        });
+
+        if (added) {
+            console.log('🔄 Harcamalardan yeni kart/kullanıcılar çıkarıldı');
+            this.saveUserData();
+            if (typeof updateCardOptions === 'function') updateCardOptions();
+            if (typeof updateUserOptions === 'function') updateUserOptions();
+            if (typeof updateCardAndUserManagement === 'function') updateCardAndUserManagement();
+        }
     }
 
     // Admin panelini göster

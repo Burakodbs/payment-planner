@@ -208,12 +208,25 @@ function showToast(message, type = 'info') {
 
 // Data Export/Import
 function exportData() {
+    // Auth sistem verisini kaynağından al (güncel değilse önce çıkarım yap)
+    if (typeof authSystem !== 'undefined' && authSystem && typeof authSystem.ensureCardUserExtraction === 'function') {
+        try { authSystem.ensureCardUserExtraction(); } catch (_) {}
+    }
+
     const data = {
-        harcamalar,
-        duzenliOdemeler,
-        kredikartlari,
-        kisiler,
-        exportDate: new Date().toISOString()
+        version: 2,
+        user: (authSystem && authSystem.currentUser) || null,
+        exportDate: new Date().toISOString(),
+        counts: {
+            harcamalar: harcamalar.length,
+            duzenliOdemeler: duzenliOdemeler.length,
+            kredikartlari: kredikartlari.length,
+            kisiler: kisiler.length
+        },
+        harcamalar: harcamalar,
+        duzenliOdemeler: duzenliOdemeler,
+        kredikartlari: kredikartlari,
+        kisiler: kisiler
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -227,27 +240,34 @@ function exportData() {
     document.body.removeChild(a);
 
     URL.revokeObjectURL(url);
-    showToast('Veriler başarıyla dışa aktarıldı!', 'success');
+    showToast('Veriler (kart & kullanıcı dahil) dışa aktarıldı', 'success');
 }
 
-function importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
+// Button tıklamasında çalışacak şekilde düzenlendi
+function importData() {
+    const input = document.getElementById('fileInput');
+    if (!input || !input.files || input.files.length === 0) {
+        showToast('Lütfen önce bir yedek dosyası seçin', 'error');
+        return;
+    }
+    const file = input.files[0];
     const reader = new FileReader();
     reader.onload = function (e) {
         try {
             const data = JSON.parse(e.target.result);
 
             // Veri kontrolü ve geri yükleme
-            if (data.harcamalar && Array.isArray(data.harcamalar)) {
+            if (Array.isArray(data.harcamalar)) {
                 harcamalar = data.harcamalar;
-                localStorage.setItem('harcamalar', JSON.stringify(harcamalar));
             }
-
-            if (data.duzenliOdemeler && Array.isArray(data.duzenliOdemeler)) {
+            if (Array.isArray(data.duzenliOdemeler)) {
                 duzenliOdemeler = data.duzenliOdemeler;
-                localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
+            }
+            if (Array.isArray(data.kredikartlari)) {
+                kredikartlari = data.kredikartlari;
+            }
+            if (Array.isArray(data.kisiler)) {
+                kisiler = data.kisiler;
             }
 
             if (data.kredikartlari && Array.isArray(data.kredikartlari)) {
