@@ -447,64 +447,38 @@ class AuthSystem {
 
     // Kullanıcı datalerini yükle
     loadUserData() {
-        if (!this.currentUser || !this.users[this.currentUser]) {
-            console.warn('LoadUserData: No current user or user not found');
-            return;
-        }
-
-        // Ensure user has data object
-        if (!this.users[this.currentUser].data) {
-            console.log('Creating empty data object for user:', this.currentUser);
-            this.users[this.currentUser].data = {
-                expenses: [],
-                regularPayments: [],
-                creditCards: [],
-                people: []
-            };
-        }
+        if (!this.currentUser || !this.users[this.currentUser]) return;
 
         const userData = this.users[this.currentUser].data;
-        console.log('LoadUserData: Loading data for user:', this.currentUser);
-        console.log('LoadUserData: UserData object:', userData);
 
         // Global değişkenleri güncelle - güvenli şekilde
         if (typeof expenses !== 'undefined') {
             expenses = userData.expenses || [];
-            console.log('LoadUserData: Set expenses to:', expenses.length);
         } else {
             // Global değişken henüz tanımlı değilse window'da tanımla
             window.expenses = userData.expenses || [];
-            console.log('LoadUserData: Set window.expenses to:', window.expenses.length);
         }
         
         if (typeof regularPayments !== 'undefined') {
             regularPayments = userData.regularPayments || [];
-            console.log('LoadUserData: Set regularPayments to:', regularPayments.length);
         } else {
             window.regularPayments = userData.regularPayments || [];
-            console.log('LoadUserData: Set window.regularPayments to:', window.regularPayments.length);
         }
         
         if (typeof creditCards !== 'undefined') {
             creditCards = userData.creditCards || [];
-            console.log('LoadUserData: Set creditCards to:', creditCards.length);
         } else {
             window.creditCards = userData.creditCards || [];
-            console.log('LoadUserData: Set window.creditCards to:', window.creditCards.length);
         }
         
         if (typeof people !== 'undefined') {
             people = userData.people || [];
-            console.log('LoadUserData: Set people to:', people.length);
         } else {
             window.people = userData.people || [];
-            console.log('LoadUserData: Set window.people to:', window.people.length);
         }
 
         // currentUserData property'sini de güncelle (uyumluluk için)
         this.currentUserData = userData;
-        console.log('LoadUserData: Final currentUserData:', this.currentUserData);
-        
         if (this.debug) {
             console.log('user-data-loaded', {
                 expenses: userData.expenses?.length || 0,
@@ -527,16 +501,7 @@ class AuthSystem {
 
     // Kullanıcı datalerini kaydet
     saveUserData() {
-        if (!this.currentUser || !this.users[this.currentUser]) {
-            console.warn('SaveUserData: No current user');
-            return;
-        }
-
-        console.log('SaveUserData: Saving data for user:', this.currentUser);
-        console.log('SaveUserData: Global expenses:', expenses?.length || 0);
-        console.log('SaveUserData: Global creditCards:', creditCards?.length || 0);
-        console.log('SaveUserData: Global people:', people?.length || 0);
-        console.log('SaveUserData: Global regularPayments:', regularPayments?.length || 0);
+        if (!this.currentUser || !this.users[this.currentUser]) return;
 
         this.users[this.currentUser].data = {
             expenses: expenses || [],
@@ -545,14 +510,11 @@ class AuthSystem {
             people: people || []
         };
 
-        console.log('SaveUserData: Saved user data:', this.users[this.currentUser].data);
-
         this.users[this.currentUser].settings = {
             theme: 'light' // Simple light theme
         };
 
         localStorage.setItem('app_users', JSON.stringify(this.users));
-        console.log('SaveUserData: Data saved to localStorage');
     }
 
     // Harcamalardan eksik card ve kullanıcıları otomatik çıkar
