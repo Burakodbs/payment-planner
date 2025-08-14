@@ -11,8 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const ozetTarih = document.getElementById('ozet_tarih');
     if (ozetTarih) {
-        const currentMonth = new Date().toISOString().slice(0, 7);
-        ozetTarih.value = currentMonth;
+        ozetTarih.value = new Date().toISOString().slice(0, 7);
 
         // Kısa bir gecikme sonra özeti güncelle
         setTimeout(() => {
