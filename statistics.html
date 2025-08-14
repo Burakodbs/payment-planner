@@ -6,9 +6,9 @@
         <title>İstatistikler - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+            content="Kredi cardı expensesınızı ve düzenli ödemelerinizi profesyonelce takip edin">
         <meta name="keywords"
-            content="kredi kartı, harcama takip, fatura, ödeme, finans">
+            content="kredi cardı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
 
         <meta name="theme-color" content="#6366f1">
@@ -46,7 +46,7 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
                     </div>
 
                     <!-- Login Form -->
@@ -66,57 +66,16 @@
                             <button type="submit" class="btn btn-primary">Giriş
                                 Yap</button>
                         </form>
-                        <p class="auth-switch">
-                            Hesabınız yok mu? <a href="#"
-                                onclick="showRegister()">Kayıt olun</a>
-                        </p>
-                    </div>
-
-                    <!-- Register Form -->
-                    <div id="registerForm" class="auth-form"
-                        style="display: none;">
-                        <h2>Kayıt Ol</h2>
-                        <form onsubmit="handleRegister(event)">
-                            <div class="form-group">
-                                <label for="registerUsername">Kullanıcı
-                                    Adı</label>
-                                <input type="text" id="registerUsername"
-                                    required minlength="3"
-                                    autocomplete="username">
-                                <small>En az 3 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="registerEmail">E-posta
-                                    (Opsiyonel)</label>
-                                <input type="email" id="registerEmail"
-                                    autocomplete="email">
-                            </div>
-                            <div class="form-group">
-                                <label for="registerPassword">Şifre</label>
-                                <input type="password" id="registerPassword"
-                                    required minlength="6"
-                                    autocomplete="new-password">
-                                <small>En az 6 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Şifre
-                                    Tekrar</label>
-                                <input type="password" id="confirmPassword"
-                                    required autocomplete="new-password">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Kayıt
-                                Ol</button>
-                        </form>
-                        <p class="auth-switch">
-                            Zaten hesabınız var mı? <a href="#"
-                                onclick="showLogin()">Giriş yapın</a>
-                        </p>
+                        <div class="auth-info">
+                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
+                            <small>Yeni kullanıcılar sadece admin tarafından oluşturulabilir</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Setup Wizard -->
+        <!-- Setup Wizard - Sadece yeni kullanıcılar için -->
         <div id="setupWizard" style="display: none;">
             <div class="setup-wrapper">
                 <div class="setup-container">
@@ -130,7 +89,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi kartlarını
+                            <p>Takip etmek istediğiniz kredi cardsını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -143,8 +102,8 @@
                                     onclick="addCard()">Kart Ekle</button>
 
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz kart eklenmedi.
-                                        En az bir kart eklemeniz önerilir.</p>
+                                    <p class="setup-help">Henüz card eklenmedi.
+                                        En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
                         </div>
@@ -194,8 +153,8 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi kartı
-                                    harcamalarınızı profesyonelce yönetin</div>
+                                <div class="header-subtitle">Kredi cardı
+                                    expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
                     </div>
@@ -213,14 +172,14 @@
                 </div>
                 <div class="tabs">
                     <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-                    <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-                    <a href="harcama-listesi.html" class="tab">📋 Harcama
+                    <a href="add-expense.html" class="tab">➕ Add Expense</a>
+                    <a href="expense-list.html" class="tab">📋 Harcama
                         Listesi</a>
-                    <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-                    <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-                    <a href="istatistikler.html" class="tab active">📊
+                    <a href="accounts.html" class="tab">💰 Hesaplar</a>
+                    <a href="monthly-summary.html" class="tab">📅 Aylık Özet</a>
+                    <a href="statistics.html" class="tab active">📊
                         İstatistikler</a>
-                    <a href="veri-yonetimi.html" class="tab">⚙️ Veri
+                    <a href="data-management.html" class="tab">⚙️ Veri
                         Yönetimi</a>
                 </div>
 
@@ -232,10 +191,10 @@
                         <!-- İstatistik Kartları -->
                         <div class="summary-cards">
                             <div class="summary-card">
-                                <h3>📈 Toplam Harcama</h3>
+                                <h3>📈 Total Expenses</h3>
                                 <div class="amount" id="totalExpenses">0
                                     TL</div>
-                                <small id="totalExpensesCount">0 harcama</small>
+                                <small id="totalExpensesCount">0 expense</small>
                             </div>
                             <div class="summary-card">
                                 <h3>📅 En Yoğun Ay</h3>
@@ -247,7 +206,7 @@
                                 <h3>💳 En Çok Kullanılan Kart</h3>
                                 <div class="stat-value"
                                     id="mostUsedCard">-</div>
-                                <small id="mostUsedCardCount">0 harcama</small>
+                                <small id="mostUsedCardCount">0 expense</small>
                             </div>
                             <div class="summary-card">
                                 <h3>👤 En Çok Harcayan</h3>
@@ -264,6 +223,70 @@
                                 <canvas id="monthlyTrendChart"
                                     style="max-height: 400px;"></canvas>
                             </div>
+                            
+                            <div class="summary-card">
+                                <h3>💳 Kart Bazında Dağılım</h3>
+                                <canvas id="cardDistributionChart"
+                                    style="max-height: 400px;"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Kişiye Özel İstatistikler -->
+                        <div class="personal-stats">
+                            <div class="stats-header">
+                                <h3>👥 Kişiye Özel İstatistikler</h3>
+                                <div class="form-group" style="max-width: 200px;">
+                                    <label for="personFilter">Kişi Seçin:</label>
+                                    <select id="personFilter" onchange="updatePersonalStats()">
+                                        <option value="">Tüm Kişiler</option>
+                                        <!-- Kişiler buraya yüklenecek -->
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="personal-charts" id="personalChartsContainer">
+                                <div class="charts-grid">
+                                    <div class="summary-card">
+                                        <h4>📈 Kişisel Harcama Trendi</h4>
+                                        <canvas id="personalTrendChart" style="max-height: 300px;"></canvas>
+                                    </div>
+                                    
+                                    <div class="summary-card">
+                                        <h4>💳 Kart Kullanım Oranı</h4>
+                                        <canvas id="personalCardChart" style="max-height: 300px;"></canvas>
+                                    </div>
+                                    
+                                    <div class="summary-card">
+                                        <h4>📊 Aylık Karşılaştırma</h4>
+                                        <canvas id="personalComparisonChart" style="max-height: 300px;"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- Kişisel İstatistik Kartları -->
+                                <div class="personal-stats-cards">
+                                    <div class="summary-card">
+                                        <h4>💰 Total Expenses</h4>
+                                        <div class="amount" id="personalTotalAmount">0 TL</div>
+                                        <small id="personalTotalCount">0 expense</small>
+                                    </div>
+                                    <div class="summary-card">
+                                        <h4>📊 Average Expenses</h4>
+                                        <div class="amount" id="personalAvgAmount">0 TL</div>
+                                        <small>Harcama başına</small>
+                                    </div>
+                                    <div class="summary-card">
+                                        <h4>🎯 En Yüksek Harcama</h4>
+                                        <div class="amount" id="personalMaxAmount">0 TL</div>
+                                        <small id="personalMaxDate">-</small>
+                                    </div>
+                                    <div class="summary-card">
+                                        <h4>📈 Bu Ay</h4>
+                                        <div class="amount" id="personalThisMonth">0 TL</div>
+                                        <small id="personalThisMonthCount">0 expense</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                             <div class="summary-card">
                                 <h3>💳 Kart Bazlı Dağılım</h3>
                                 <canvas id="cardDistributionChart"
@@ -279,7 +302,7 @@
                                     style="max-height: 400px;"></canvas>
                             </div>
                             <div class="summary-card">
-                                <h3>📊 Haftalık Ortalama</h3>
+                                <h3>📊 Weekly Average</h3>
                                 <canvas id="weeklyAverageChart"
                                     style="max-height: 400px;"></canvas>
                             </div>
@@ -317,13 +340,13 @@
             </div>
         </div>
 
-        <!-- Cache Manager (must be first) -->
-        <script src="./assets/js/cache-manager.js"></script>
-
-        <!-- JavaScript Files -->
+        <!-- JavaScript Files - Refactored -->
+        <script src="./assets/js/notifications.js"></script>
+        <script src="./assets/js/form-handlers.js"></script>
+        <script src="./assets/js/data-operations.js"></script>
+        <script src="./assets/js/expense-editor.js"></script>
         <script src="./assets/js/components.js"></script>
         <script src="./assets/js/auth.js"></script>
-        <script src="./assets/js/auth-ui.js"></script>
         <script src="./assets/js/app.js"></script>
         <script src="./assets/js/data-manager.js"></script>
         <script src="./assets/js/calculations.js"></script>
@@ -331,6 +354,6 @@
         <script src="./assets/js/utils.js"></script>
 
         <!-- Page Specific Scripts -->
-        <script src="./assets/js/pages/istatistikler.js"></script>
+        <script src="./assets/js/pages/statistics.js"></script>
     </body>
 </html>

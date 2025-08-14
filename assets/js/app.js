@@ -1,8 +1,8 @@
-// Ana Uygulama Değişkenleri - Auth sistemi tarafından yönetilir
-let harcamalar = [];
-let duzenliOdemeler = [];
-let kredikartlari = [];
-let kisiler = [];
+// Main Application Variables - Managed by auth system
+let expenses = [];
+let regularPayments = [];
+let creditCards = [];
+let people = [];
 
 const currentMonth = new Date().toISOString().slice(0, 7);
 const currentDate = new Date().toISOString().slice(0, 10);
@@ -51,20 +51,20 @@ function showTab(tabName) {
     event.target.classList.add('active');
 
     if (tabName === 'liste') {
-        updateHarcamaTable();
+        updateExpenseTable();
     } else if (tabName === 'duzenli') {
-        updateDuzenliOdemelerListesi();
+        updateRegularPaymentsList();
     } else if (tabName === 'analitik') {
         initializeAnalytics();
-    } else if (tabName === 'hesaplar') {
-        updateHesaplar();
+    } else if (tabName === 'accounts') {
+        updateAccounts();
     } else if (tabName === 'aylik') {
         // Ay seçili değilse bugünkü ayı set et
-        const ozetTarih = document.getElementById('ozet_tarih');
-        if (ozetTarih && !ozetTarih.value) {
-            ozetTarih.value = currentMonth;
+        const summaryTarih = document.getElementById('summaryDate');
+        if (summaryTarih && !summaryTarih.value) {
+            summaryTarih.value = currentMonth;
         }
-        updateAylikOzet();
+        updateMonthlySummary();
     } else if (tabName === 'dashboard') {
         updateDashboard();
     }
@@ -79,19 +79,19 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         if (authSystem && authSystem.currentUser) {
             // Kart ve kullanıcı seçeneklerini initialize et
-            updateCardOptions();
-            updateUserOptions();
+            FormHandlers.updateCardOptions();
+            FormHandlers.updateUserOptions();
 
             // Form başlangıç değerleri
-            const ozetTarih = document.getElementById('ozet_tarih');
-            const harcamaTarih = document.getElementById('harcamaTarih');
-            const duzenliBaslangic = document.getElementById('duzenliBaslangic');
-            const kart = document.getElementById('kart');
+            const summaryTarih = document.getElementById('summaryDate');
+            const expenseTarih = document.getElementById('expenseDate');
+            const regularBaslangic = document.getElementById('regularStart');
+            const card = document.getElementById('card');
 
-            if (ozetTarih) ozetTarih.value = currentMonth;
-            if (harcamaTarih) harcamaTarih.value = currentDate;
-            if (duzenliBaslangic) duzenliBaslangic.value = currentMonth;
-            if (kart) kart.focus();
+            if (summaryTarih) summaryTarih.value = currentMonth;
+            if (expenseTarih) expenseTarih.value = currentDate;
+            if (regularBaslangic) regularBaslangic.value = currentMonth;
+            if (card) card.focus();
         }
     }, 100);
 });

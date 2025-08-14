@@ -3,12 +3,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Harcama Ekle - Kredi Kartı Harcama Takip Sistemi</title>
+        <title>Add Expense - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+            content="Kredi cardı expensesınızı ve düzenli ödemelerinizi profesyonelce takip edin">
         <meta name="keywords"
-            content="kredi kartı, harcama takip, fatura, ödeme, finans">
+            content="kredi cardı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
 
         <meta name="theme-color" content="#6366f1">
@@ -47,10 +47,10 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
                     </div>
 
-                    <!-- Login Form -->
+                    <!-- Login Form Only -->
                     <div id="loginForm" class="auth-form">
                         <h2>Giriş Yap</h2>
                         <form onsubmit="handleLogin(event)">
@@ -64,60 +64,18 @@
                                 <input type="password" id="loginPassword"
                                     required autocomplete="current-password">
                             </div>
-                            <button type="submit" class="btn btn-primary">Giriş
-                                Yap</button>
+                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
                         </form>
-                        <p class="auth-switch">
-                            Hesabınız yok mu? <a href="#"
-                                onclick="showRegister()">Kayıt olun</a>
-                        </p>
-                    </div>
-
-                    <!-- Register Form -->
-                    <div id="registerForm" class="auth-form"
-                        style="display: none;">
-                        <h2>Kayıt Ol</h2>
-                        <form onsubmit="handleRegister(event)">
-                            <div class="form-group">
-                                <label for="registerUsername">Kullanıcı
-                                    Adı</label>
-                                <input type="text" id="registerUsername"
-                                    required minlength="3"
-                                    autocomplete="username">
-                                <small>En az 3 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="registerEmail">E-posta
-                                    (Opsiyonel)</label>
-                                <input type="email" id="registerEmail"
-                                    autocomplete="email">
-                            </div>
-                            <div class="form-group">
-                                <label for="registerPassword">Şifre</label>
-                                <input type="password" id="registerPassword"
-                                    required minlength="6"
-                                    autocomplete="new-password">
-                                <small>En az 6 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Şifre
-                                    Tekrar</label>
-                                <input type="password" id="confirmPassword"
-                                    required autocomplete="new-password">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Kayıt
-                                Ol</button>
-                        </form>
-                        <p class="auth-switch">
-                            Zaten hesabınız var mı? <a href="#"
-                                onclick="showLogin()">Giriş yapın</a>
-                        </p>
+                        <div class="auth-info">
+                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
+                            <small>Yeni kullanıcılar sadece admin tarafından oluşturulabilir</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Setup Wizard -->
+        <!-- Setup Wizard - Sadece yeni kullanıcılar için -->
         <div id="setupWizard" style="display: none;">
             <div class="setup-wrapper">
                 <div class="setup-container">
@@ -131,7 +89,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi kartlarını
+                            <p>Takip etmek istediğiniz kredi cardsını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -144,8 +102,8 @@
                                     onclick="addCard()">Kart Ekle</button>
 
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz kart eklenmedi.
-                                        En az bir kart eklemeniz önerilir.</p>
+                                    <p class="setup-help">Henüz card eklenmedi.
+                                        En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
                         </div>
@@ -195,8 +153,8 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi kartı
-                                    harcamalarınızı profesyonelce yönetin</div>
+                                <div class="header-subtitle">Kredi cardı
+                                    expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
                     </div>
@@ -214,70 +172,70 @@
                 </div>
                 <div class="tabs">
                     <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-                    <a href="harcama-ekle.html" class="tab active">➕ Harcama
+                    <a href="add-expense.html" class="tab active">➕ Harcama
                         Ekle</a>
-                    <a href="harcama-listesi.html" class="tab">📋 Harcama
+                    <a href="expense-list.html" class="tab">📋 Harcama
                         Listesi</a>
-                    <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-                    <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-                    <a href="istatistikler.html" class="tab">📊
+                    <a href="accounts.html" class="tab">💰 Hesaplar</a>
+                    <a href="monthly-summary.html" class="tab">📅 Aylık Özet</a>
+                    <a href="statistics.html" class="tab">📊
                         İstatistikler</a>
-                    <a href="veri-yonetimi.html" class="tab">⚙️ Veri
+                    <a href="data-management.html" class="tab">⚙️ Veri
                         Yönetimi</a>
                 </div>
 
                 <div class="content">
-                    <!-- Harcama Ekleme Content -->
+                    <!-- Add Expenseme Content -->
                     <div class="page-content">
                         <div class="page-tabs">
                             <button class="page-tab active"
-                                onclick="showPageTab('harcama')">💳 Harcama
+                                onclick="showPageTab('expense')">💳 Harcama
                                 Ekle</button>
                             <button class="page-tab"
                                 onclick="showPageTab('duzenli')">🔄 Düzenli
                                 Ödemeler</button>
                         </div>
 
-                        <!-- Harcama Ekleme Tab -->
-                        <div id="harcamaTab" class="tab-content active">
-                            <h2>Yeni Harcama Ekle</h2>
+                        <!-- Add Expenseme Tab -->
+                        <div id="expenseTab" class="tab-content active">
+                            <h2>Yeni Add Expense</h2>
                             <div class="quick-info">
                                 <h3>Hızlı Ekleme</h3>
                                 <p>Sadece zorunlu alanları doldurun, Tab tuşuyla
                                     hızlıca geçiş yapın ve Enter'a basarak
                                     ekleyin.</p>
                                 <p class="shortcut-info"
-                                    id="kisayolBilgi">Kısayollar: Kullanıcılar
+                                    id="shortcutInfo">Kısayollar: Kullanıcılar
                                     yükleniyor...</p>
                             </div>
 
-                            <form id="harcamaForm"
-                                onsubmit="handleHarcamaSubmit(event)">
+                            <form id="expenseForm"
+                                onsubmit="handleExpenseSubmit(event)">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="kart">Kredi Kartı *</label>
-                                        <select name="kart" id="kart" required>
+                                        <label for="card">Kredi Kartı *</label>
+                                        <select name="card" id="card" required>
                                             <option value>Kart Seçin</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="harcamaTarih">Hangi Tarih?
+                                        <label for="expenseDate">Hangi Tarih?
                                             *</label>
-                                        <input type="date" name="tarih"
-                                            id="harcamaTarih" required>
+                                        <input type="date" name="date"
+                                            id="expenseDate" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="tutar">Tutar (TL) *</label>
-                                        <input type="number" name="tutar"
-                                            id="tutar" step="0.01" min="0.01"
+                                        <label for="amount">Tutar (TL) *</label>
+                                        <input type="number" name="amount"
+                                            id="amount" step="0.01" min="0.01"
                                             required>
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="kullanici">Kim Harcadı?
+                                        <label for="user">Kim Harcadı?
                                             *</label>
-                                        <select name="kullanici" id="kullanici"
+                                        <select name="user" id="user"
                                             required>
                                             <option value>Kullanıcı
                                                 Seçin</option>
@@ -298,9 +256,9 @@
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="aciklama">Açıklama</label>
-                                        <input type="text" name="aciklama"
-                                            id="aciklama"
+                                        <label for="description">Açıklama</label>
+                                        <input type="text" name="description"
+                                            id="description"
                                             placeholder="Harcama detayı...">
                                     </div>
                                     <div class="form-group">
@@ -316,7 +274,7 @@
                         </div>
 
                         <!-- Düzenli Ödemeler Tab -->
-                        <div id="duzenliTab" class="tab-content">
+                        <div id="regularTab" class="tab-content">
                             <h2>Düzenli Ödemeler</h2>
                             <div class="quick-info">
                                 <h3>Otomatik Ödeme Yönetimi</h3>
@@ -329,7 +287,7 @@
                                 <!-- Düzenli Ödemeler Listesi -->
                                 <div class="data-management-card">
                                     <h3>📋 Mevcut Düzenli Ödemeler</h3>
-                                    <div id="duzenliOdemelerListesi">
+                                    <div id="regularPaymentsList">
                                         <p class="text-muted">Henüz düzenli
                                             ödeme tanımlanmamış.</p>
                                     </div>
@@ -338,32 +296,32 @@
                                 <!-- Yeni Düzenli Ödeme Ekleme -->
                                 <div class="data-management-card">
                                     <h3>➕ Yeni Düzenli Ödeme</h3>
-                                    <form id="duzenliOdemeForm"
+                                    <form id="regularOdemeForm"
                                         onsubmit="handleDuzenliOdemeSubmit(event)">
                                         <div class="form-row">
                                             <div class="form-group">
                                                 <label
-                                                    for="duzenliAciklama">Açıklama
+                                                    for="regularDescription">Açıklama
                                                     *</label>
                                                 <input type="text"
-                                                    id="duzenliAciklama"
+                                                    id="regularDescription"
                                                     placeholder="Elektrik faturası"
                                                     required>
                                             </div>
                                             <div class="form-group">
-                                                <label for="duzenliTutar">Tutar
+                                                <label for="regularAmount">Tutar
                                                     (TL) *</label>
                                                 <input type="number"
-                                                    id="duzenliTutar"
+                                                    id="regularAmount"
                                                     step="0.01" min="0.01"
                                                     required>
                                             </div>
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group">
-                                                <label for="duzenliKart">Kart
+                                                <label for="regularCard">Kart
                                                     *</label>
-                                                <select id="duzenliKart"
+                                                <select id="regularCard"
                                                     required>
                                                     <option value>Kart
                                                         Seçin</option>
@@ -371,9 +329,9 @@
                                             </div>
                                             <div class="form-group">
                                                 <label
-                                                    for="duzenliKullanici">Kullanıcı
+                                                    for="regularUser">Kullanıcı
                                                     *</label>
-                                                <select id="duzenliKullanici"
+                                                <select id="regularUser"
                                                     required>
                                                     <option value>Kullanıcı
                                                         Seçin</option>
@@ -383,17 +341,17 @@
                                         <div class="form-row">
                                             <div class="form-group">
                                                 <label
-                                                    for="duzenliBaslangic">Başlangıç
+                                                    for="regularStart">Başlangıç
                                                     Tarihi *</label>
                                                 <input type="date"
-                                                    id="duzenliBaslangic"
+                                                    id="regularStart"
                                                     required>
                                             </div>
                                             <div class="form-group">
                                                 <label
-                                                    for="duzenliKategori">Kategori</label>
+                                                    for="regularKategori">Kategori</label>
                                                 <input type="text"
-                                                    id="duzenliKategori"
+                                                    id="regularKategori"
                                                     value="Düzenli Ödeme"
                                                     readonly>
                                             </div>
@@ -410,13 +368,13 @@
             </div>
         </div>
 
-        <!-- Cache Manager (must be first) -->
-        <script src="./assets/js/cache-manager.js"></script>
-
-        <!-- JavaScript Files -->
+        <!-- JavaScript Files - Refactored -->
+        <script src="./assets/js/notifications.js"></script>
+        <script src="./assets/js/form-handlers.js"></script>
+        <script src="./assets/js/data-operations.js"></script>
+        <script src="./assets/js/expense-editor.js"></script>
         <script src="./assets/js/components.js"></script>
         <script src="./assets/js/auth.js"></script>
-        <script src="./assets/js/auth-ui.js"></script>
         <script src="./assets/js/app.js"></script>
         <script src="./assets/js/data-manager.js"></script>
         <script src="./assets/js/calculations.js"></script>
@@ -424,6 +382,6 @@
         <script src="./assets/js/utils.js"></script>
 
         <!-- Page Specific Scripts -->
-        <script src="./assets/js/pages/harcama-ekle.js"></script>
+        <script src="./assets/js/pages/add-expense.js"></script>
     </body>
 </html>

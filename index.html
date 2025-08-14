@@ -6,10 +6,13 @@
         <title>Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+            content="Kredi cardı expensesınızı ve düzenli ödemelerinizi profesyonelce takip edin">
         <meta name="keywords"
-            content="kredi kartı, harcama takip, fatura, ödeme, finans">
+            content="kredi cardı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiM2MzY2ZjEiLz4KPHA+PGNpcmNsZSBjeD0iMjQiIGN5PSIxNiIgcj0iNCIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTIiIHk9IjI0IiB3aWR0aD0iMjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IndoaXRlIi8+CjxyZWN0IHg9IjEyIiB5PSIzMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjQiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
 
         <meta name="theme-color" content="#6366f1">
         <meta name="msapplication-navbutton-color" content="#6366f1">
@@ -47,10 +50,10 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
                     </div>
 
-                    <!-- Login Form -->
+                    <!-- Login Form Only -->
                     <div id="loginForm" class="auth-form">
                         <h2>Giriş Yap</h2>
                         <form onsubmit="handleLogin(event)">
@@ -64,60 +67,140 @@
                                 <input type="password" id="loginPassword"
                                     required autocomplete="current-password">
                             </div>
-                            <button type="submit" class="btn btn-primary">Giriş
-                                Yap</button>
+                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
                         </form>
-                        <p class="auth-switch">
-                            Hesabınız yok mu? <a href="#"
-                                onclick="showRegister()">Kayıt olun</a>
-                        </p>
-                    </div>
-
-                    <!-- Register Form -->
-                    <div id="registerForm" class="auth-form"
-                        style="display: none;">
-                        <h2>Kayıt Ol</h2>
-                        <form onsubmit="handleRegister(event)">
-                            <div class="form-group">
-                                <label for="registerUsername">Kullanıcı
-                                    Adı</label>
-                                <input type="text" id="registerUsername"
-                                    required minlength="3"
-                                    autocomplete="username">
-                                <small>En az 3 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="registerEmail">E-posta
-                                    (Opsiyonel)</label>
-                                <input type="email" id="registerEmail"
-                                    autocomplete="email">
-                            </div>
-                            <div class="form-group">
-                                <label for="registerPassword">Şifre</label>
-                                <input type="password" id="registerPassword"
-                                    required minlength="6"
-                                    autocomplete="new-password">
-                                <small>En az 6 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Şifre
-                                    Tekrar</label>
-                                <input type="password" id="confirmPassword"
-                                    required autocomplete="new-password">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Kayıt
-                                Ol</button>
-                        </form>
-                        <p class="auth-switch">
-                            Zaten hesabınız var mı? <a href="#"
-                                onclick="showLogin()">Giriş yapın</a>
-                        </p>
+                        <div class="auth-info">
+                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
+                            <small>Yeni kullanıcılar sadece admin tarafından oluşturulabilir</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Setup Wizard -->
+        <!-- Admin Panel Container -->
+        <div id="adminPanel" style="display: none;">
+            <div class="admin-wrapper">
+                <header class="admin-header">
+                    <div class="admin-nav">
+                        <h1>🛠️ Admin Panel</h1>
+                        <div class="admin-user-info">
+                            <span>Admin: <strong id="currentAdminInfo"></strong></span>
+                            <button class="btn btn-danger btn-sm" onclick="authSystem.logout()">
+                                Çıkış Yap
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="admin-main">
+                    <div class="admin-section">
+                        <div class="section-header">
+                            <h2>👥 Kullanıcı Yönetimi</h2>
+                            <button class="btn btn-primary" onclick="toggleAdminForm()">
+                                Yeni Kullanıcı Ekle
+                            </button>
+                        </div>
+
+                        <!-- Yeni Kullanıcı Oluşturma Formu -->
+                        <div id="createUserForm" class="admin-form" style="display: none;">
+                            <h3>Yeni Kullanıcı Oluştur</h3>
+                            <form onsubmit="handleCreateUser(event)">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="newUsername">Kullanıcı Adı *</label>
+                                        <input type="text" id="newUsername" required minlength="3">
+                                        <small>En az 3 karakter</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="newUserEmail">E-posta</label>
+                                        <input type="email" id="newUserEmail">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="newUserPassword">Şifre *</label>
+                                        <input type="password" id="newUserPassword" required minlength="8">
+                                        <small>En az 8 karakter, büyük/küçük harf ve rakam içermeli</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirmNewUserPassword">Şifre Tekrar *</label>
+                                        <input type="password" id="confirmNewUserPassword" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success">Kullanıcı Oluştur</button>
+                            </form>
+                        </div>
+
+                        <!-- Kullanıcı Listesi -->
+                        <div class="users-list">
+                            <h3>Mevcut Kullanıcılar</h3>
+                            <div id="usersList" class="users-container">
+                                <!-- Kullanıcılar buraya yüklenecek -->
+                            </div>
+                        </div>
+
+                        <!-- Admin İşlemleri -->
+                        <div class="admin-actions">
+                            <h3>Sistem Yönetimi</h3>
+                            <div class="action-buttons">
+                                <button class="btn btn-warning" onclick="clearAllSessions()">
+                                    🔄 Tüm Oturumları Temizle
+                                </button>
+                                <button class="btn btn-info" onclick="showSystemInfo()">
+                                    📊 Sistem Bilgileri
+                                </button>
+                                <button class="btn btn-secondary" onclick="showMigrationHelp()">
+                                    🔧 Veri Geçiş Yardımı
+                                </button>
+                            </div>
+                            
+                            <div id="systemInfo" class="system-info" style="display: none;">
+                                <h4>Sistem İstatistikleri</h4>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">Toplam Kullanıcı:</span>
+                                        <span id="totalUsers" class="info-value">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Aktif Oturumlar:</span>
+                                        <span id="activeSessions" class="info-value">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Son Giriş:</span>
+                                        <span id="lastLogin" class="info-value">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="migrationHelp" class="system-info" style="display: none;">
+                                <h4>🔧 Veri Geçiş Yardımı</h4>
+                                <div class="migration-info">
+                                    <p><strong>Mevcut datalerinize erişim:</strong></p>
+                                    <ul>
+                                        <li>Eski kullanıcı dataleriniz otomatik olarak tespit edildi</li>
+                                        <li>Varsayılan şifre: <code>123456</code></li>
+                                        <li>Giriş yaptıktan sonra şifrenizi değiştirin</li>
+                                    </ul>
+                                    
+                                    <p><strong>Manuel kontrol için:</strong></p>
+                                    <div class="migration-buttons">
+                                        <button class="btn btn-sm btn-outline" onclick="checkOldData()">
+                                            Eski Verileri Kontrol Et
+                                        </button>
+                                        <button class="btn btn-sm btn-warning" onclick="forceDataMigration()">
+                                            Zorunlu Veri Geçişi
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Setup Wizard - Sadece yeni kullanıcılar için -->
         <div id="setupWizard" style="display: none;">
             <div class="setup-wrapper">
                 <div class="setup-container">
@@ -131,7 +214,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi kartlarını
+                            <p>Takip etmek istediğiniz kredi cardsını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -144,8 +227,8 @@
                                     onclick="addCard()">Kart Ekle</button>
 
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz kart eklenmedi.
-                                        En az bir kart eklemeniz önerilir.</p>
+                                    <p class="setup-help">Henüz card eklenmedi.
+                                        En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
                         </div>
@@ -195,8 +278,8 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi kartı
-                                    harcamalarınızı profesyonelce yönetin</div>
+                                <div class="header-subtitle">Kredi cardı
+                                    expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
                     </div>
@@ -206,6 +289,11 @@
                             <span>👤</span>
                             <span id="currentUserInfo">Kullanıcı</span>
                         </div>
+                        <button class="btn btn-danger btn-sm" 
+                                onclick="authSystem.logout()"
+                                title="Çıkış Yap">
+                            🚪 Çıkış
+                        </button>
                         <button class="theme-toggle" onclick="toggleTheme()"
                             title="Tema Değiştir">
                             🌙
@@ -215,14 +303,14 @@
                 <div class="tabs">
                     <a href="index.html" class="tab active">📊 Gösterge
                         Paneli</a>
-                    <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-                    <a href="harcama-listesi.html" class="tab">📋 Harcama
+                    <a href="add-expense.html" class="tab">➕ Add Expense</a>
+                    <a href="expense-list.html" class="tab">📋 Harcama
                         Listesi</a>
-                    <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-                    <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-                    <a href="istatistikler.html" class="tab">📊
+                    <a href="accounts.html" class="tab">💰 Hesaplar</a>
+                    <a href="monthly-summary.html" class="tab">📅 Aylık Özet</a>
+                    <a href="statistics.html" class="tab">📊
                         İstatistikler</a>
-                    <a href="veri-yonetimi.html" class="tab">⚙️ Veri
+                    <a href="data-management.html" class="tab">⚙️ Veri
                         Yönetimi</a>
                 </div>
 
@@ -233,7 +321,7 @@
 
                         <div class="summary-cards">
                             <div class="summary-card">
-                                <h3>💰 Bu Ay Toplam Harcama</h3>
+                                <h3>💰 Bu Ay Total Expenses</h3>
                                 <div class="amount" id="thisMonthTotal">0
                                     TL</div>
                             </div>
@@ -276,13 +364,13 @@
             </div>
         </div>
 
-        <!-- Cache Manager (must be first) -->
-        <script src="./assets/js/cache-manager.js"></script>
-
-        <!-- JavaScript Files -->
+        <!-- JavaScript Files - Refactored and Optimized -->
+        <script src="./assets/js/notifications.js"></script>
+        <script src="./assets/js/form-handlers.js"></script>
+        <script src="./assets/js/data-operations.js"></script>
+        <script src="./assets/js/expense-editor.js"></script>
         <script src="./assets/js/components.js"></script>
         <script src="./assets/js/auth.js"></script>
-        <script src="./assets/js/auth-ui.js"></script>
         <script src="./assets/js/app.js"></script>
         <script src="./assets/js/data-manager.js"></script>
         <script src="./assets/js/calculations.js"></script>

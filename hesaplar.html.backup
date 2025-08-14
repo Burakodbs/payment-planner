@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Harcama Listesi - Kredi Kartı Harcama Takip Sistemi</title>
+        <title>Hesaplar - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
             content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
@@ -68,8 +68,38 @@
                                 Yap</button>
                         </form>
                         <p class="auth-switch">
-                            Hesabınız yok mu? <a href="#"
-                                onclick="showRegister()">Kayıt olun</a>
+                        <div id="authContainer" style="display: none;">
+            <div class="auth-wrapper">
+                <div class="auth-container">
+                    <div class="auth-header">
+                        <h1>💳 Harcama Takip Sistemi</h1>
+                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                    </div>
+
+                    <!-- Login Form Only -->
+                    <div id="loginForm" class="auth-form">
+                        <h2>Giriş Yap</h2>
+                        <form onsubmit="handleLogin(event)">
+                            <div class="form-group">
+                                <label for="loginUsername">Kullanıcı Adı</label>
+                                <input type="text" id="loginUsername" required
+                                    autocomplete="username">
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Şifre</label>
+                                <input type="password" id="loginPassword"
+                                    required autocomplete="current-password">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                        </form>
+                        <div class="auth-info">
+                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
+                            <small>Yeni kullanıcılar sadece admin tarafından oluşturulabilir</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
                         </p>
                     </div>
 
@@ -97,27 +127,11 @@
                                 <input type="password" id="registerPassword"
                                     required minlength="6"
                                     autocomplete="new-password">
-                                <small>En az 6 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Şifre
-                                    Tekrar</label>
-                                <input type="password" id="confirmPassword"
-                                    required autocomplete="new-password">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Kayıt
-                                Ol</button>
-                        </form>
-                        <p class="auth-switch">
-                            Zaten hesabınız var mı? <a href="#"
-                                onclick="showLogin()">Giriş yapın</a>
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Setup Wizard -->
+        <!-- Setup Wizard - Sadece yeni kullanıcılar için -->
         <div id="setupWizard" style="display: none;">
             <div class="setup-wrapper">
                 <div class="setup-container">
@@ -215,9 +229,9 @@
                 <div class="tabs">
                     <a href="index.html" class="tab">📊 Gösterge Paneli</a>
                     <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-                    <a href="harcama-listesi.html" class="tab active">📋 Harcama
+                    <a href="harcama-listesi.html" class="tab">📋 Harcama
                         Listesi</a>
-                    <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
+                    <a href="hesaplar.html" class="tab active">💰 Hesaplar</a>
                     <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
                     <a href="istatistikler.html" class="tab">📊
                         İstatistikler</a>
@@ -226,167 +240,48 @@
                 </div>
 
                 <div class="content">
-                    <!-- Harcama Listesi Content -->
+                    <!-- Hesaplar Content -->
                     <div class="page-content">
-                        <h2>Harcama Listesi</h2>
-
-                        <div class="filters">
-                            <div class="filter-row">
-                                <div class="filter-group">
-                                    <label for="filtreTarih">📅 Ay/Yıl</label>
-                                    <input type="month" id="filtreTarih"
-                                        onchange="updateHarcamaTable()">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="filtreKullanici">👤 Kişi</label>
-                                    <select id="filtreKullanici"
-                                        onchange="updateHarcamaTable()">
-                                        <option value>Tümü</option>
-                                    </select>
-                                </div>
-                                <div class="filter-group">
-                                    <label for="filtreKart">💳 Kart</label>
-                                    <select id="filtreKart"
-                                        onchange="updateHarcamaTable()">
-                                        <option value>Tümü</option>
-                                    </select>
-                                </div>
-                                <div class="filter-group">
-                                    <label for="minTutar">💰 Min</label>
-                                    <input type="number" id="minTutar"
-                                        placeholder="0 ₺"
-                                        onchange="updateHarcamaTable()">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="maxTutar">💰 Max</label>
-                                    <input type="number" id="maxTutar"
-                                        placeholder="∞ ₺"
-                                        onchange="updateHarcamaTable()">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="siralamaKriteri">📊
-                                        Sıralama</label>
-                                    <select id="siralamaKriteri"
-                                        onchange="updateHarcamaTable()">
-                                        <option value="tarih-desc">🗓️ Yeni →
-                                            Eski</option>
-                                        <option value="tarih-asc">🗓️ Eski →
-                                            Yeni</option>
-                                        <option value="tutar-desc">💸 Büyük →
-                                            Küçük</option>
-                                        <option value="tutar-asc">💸 Küçük →
-                                            Büyük</option>
-                                        <option value="kullanici-asc">👤 A →
-                                            Z</option>
-                                        <option value="kart-asc">💳 A →
-                                            Z</option>
-                                    </select>
-                                </div>
-                                <div class="filter-group">
-                                    <label>&nbsp;</label>
-                                    <button class="btn btn-outline"
-                                        onclick="clearAllFilters()">🧹
-                                        Temizle</button>
-                                </div>
-                            </div>
-                        </div>
+                        <h2>Hesaplar</h2>
+                        <p>Kişi bazında borç/alacak durumu ve gelecek taksit
+                            ödemeleri</p>
 
                         <div class="table-container">
-                            <div class="table-header">
-                                <span id="sonucSayisi">Toplam: 0 harcama</span>
-                            </div>
-                            <table id="harcamaTable" class="harcama-table">
+                            <table id="hesaplarTable" class="hesaplar-table">
                                 <thead>
                                     <tr>
-                                        <th>Tarih</th>
-                                        <th>Kart</th>
-                                        <th>Kullanıcı</th>
-                                        <th>Açıklama</th>
-                                        <th>Taksit</th>
-                                        <th>Tutar</th>
-                                        <th>İşlemler</th>
+                                        <th>Kişi</th>
+                                        <th>Mevcut Harcama</th>
+                                        <th>Gelecek Taksitler</th>
+                                        <th>Toplam Borç</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td colspan="7"
+                                        <td colspan="4"
                                             style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                            Henüz harcama kaydı yok
+                                            Henüz veri yok
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- Harcama Düzenleme Modal -->
-                        <div id="editHarcamaModal"
-                            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-                            <div
-                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg); padding: 24px; border-radius: var(--radius); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
-                                <h3>Harcamayı Düzenle</h3>
-                                <form id="editHarcamaForm">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="editTarih">Tarih
-                                                *</label>
-                                            <input type="date" id="editTarih"
-                                                required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="editKart">Kart *</label>
-                                            <select id="editKart" required>
-                                                <option value>Kart
-                                                    Seçin</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="editKullanici">Kullanıcı
-                                                *</label>
-                                            <select id="editKullanici" required>
-                                                <option value>Kullanıcı
-                                                    Seçin</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label
-                                                for="editAciklama">Açıklama</label>
-                                            <input type="text" id="editAciklama"
-                                                placeholder="Harcama detayı...">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="editTutar">Tutar (TL)
-                                                *</label>
-                                            <input type="number" id="editTutar"
-                                                step="0.01" min="0.01" required>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="editTaksitNo">Kaçıncı
-                                                Taksit?</label>
-                                            <input type="number"
-                                                id="editTaksitNo" min="1"
-                                                max="99">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="editToplamTaksit">Toplam
-                                                Taksit</label>
-                                            <input type="number"
-                                                id="editToplamTaksit" min="1"
-                                                max="99">
-                                        </div>
-                                    </div>
-                                    <div
-                                        style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
-                                        <button type="button"
-                                            class="btn btn-outline"
-                                            onclick="closeEditHarcamaModal()">İptal</button>
-                                        <button type="submit"
-                                            class="btn btn-primary">Güncelle</button>
-                                    </div>
-                                </form>
+                        <div class="debt-summary">
+                            <h3>Borç Açıklaması</h3>
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <span
+                                        class="legend-color debt-positive"></span>
+                                    <span>Pozitif: Bu kişi toplam bu kadar ödeme
+                                        yapmış/yapacak</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span
+                                        class="legend-color debt-negative"></span>
+                                    <span>Negatif: Bu kişiye bu kadar borç
+                                        var</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -408,6 +303,6 @@
         <script src="./assets/js/utils.js"></script>
 
         <!-- Page Specific Scripts -->
-        <script src="./assets/js/pages/harcama-listesi.js"></script>
+        <script src="./assets/js/pages/hesaplar.js"></script>
     </body>
 </html>

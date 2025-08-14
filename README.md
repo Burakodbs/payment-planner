@@ -7,6 +7,9 @@ Modern, profesyonel ve kullanıcı dostu kredi kartı harcama takip uygulaması.
 ### Dosya Organizasyonu
 ```
 payment-planner/
+
+```text
+payment-planner/
 ├── assets/
 │   ├── css/
 │   │   ├── variables.css      # CSS değişkenleri ve tema
@@ -22,7 +25,36 @@ payment-planner/
 │   │   ├── data-manager.js   # Veri yönetimi ve filtreleme
 │   │   ├── calculations.js   # Hesaplamalar ve finansal işlemler
 │   │   ├── chart-manager.js  # Grafik ve görselleştirme
-│   │   ├── utils.js          # Yardımcı fonksiyonlar
+│   │   ├── utils.js          # Genel yardımcı + dashboard vb (düzenli ödeme logic'i ayrıldı)
+│   │   ├── regular-payments.js # Düzenli ödeme yönetimi (CRUD, liste, otomatik üretim)
+│   │   └── pages/           # Sayfa-özel JavaScript dosyaları
+│   │       ├── dashboard.js
+│   │       ├── harcama-ekle.js
+│   │       ├── harcama-listesi.js
+│   │       ├── hesaplar.js
+│   │       ├── aylik-ozet.js
+│   │       └── veri-yonetimi.js
+│   └── icons/               # Uygulama ikonları
+├── index.html               # Ana dashboard sayfası
+├── harcama-ekle.html       # Harcama ekleme sayfası
+├── harcama-listesi.html    # Harcama listesi ve filtreleme
+├── hesaplar.html           # Hesap durumları
+├── aylik-ozet.html         # Aylık özetler
+├── veri-yonetimi.html      # Veri yönetimi ve ayarlar
+├── manifest.json           # PWA manifest
+├── sw.js                   # Service Worker
+└── package.json            # NPM yapılandırması
+```
+├── assets/
+│   ├── css/
+│   │   ├── variables.css      # CSS değişkenleri ve tema
+│   ├── js/
+│   │   ├── app.js            # Ana uygulama mantığı
+│   │   ├── auth.js           # Kimlik doğrulama sistemi
+│   │   ├── auth-ui.js        # Kimlik doğrulama UI
+│   │   ├── data-manager.js   # Veri yönetimi ve filtreleme
+│   │   ├── utils.js          # Genel yardımcı + dashboard vb (düzenli ödeme logic'i ayrıldı)
+│   │   ├── regular-payments.js # Düzenli ödeme yönetimi (CRUD, liste, otomatik üretim)
 │   │   └── pages/           # Sayfa-özel JavaScript dosyaları
 │   │       ├── dashboard.js
 │   │       ├── harcama-ekle.js
@@ -66,13 +98,13 @@ payment-planner/
    cd payment-planner
    ```
 
-2. **Bağımlılıkları yükleyin:**
+1. **Bağımlılıkları yükleyin:**
 
    ```bash
    npm install
    ```
 
-3. **Geliştirme sunucusunu başlatın:**
+1. **Geliştirme sunucusunu başlatın:**
 
    ```bash
    npm run dev
@@ -80,25 +112,23 @@ payment-planner/
    npm run serve
    ```
 
+1. **Tarayıcıda açın:**
 
-4. **Tarayıcıda açın:**
-
-   ```
-   http://localhost:8000
-   ```
+   Tarayıcıda: <http://localhost:8000>
 
 ### NPM Komutları
 
 ```bash
-npm run dev        # Geliştirme sunucusunu başlat
-npm run serve      # Sunucuyu başlat (alternatif)
-npm run preview    # Preview sunucusunu başlat
-npm run build      # Build bilgisi (statik proje)
-npm run lint       # Linting kurulum bilgisi
-npm run format     # Formatlama kurulum bilgisi
+npm run dev        # Geliştirme sunucusu
+npm run serve      # Alternatif sunucu
+npm run preview    # Preview
+npm run build      # Statik build (bilgi amaçlı)
+npm run lint       # Lint (konfig gereken)
+npm run format     # Format (konfig gereken)
 ```
 
 ### Manuel Çalıştırma
+
 ```bash
 python -m http.server 8000
 # veya herhangi bir HTTP server
@@ -109,9 +139,7 @@ python -m http.server 8000
 ### İlk Kurulum
 
 1. Uygulamayı açın ve kayıt olun
-2. Kurulum sihirbazını takip edin:
-   - Kredi kartlarınızı ekleyin
-   - Kullanıcıları tanımlayın
+2. Kredi kartlarınızı ve kullanıcıları ekleyin
 3. Kurulumu tamamlayın
 
 ### Harcama Ekleme

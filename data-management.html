@@ -6,9 +6,9 @@
         <title>Veri Yönetimi - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+            content="Kredi cardı expensesınızı ve düzenli ödemelerinizi profesyonelce takip edin">
         <meta name="keywords"
-            content="kredi kartı, harcama takip, fatura, ödeme, finans">
+            content="kredi cardı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
 
         <meta name="theme-color" content="#007bff">
@@ -47,10 +47,10 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
                     </div>
 
-                    <!-- Login Form -->
+                    <!-- Login Form Only -->
                     <div id="loginForm" class="auth-form">
                         <h2>Giriş Yap</h2>
                         <form onsubmit="handleLogin(event)">
@@ -64,60 +64,18 @@
                                 <input type="password" id="loginPassword"
                                     required autocomplete="current-password">
                             </div>
-                            <button type="submit" class="btn btn-primary">Giriş
-                                Yap</button>
+                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
                         </form>
-                        <p class="auth-switch">
-                            Hesabınız yok mu? <a href="#"
-                                onclick="showRegister()">Kayıt olun</a>
-                        </p>
-                    </div>
-
-                    <!-- Register Form -->
-                    <div id="registerForm" class="auth-form"
-                        style="display: none;">
-                        <h2>Kayıt Ol</h2>
-                        <form onsubmit="handleRegister(event)">
-                            <div class="form-group">
-                                <label for="registerUsername">Kullanıcı
-                                    Adı</label>
-                                <input type="text" id="registerUsername"
-                                    required minlength="3"
-                                    autocomplete="username">
-                                <small>En az 3 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="registerEmail">E-posta
-                                    (Opsiyonel)</label>
-                                <input type="email" id="registerEmail"
-                                    autocomplete="email">
-                            </div>
-                            <div class="form-group">
-                                <label for="registerPassword">Şifre</label>
-                                <input type="password" id="registerPassword"
-                                    required minlength="6"
-                                    autocomplete="new-password">
-                                <small>En az 6 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Şifre
-                                    Tekrar</label>
-                                <input type="password" id="confirmPassword"
-                                    required autocomplete="new-password">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Kayıt
-                                Ol</button>
-                        </form>
-                        <p class="auth-switch">
-                            Zaten hesabınız var mı? <a href="#"
-                                onclick="showLogin()">Giriş yapın</a>
-                        </p>
+                        <div class="auth-info">
+                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
+                            <small>Yeni kullanıcılar sadece admin tarafından oluşturulabilir</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Setup Wizard -->
+        <!-- Setup Wizard - Sadece yeni kullanıcılar için -->
         <div id="setupWizard" style="display: none;">
             <div class="setup-wrapper">
                 <div class="setup-container">
@@ -131,7 +89,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi kartlarını
+                            <p>Takip etmek istediğiniz kredi cardsını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -144,8 +102,8 @@
                                     onclick="addCard()">Kart Ekle</button>
 
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz kart eklenmedi.
-                                        En az bir kart eklemeniz önerilir.</p>
+                                    <p class="setup-help">Henüz card eklenmedi.
+                                        En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
                         </div>
@@ -195,8 +153,8 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi kartı
-                                    harcamalarınızı profesyonelce yönetin</div>
+                                <div class="header-subtitle">Kredi cardı
+                                    expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
                     </div>
@@ -214,14 +172,14 @@
                 </div>
                 <div class="tabs">
                     <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-                    <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-                    <a href="harcama-listesi.html" class="tab">📋 Harcama
+                    <a href="add-expense.html" class="tab">➕ Add Expense</a>
+                    <a href="expense-list.html" class="tab">📋 Harcama
                         Listesi</a>
-                    <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-                    <a href="aylik-ozet.html" class="tab">📅 Aylık Özet</a>
-                    <a href="istatistikler.html" class="tab">📊
+                    <a href="accounts.html" class="tab">💰 Hesaplar</a>
+                    <a href="monthly-summary.html" class="tab">📅 Aylık Özet</a>
+                    <a href="statistics.html" class="tab">📊
                         İstatistikler</a>
-                    <a href="veri-yonetimi.html" class="tab active">⚙️ Veri
+                    <a href="data-management.html" class="tab active">⚙️ Veri
                         Yönetimi</a>
                 </div>
 
@@ -244,7 +202,7 @@
                                         Yedek Al</h4>
                                     <p
                                         style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">Tüm
-                                        verilerinizi JSON formatında
+                                        datalerinizi JSON formatında
                                         kaydedin</p>
                                     <button class="btn btn-primary"
                                         onclick="exportData()"
@@ -260,7 +218,7 @@
                                         Yedek Yükle</h4>
                                     <p
                                         style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">Yedek
-                                        dosyanızı seçin ve verilerinizi geri
+                                        dosyanızı seçin ve datalerinizi geri
                                         yükleyin</p>
                                     <div style="margin-bottom: 12px;">
                                         <input type="file" id="fileInput"
@@ -278,7 +236,7 @@
                             <!-- Kart ve Kullanıcı Yönetimi -->
                             <div class="data-management-card" style="order: 2;">
                                 <h3>👥 Kart ve Kullanıcı Yönetimi</h3>
-                                <p>Kredi kartlarınızı ve kullanıcılarınızı
+                                <p>Kredi cardsınızı ve kullanıcılarınızı
                                     kolayca ekleyin, düzenleyin ve silin.</p>
 
                                 <div style="margin-bottom: 24px;">
@@ -289,7 +247,7 @@
                                     <div
                                         style="display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 12px; align-items: center;">
                                         <input type="text" id="newCardInput"
-                                            placeholder="Yeni kart adı"
+                                            placeholder="Yeni card adı"
                                             style="padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 14px; width: 100%;">
                                         <button class="btn btn-primary"
                                             onclick="addNewCard()"
@@ -343,14 +301,14 @@
                 </div>
             </div>
         </div>
-
-        <!-- Cache Manager (must be first) -->
-        <script src="./assets/js/cache-manager.js"></script>
-
-        <!-- JavaScript Files -->
+        
+        <!-- JavaScript Files - Refactored -->
+        <script src="./assets/js/notifications.js"></script>
+        <script src="./assets/js/form-handlers.js"></script>
+        <script src="./assets/js/data-operations.js"></script>
+        <script src="./assets/js/expense-editor.js"></script>
         <script src="./assets/js/components.js"></script>
         <script src="./assets/js/auth.js"></script>
-        <script src="./assets/js/auth-ui.js"></script>
         <script src="./assets/js/app.js"></script>
         <script src="./assets/js/data-manager.js"></script>
         <script src="./assets/js/calculations.js"></script>
@@ -358,6 +316,6 @@
         <script src="./assets/js/utils.js"></script>
 
         <!-- Page Specific Scripts -->
-        <script src="./assets/js/pages/veri-yonetimi.js"></script>
+        <script src="./assets/js/pages/data-management.js"></script>
     </body>
 </html>

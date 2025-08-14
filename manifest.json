@@ -2,7 +2,7 @@
   "name": "Kredi Kartı Harcama Takip Sistemi",
   "short_name": "Harcama Takip",
   "description": "Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin",
-  "start_url": "./kredi_karti_takip.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#6366f1",
   "theme_color": "#6366f1",
