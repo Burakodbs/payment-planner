@@ -6,18 +6,18 @@ class FormHandlers {
         const formData = new FormData(event.target);
         const expense = {
             id: Date.now(),
-            tarih: formData.get('tarih'),
-            kart: formData.get('kart'),
-            kullanici: formData.get('kullanici'),
+            date: formData.get('tarih'),
+            card: formData.get('kart'),
+            person: formData.get('kullanici'),
             kategori: formData.get('kategori'),
-            aciklama: formData.get('aciklama'),
-            tutar: parseFloat(formData.get('tutar')),
+            description: formData.get('aciklama'),
+            amount: parseFloat(formData.get('tutar')),
             taksitNo: formData.get('taksitNo') ? parseInt(formData.get('taksitNo')) : null,
             toplamTaksit: formData.get('toplamTaksit') ? parseInt(formData.get('toplamTaksit')) : null,
             isTaksit: formData.get('taksitNo') && formData.get('toplamTaksit')
         };
 
-        harcamalar.push(expense);
+        expenses.push(expense);
         DataManager.save();
 
         // Sticky values
@@ -65,7 +65,7 @@ class FormHandlers {
         }
         
         // Always set current date
-        const dateField = document.getElementById('harcamaTarih');
+        const dateField = document.getElementById('expenseDate');
         if (dateField) {
             dateField.value = new Date().toISOString().slice(0, 10);
         }

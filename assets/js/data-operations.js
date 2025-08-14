@@ -13,15 +13,15 @@ class DataOperations {
             user: (authSystem && authSystem.currentUser) || null,
             exportDate: new Date().toISOString(),
             counts: {
-                harcamalar: harcamalar.length,
-                duzenliOdemeler: duzenliOdemeler.length,
-                kredikartlari: kredikartlari.length,
-                kisiler: kisiler.length
+                expenses: expenses.length,
+                regularPayments: regularPayments.length,
+                creditCards: creditCards.length,
+                people: people.length
             },
-            harcamalar: harcamalar,
-            duzenliOdemeler: duzenliOdemeler,
-            kredikartlari: kredikartlari,
-            kisiler: kisiler
+            expenses: expenses,
+            regularPayments: regularPayments,
+            creditCards: creditCards,
+            people: people
         };
 
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -53,10 +53,10 @@ class DataOperations {
                 const data = JSON.parse(e.target.result);
 
                 // Load raw data
-                if (Array.isArray(data.harcamalar)) harcamalar = data.harcamalar;
-                if (Array.isArray(data.duzenliOdemeler)) duzenliOdemeler = data.duzenliOdemeler;
-                if (Array.isArray(data.kredikartlari)) kredikartlari = data.kredikartlari;
-                if (Array.isArray(data.kisiler)) kisiler = data.kisiler;
+                if (Array.isArray(data.expenses)) expenses = data.expenses;
+                if (Array.isArray(data.regularPayments)) regularPayments = data.regularPayments;
+                if (Array.isArray(data.creditCards)) creditCards = data.creditCards;
+                if (Array.isArray(data.people)) people = data.people;
 
                 // Save data
                 DataManager.save();
@@ -68,13 +68,13 @@ class DataOperations {
                 DataManager.updateAllViews();
 
                 const importCount = {
-                    harcamalar: Array.isArray(data.harcamalar) ? data.harcamalar.length : 0,
-                    duzenliOdemeler: Array.isArray(data.duzenliOdemeler) ? data.duzenliOdemeler.length : 0,
-                    kredikartlari: Array.isArray(data.kredikartlari) ? data.kredikartlari.length : 0,
-                    kisiler: Array.isArray(data.kisiler) ? data.kisiler.length : 0
+                    expenses: Array.isArray(data.expenses) ? data.expenses.length : 0,
+                    regularPayments: Array.isArray(data.regularPayments) ? data.regularPayments.length : 0,
+                    creditCards: Array.isArray(data.creditCards) ? data.creditCards.length : 0,
+                    people: Array.isArray(data.people) ? data.people.length : 0
                 };
 
-                NotificationService.success(`Veriler içe aktarıldı: ${importCount.harcamalar} harcama, ${importCount.duzenliOdemeler} düzenli ödeme, ${importCount.kredikartlari} kart, ${importCount.kisiler} kişi`);
+                NotificationService.success(`Veriler içe aktarıldı: ${importCount.expenses} harcama, ${importCount.regularPayments} düzenli ödeme, ${importCount.creditCards} kart, ${importCount.people} kişi`);
 
                 fileInput.value = '';
             } catch (error) {
@@ -89,10 +89,10 @@ class DataOperations {
         if (confirm('Tüm verileri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
             if (confirm('Bu işlem GERİ ALINAMAZ! Emin misiniz?')) {
                 if (authSystem && authSystem.currentUser) {
-                    harcamalar = [];
-                    duzenliOdemeler = [];
-                    kredikartlari = [];
-                    kisiler = [];
+                    expenses = [];
+                    regularPayments = [];
+                    creditCards = [];
+                    people = [];
                     authSystem.saveUserData();
                     location.reload();
                 } else {
@@ -105,7 +105,7 @@ class DataOperations {
 
     static clearExpenseData() {
         if (confirm('Sadece harcama verilerini silmek istediğinizden emin misiniz?')) {
-            harcamalar = [];
+            expenses = [];
             DataManager.save();
             NotificationService.success('Harcama verileri silindi');
             DataManager.updateAllViews();
@@ -114,7 +114,7 @@ class DataOperations {
 
     static migrateRegularExpensesToDefinitions() {
         try {
-            if (!Array.isArray(harcamalar) || !Array.isArray(duzenliOdemeler)) return;
+            if (!Array.isArray(expenses) || !Array.isArray(regularPayments)) return;
 
             const userKey = (authSystem && authSystem.currentUser)
                 ? `regular_defs_migrated_${authSystem.currentUser}`
@@ -123,15 +123,15 @@ class DataOperations {
             const alreadyFlagged = localStorage.getItem(userKey) || 
                 (authSystem && authSystem.currentUserData && authSystem.currentUserData._regularDefsMigrated);
 
-            if (alreadyFlagged && duzenliOdemeler.length > 0) return;
+            if (alreadyFlagged && regularPayments.length > 0) return;
 
             const isExpenseRegular = (h) => h && (
                 h.isRegular || h.isDuzenli || h.isDuzenliOtomatik ||
-                /(\(Düzenli\))/i.test(h.aciklama || '') ||
+                /(\(Düzenli\))/i.test(h.description || '') ||
                 (typeof h.id === 'string' && h.id.startsWith('duzenli_'))
             );
 
-            const candidateRecords = harcamalar.filter(isExpenseRegular);
+            const candidateRecords = expenses.filter(isExpenseRegular);
             if (candidateRecords.length === 0) {
                 if (!alreadyFlagged) {
                     localStorage.setItem(userKey, '1');
@@ -142,32 +142,32 @@ class DataOperations {
                 return;
             }
 
-            const existingDefinitionIds = new Set((duzenliOdemeler || []).map(d => d.id));
+            const existingDefinitionIds = new Set((regularPayments || []).map(d => d.id));
             const groups = new Map();
 
             candidateRecords.forEach(h => {
                 if (h.duzenliOdemeId && existingDefinitionIds.has(h.duzenliOdemeId)) return;
 
-                const baseName = (h.aciklama || 'Düzenli Ödeme')
+                const baseName = (h.description || 'Düzenli Ödeme')
                     .replace(/\(Düzenli.*?\)/i, '')
                     .replace(/\(Otomatik.*?\)/i, '')
                     .trim() || 'Düzenli Ödeme';
                     
-                const key = [baseName, h.kart || '', h.kullanici || '', Number(h.tutar) || 0].join('||');
+                const key = [baseName, h.card || '', h.person || '', Number(h.amount) || 0].join('||');
                 const existing = groups.get(key);
                 
                 if (existing) {
-                    if (h.tarih && h.tarih < existing.baslangicTarihi) {
-                        existing.baslangicTarihi = h.tarih;
+                    if (h.date && h.date < existing.baslangicTarihi) {
+                        existing.baslangicTarihi = h.date;
                     }
                     existing.items.push(h);
                 } else {
                     groups.set(key, {
-                        aciklama: baseName,
-                        kart: h.kart,
-                        kullanici: h.kullanici,
-                        tutar: Number(h.tutar) || 0,
-                        baslangicTarihi: h.tarih || new Date().toISOString().slice(0, 10),
+                        description: baseName,
+                        card: h.card,
+                        person: h.person,
+                        amount: Number(h.amount) || 0,
+                        baslangicTarihi: h.date || new Date().toISOString().slice(0, 10),
                         kategori: 'Düzenli Ödeme',
                         items: [h]
                     });
@@ -186,12 +186,12 @@ class DataOperations {
 
             groups.forEach(group => {
                 const newId = Date.now() + Math.floor(Math.random() * 1000000);
-                duzenliOdemeler.push({
+                regularPayments.push({
                     id: newId,
-                    aciklama: group.aciklama,
-                    tutar: group.tutar,
-                    kart: group.kart,
-                    kullanici: group.kullanici,
+                    description: group.description,
+                    amount: group.amount,
+                    card: group.card,
+                    person: group.person,
                     baslangicTarihi: group.baslangicTarihi,
                     kategori: group.kategori,
                     aktif: true

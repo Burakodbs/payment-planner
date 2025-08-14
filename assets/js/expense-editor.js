@@ -3,7 +3,7 @@ class ExpenseEditor {
     static editingId = null;
 
     static edit(id) {
-        const expense = harcamalar.find(h => h.id === id);
+        const expense = expenses.find(h => h.id === id);
         if (!expense) {
             NotificationService.error('Harcama bulunamadı');
             return;
@@ -12,9 +12,9 @@ class ExpenseEditor {
         this.editingId = id;
 
         // Fill modal fields
-        document.getElementById('editTarih').value = expense.tarih;
-        document.getElementById('editAciklama').value = expense.aciklama || '';
-        document.getElementById('editTutar').value = expense.tutar;
+        document.getElementById('editTarih').value = expense.date;
+        document.getElementById('editAciklama').value = expense.description || '';
+        document.getElementById('editTutar').value = expense.amount;
         document.getElementById('editTaksitNo').value = expense.taksitNo || '';
         document.getElementById('editToplamTaksit').value = expense.toplamTaksit || '';
 
@@ -22,8 +22,8 @@ class ExpenseEditor {
         this.populateModalSelects();
 
         // Set values
-        document.getElementById('editKart').value = expense.kart;
-        document.getElementById('editKullanici').value = expense.kullanici;
+        document.getElementById('editKart').value = expense.card;
+        document.getElementById('editKullanici').value = expense.person;
 
         // Show modal
         document.getElementById('editHarcamaModal').style.display = 'block';
@@ -73,7 +73,7 @@ class ExpenseEditor {
             return;
         }
 
-        const expenseIndex = harcamalar.findIndex(h => h.id === this.editingId);
+        const expenseIndex = expenses.findIndex(h => h.id === this.editingId);
         if (expenseIndex === -1) {
             NotificationService.error('Harcama bulunamadı');
             return;
@@ -94,13 +94,13 @@ class ExpenseEditor {
         }
 
         // Update expense
-        harcamalar[expenseIndex] = {
-            ...harcamalar[expenseIndex],
+        expenses[expenseIndex] = {
+            ...expenses[expenseIndex],
             tarih,
             kart,
             kullanici,
             aciklama,
-            tutar: parseFloat(tutar),
+            amount: parseFloat(tutar),
             taksitNo: taksitNo ? parseInt(taksitNo) : null,
             toplamTaksit: toplamTaksit ? parseInt(toplamTaksit) : null,
             isTaksit: taksitNo && toplamTaksit
@@ -114,9 +114,9 @@ class ExpenseEditor {
 
     static delete(id) {
         if (confirm('Bu harcamayı silmek istediğinizden emin misiniz?')) {
-            const expenseIndex = harcamalar.findIndex(h => h.id === id);
+            const expenseIndex = expenses.findIndex(h => h.id === id);
             if (expenseIndex !== -1) {
-                harcamalar.splice(expenseIndex, 1);
+                expenses.splice(expenseIndex, 1);
                 DataManager.save();
                 DataManager.updateAllViews();
                 NotificationService.success('Harcama silindi');

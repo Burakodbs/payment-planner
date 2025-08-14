@@ -1,15 +1,15 @@
 // Essential Legacy Utilities - Minimized
 
 // Legacy migration - will be removed in future versions
-function migrateDuzenliOdemeData() {
+function migrateRegularPaymentData() {
     let migrationCount = 0;
-    harcamalar.forEach(expense => {
+    expenses.forEach(expense => {
         if (expense.isDuzenliOtomatik && !expense.isRegular) {
             expense.isRegular = true;
             delete expense.isDuzenliOtomatik;
             
-            if (expense.aciklama && expense.aciklama.includes('(Otomatik)')) {
-                expense.aciklama = expense.aciklama.replace('(Otomatik)', '(Düzenli)');
+            if (expense.description && expense.description.includes('(Otomatik)')) {
+                expense.description = expense.description.replace('(Otomatik)', '(Düzenli)');
             }
             migrationCount++;
         }
@@ -40,8 +40,8 @@ function updateDashboardStats() {
     }
 
     const thisMonth = new Date().toISOString().slice(0, 7);
-    const thisMonthExpenses = harcamalar.filter(h => h.tarih && h.tarih.startsWith(thisMonth));
-    const thisMonthTotal = thisMonthExpenses.reduce((sum, h) => sum + (parseFloat(h.tutar) || 0), 0);
+    const thisMonthExpenses = expenses.filter(h => h.date && h.date.startsWith(thisMonth));
+    const thisMonthTotal = thisMonthExpenses.reduce((sum, h) => sum + (parseFloat(h.amount) || 0), 0);
 
     const { hesaplar, gelecekTaksitler } = calculateDebts();
     const totalCurrentDebt = Object.values(hesaplar).reduce((sum, debt) => sum + debt, 0);
@@ -56,8 +56,8 @@ function updateDashboardRecentExpenses() {
     const container = document.getElementById('recentExpensesList');
     if (!container) return;
 
-    const recentExpenses = harcamalar
-        .sort((a, b) => new Date(b.tarih) - new Date(a.tarih))
+    const recentExpenses = expenses
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 5);
 
     if (recentExpenses.length === 0) {
@@ -66,14 +66,14 @@ function updateDashboardRecentExpenses() {
     }
 
     const html = recentExpenses.map(expense => {
-        const date = new Date(expense.tarih).toLocaleDateString('tr-TR');
+        const date = new Date(expense.date).toLocaleDateString('tr-TR');
         return `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
                 <div>
-                    <div style="font-weight: 600; color: var(--text-primary);">${expense.aciklama || 'Açıklama yok'}</div>
-                    <div style="font-size: 12px; color: var(--text-secondary);">${date} - ${expense.kullanici} - ${expense.kart}</div>
+                    <div style="font-weight: 600; color: var(--text-primary);">${expense.description || 'Açıklama yok'}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">${date} - ${expense.person} - ${expense.card}</div>
                 </div>
-                <div style="font-weight: 600; color: var(--primary);">${(parseFloat(expense.tutar) || 0).toFixed(2)} TL</div>
+                <div style="font-weight: 600; color: var(--primary);">${(parseFloat(expense.amount) || 0).toFixed(2)} TL</div>
             </div>
         `;
     }).join('');
@@ -99,10 +99,10 @@ function updateDashboardUpcomingInstallments() {
     const html = upcomingInstallments.slice(0, 5).map(installment => `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
             <div>
-                <div style="font-weight: 600; color: var(--text-primary);">${installment.aciklama || 'Taksit'}</div>
-                <div style="font-size: 12px; color: var(--text-secondary);">${installment.taksitNo}/${installment.toplamTaksit} - ${installment.kullanici} - ${installment.kart}</div>
+                <div style="font-weight: 600; color: var(--text-primary);">${installment.description || 'Taksit'}</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">${installment.taksitNo}/${installment.toplamTaksit} - ${installment.person} - ${installment.card}</div>
             </div>
-            <div style="font-weight: 600; color: var(--warning);">${(parseFloat(installment.tutar) || 0).toFixed(2)} TL</div>
+            <div style="font-weight: 600; color: var(--warning);">${(parseFloat(installment.amount) || 0).toFixed(2)} TL</div>
         </div>
     `).join('');
 
@@ -113,22 +113,22 @@ function updateDashboardUpcomingInstallments() {
 function syncAllDataAfterNameChange(type, oldName, newName) {
     let updateCount = 0;
 
-    harcamalar.forEach(expense => {
-        if (type === 'kart' && expense.kart === oldName) {
-            expense.kart = newName;
+    expenses.forEach(expense => {
+        if (type === 'kart' && expense.card === oldName) {
+            expense.card = newName;
             updateCount++;
-        } else if (type === 'kullanici' && expense.kullanici === oldName) {
-            expense.kullanici = newName;
+        } else if (type === 'kullanici' && expense.person === oldName) {
+            expense.person = newName;
             updateCount++;
         }
     });
 
-    duzenliOdemeler.forEach(payment => {
-        if (type === 'kart' && payment.kart === oldName) {
-            payment.kart = newName;
+    regularPayments.forEach(payment => {
+        if (type === 'kart' && payment.card === oldName) {
+            payment.card = newName;
             updateCount++;
-        } else if (type === 'kullanici' && payment.kullanici === oldName) {
-            payment.kullanici = newName;
+        } else if (type === 'kullanici' && payment.person === oldName) {
+            payment.person = newName;
             updateCount++;
         }
     });
@@ -146,14 +146,14 @@ function editCard(oldCardName) {
     if (newCardName && newCardName.trim() && newCardName.trim() !== oldCardName) {
         const newName = newCardName.trim();
 
-        if (kredikartlari.includes(newName)) {
+        if (creditCards.includes(newName)) {
             NotificationService.error('Bu kart adı zaten mevcut');
             return;
         }
 
-        const cardIndex = kredikartlari.indexOf(oldCardName);
+        const cardIndex = creditCards.indexOf(oldCardName);
         if (cardIndex !== -1) {
-            kredikartlari[cardIndex] = newName;
+            creditCards[cardIndex] = newName;
         }
 
         syncAllDataAfterNameChange('kart', oldCardName, newName);
@@ -169,14 +169,14 @@ function editUser(oldUserName) {
     if (newUserName && newUserName.trim() && newUserName.trim() !== oldUserName) {
         const newName = newUserName.trim();
 
-        if (kisiler.includes(newName)) {
+        if (people.includes(newName)) {
             NotificationService.error('Bu kullanıcı adı zaten mevcut');
             return;
         }
 
-        const userIndex = kisiler.indexOf(oldUserName);
+        const userIndex = people.indexOf(oldUserName);
         if (userIndex !== -1) {
-            kisiler[userIndex] = newName;
+            people[userIndex] = newName;
         }
 
         syncAllDataAfterNameChange('kullanici', oldUserName, newName);

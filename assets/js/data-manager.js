@@ -8,16 +8,16 @@ class DataManager {
 
     static getCards() {
         if (authSystem && authSystem.currentUserData) {
-            return authSystem.currentUserData.kredikartlari || [];
+            return authSystem.currentUserData.creditCards || [];
         }
-        return kredikartlari || [];
+        return creditCards || [];
     }
 
     static getUsers() {
         if (authSystem && authSystem.currentUserData) {
-            return authSystem.currentUserData.kisiler || [];
+            return authSystem.currentUserData.people || [];
         }
-        return kisiler || [];
+        return people || [];
     }
 
     static updateAllViews() {
@@ -49,7 +49,7 @@ class RegularPayments {
         const form = document.getElementById('duzenliOdemeForm');
         if (!form) return;
         form.style.display = 'block';
-        const dateField = document.getElementById('duzenliBaslangic');
+        const dateField = document.getElementById('regularStart');
         if (dateField) dateField.value = new Date().toISOString().slice(0, 10);
     }
 
@@ -75,11 +75,11 @@ class RegularPayments {
     static add() {
         if (this.editingId) return this.update();
         
-        const aciklama = document.getElementById('duzenliAciklama')?.value?.trim();
-        const tutarVal = document.getElementById('duzenliTutar')?.value;
+        const aciklama = document.getElementById('regularDescription')?.value?.trim();
+        const tutarVal = document.getElementById('regularAmount')?.value;
         const kart = document.getElementById('duzenliKart')?.value;
         const kullanici = document.getElementById('duzenliKullanici')?.value;
-        const baslangic = document.getElementById('duzenliBaslangic')?.value;
+        const baslangic = document.getElementById('regularStart')?.value;
         
         if (!aciklama || !tutarVal || !kart || !kullanici || !baslangic) {
             NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
@@ -89,7 +89,7 @@ class RegularPayments {
         const regularPayment = {
             id: Date.now(),
             aciklama,
-            tutar: parseFloat(tutarVal),
+            amount: parseFloat(tutarVal),
             kart,
             kullanici,
             baslangicTarihi: baslangic,
@@ -97,7 +97,7 @@ class RegularPayments {
             aktif: true
         };
         
-        duzenliOdemeler.push(regularPayment);
+        regularPayments.push(regularPayment);
         DataManager.save();
         this.updateList();
         this.cancel();
@@ -109,13 +109,13 @@ class RegularPayments {
         const container = document.getElementById('duzenliOdemelerListesi');
         if (!container) return;
         
-        if (!duzenliOdemeler.length) {
+        if (!regularPayments.length) {
             container.innerHTML = '<p style="color: var(--text-muted);">Henüz düzenli ödeme tanımlanmamış</p>';
             return;
         }
         
         let html = '';
-        duzenliOdemeler.forEach(payment => {
+        regularPayments.forEach(payment => {
             const isActive = payment.aktif !== false;
             const statusStyle = isActive ? '' : 'opacity:0.6; background: var(--bg-muted);';
             const statusText = isActive ? '' : ' (Durduruldu)';
@@ -124,8 +124,8 @@ class RegularPayments {
             html += `
                 <div style="background: var(--bg-secondary); padding:12px; border-radius: var(--radius); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; ${statusStyle}">
                     <div>
-                        <div style="font-weight:600; color:var(--text);">${payment.aciklama}${statusText}</div>
-                        <div style="font-size:12px; color:var(--text-secondary);">${payment.tutar} TL - ${payment.kullanici} - ${payment.kart}</div>
+                        <div style="font-weight:600; color:var(--text);">${payment.description}${statusText}</div>
+                        <div style="font-size:12px; color:var(--text-secondary);">${payment.amount} TL - ${payment.person} - ${payment.card}</div>
                         <div style="font-size:12px; color:var(--text-muted);">Başlangıç: ${payment.baslangicTarihi}${endDate}</div>
                     </div>
                     <div>
@@ -144,7 +144,7 @@ class RegularPayments {
     }
 
     static edit(id) {
-        const payment = duzenliOdemeler.find(o => o.id === id);
+        const payment = regularPayments.find(o => o.id === id);
         if (!payment) {
             NotificationService.error('Düzenli ödeme bulunamadı');
             return;
@@ -154,11 +154,11 @@ class RegularPayments {
         const form = document.getElementById('duzenliOdemeForm');
         if (form) form.style.display = 'block';
         
-        document.getElementById('duzenliAciklama').value = payment.aciklama;
-        document.getElementById('duzenliTutar').value = payment.tutar;
-        document.getElementById('duzenliKart').value = payment.kart;
-        document.getElementById('duzenliKullanici').value = payment.kullanici;
-        document.getElementById('duzenliBaslangic').value = payment.baslangicTarihi;
+        document.getElementById('regularDescription').value = payment.description;
+        document.getElementById('regularAmount').value = payment.amount;
+        document.getElementById('duzenliKart').value = payment.card;
+        document.getElementById('duzenliKullanici').value = payment.person;
+        document.getElementById('regularStart').value = payment.baslangicTarihi;
         
         const formTitle = document.getElementById('duzenliFormTitle');
         if (formTitle) formTitle.textContent = 'Düzenli Ödemeyi Düzenle';
@@ -172,23 +172,23 @@ class RegularPayments {
     }
 
     static update() {
-        const aciklama = document.getElementById('duzenliAciklama')?.value?.trim();
-        const tutarVal = document.getElementById('duzenliTutar')?.value;
+        const aciklama = document.getElementById('regularDescription')?.value?.trim();
+        const tutarVal = document.getElementById('regularAmount')?.value;
         const kart = document.getElementById('duzenliKart')?.value;
         const kullanici = document.getElementById('duzenliKullanici')?.value;
-        const baslangic = document.getElementById('duzenliBaslangic')?.value;
+        const baslangic = document.getElementById('regularStart')?.value;
         
         if (!aciklama || !tutarVal || !kart || !kullanici || !baslangic) {
             NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
         
-        const idx = duzenliOdemeler.findIndex(o => o.id === this.editingId);
+        const idx = regularPayments.findIndex(o => o.id === this.editingId);
         if (idx !== -1) {
-            duzenliOdemeler[idx] = {
-                ...duzenliOdemeler[idx],
+            regularPayments[idx] = {
+                ...regularPayments[idx],
                 aciklama,
-                tutar: parseFloat(tutarVal),
+                amount: parseFloat(tutarVal),
                 kart,
                 kullanici,
                 baslangicTarihi: baslangic
@@ -203,18 +203,18 @@ class RegularPayments {
     }
 
     static delete(id) {
-        const payment = duzenliOdemeler.find(o => o.id === id);
+        const payment = regularPayments.find(o => o.id === id);
         if (!payment) {
             NotificationService.error('Düzenli ödeme bulunamadı');
             return;
         }
         
-        if (confirm(`"${payment.aciklama}" düzenli ödemeyi durdurmak istediğinizden emin misiniz?\n\nGeçmişteki ödemeler korunacak, sadece gelecekteki otomatik kayıtlar durdurulacak.`)) {
+        if (confirm(`"${payment.description}" düzenli ödemeyi durdurmak istediğinizden emin misiniz?\n\nGeçmişteki ödemeler korunacak, sadece gelecekteki otomatik kayıtlar durdurulacak.`)) {
             const today = new Date().toISOString().slice(0, 10);
-            const idx = duzenliOdemeler.findIndex(o => o.id === id);
+            const idx = regularPayments.findIndex(o => o.id === id);
             if (idx !== -1) {
-                duzenliOdemeler[idx].bitisTarihi = today;
-                duzenliOdemeler[idx].aktif = false;
+                regularPayments[idx].bitisTarihi = today;
+                regularPayments[idx].aktif = false;
             }
             
             DataManager.save();
@@ -225,10 +225,10 @@ class RegularPayments {
     }
 
     static reactivate(id) {
-        const idx = duzenliOdemeler.findIndex(o => o.id === id);
+        const idx = regularPayments.findIndex(o => o.id === id);
         if (idx !== -1) {
-            duzenliOdemeler[idx].aktif = true;
-            delete duzenliOdemeler[idx].bitisTarihi;
+            regularPayments[idx].aktif = true;
+            delete regularPayments[idx].bitisTarihi;
             
             DataManager.save();
             this.updateList();
@@ -237,13 +237,13 @@ class RegularPayments {
     }
 
     static permanentDelete(id) {
-        const payment = duzenliOdemeler.find(o => o.id === id);
+        const payment = regularPayments.find(o => o.id === id);
         if (!payment) return;
         
-        if (confirm(`"${payment.aciklama}" düzenli ödemeyi tamamen silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
-            const idx = duzenliOdemeler.findIndex(o => o.id === id);
+        if (confirm(`"${payment.description}" düzenli ödemeyi tamamen silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
+            const idx = regularPayments.findIndex(o => o.id === id);
             if (idx !== -1) {
-                duzenliOdemeler.splice(idx, 1);
+                regularPayments.splice(idx, 1);
                 DataManager.save();
                 this.updateList();
                 NotificationService.success('Düzenli ödeme tamamen silindi');
@@ -283,7 +283,7 @@ function updateHarcamaTable() {
 
     // console.log('Filtrelenmiş harcama sayısı:', filteredHarcamalar.length);
     // console.log('İlk 5 harcama:', filteredHarcamalar.slice(0, 5));
-    // console.log('Tüm harcamalar:', harcamalar.length);
+    // console.log('Tüm expenses:', expenses.length);
 
     filteredHarcamalar.forEach((harcama, index) => {
         const row = tbody.insertRow();
@@ -311,13 +311,13 @@ function updateHarcamaTable() {
             `;
         }
 
-        const tutarValue = harcama.tutar ? Number(harcama.tutar).toFixed(2) : '0.00';
+        const tutarValue = harcama.amount ? Number(harcama.amount).toFixed(2) : '0.00';
 
         row.innerHTML = `
-            <td style="${rowStyle}">${new Date(harcama.tarih).toLocaleDateString('tr-TR')}</td>
-            <td style="${rowStyle}">${harcama.kart || '-'}</td>
-            <td style="${rowStyle}">${harcama.kullanici || '-'}</td>
-            <td style="${rowStyle}">${harcama.aciklama || '-'}${taksitEtiket}</td>
+            <td style="${rowStyle}">${new Date(harcama.date).toLocaleDateString('tr-TR')}</td>
+            <td style="${rowStyle}">${harcama.card || '-'}</td>
+            <td style="${rowStyle}">${harcama.person || '-'}</td>
+            <td style="${rowStyle}">${harcama.description || '-'}${taksitEtiket}</td>
             <td style="${rowStyle}">${taksitBilgi}</td>
             <td class="text-right" style="${rowStyle}">${tutarValue} TL</td>
             <td style="${rowStyle}">
@@ -328,7 +328,7 @@ function updateHarcamaTable() {
 }
 
 function updateSonucSayisi(filteredHarcamalar) {
-    const toplamHarcama = harcamalar.length;
+    const toplamHarcama = expenses.length;
     const gosterilenSayi = filteredHarcamalar.length;
 
     const gercekHarcamalar = filteredHarcamalar.filter(h => !h.isFuture && !h.isRegular).length;
@@ -349,7 +349,7 @@ function updateSonucSayisi(filteredHarcamalar) {
         mesaj += ` | ${detay.join(' + ')}`;
     }
 
-    const toplamTutar = filteredHarcamalar.reduce((sum, h) => sum + (Number(h.tutar) || 0), 0);
+    const toplamTutar = filteredHarcamalar.reduce((sum, h) => sum + (Number(h.amount) || 0), 0);
     mesaj += ` | Toplam: ${toplamTutar.toFixed(2)} TL`;
 
     const sonucSayisiElement = document.getElementById('sonucSayisi');
@@ -366,7 +366,7 @@ function getDuzenliOdemelerAsHarcamalar() {
     const today = currentDate.toISOString().slice(0, 10);
 
     // Sadece aktif düzenli ödemeleri dahil et
-    const aktiveDuzenliOdemeler = duzenliOdemeler.filter(odeme => {
+    const aktiveDuzenliOdemeler = regularPayments.filter(odeme => {
         // Aktif olmayan ödemeleri hariç tut
         if (odeme.aktif === false) {
             return false;
@@ -388,12 +388,12 @@ function getDuzenliOdemelerAsHarcamalar() {
     return aktiveDuzenliOdemeler.map(odeme => {
         return {
             id: `duzenli_${odeme.id}_${currentMonth}`,
-            tarih: `${currentMonth}-15`, // Ayın ortasına koy
-            kart: odeme.kart,
-            kullanici: odeme.kullanici,
+            date: `${currentMonth}-15`, // Ayın ortasına koy
+            card: odeme.card,
+            person: odeme.person,
             kategori: 'Düzenli Ödeme',
-            aciklama: `${odeme.aciklama} (Düzenli Ödeme)`,
-            tutar: odeme.tutar,
+            description: `${odeme.description} (Düzenli Ödeme)`,
+            amount: odeme.amount,
             taksitNo: null,
             toplamTaksit: null,
             isTaksit: false,
@@ -404,11 +404,11 @@ function getDuzenliOdemelerAsHarcamalar() {
 
 function applyAllFilters() {
     // console.log('--- FILTRE BAŞLANGICI ---');
-    // console.log('Toplam harcama sayısı:', harcamalar.length);
-    // console.log('Düzenli ödeme sayısı:', duzenliOdemeler.length);
+    // console.log('Toplam harcama sayısı:', expenses.length);
+    // console.log('Düzenli ödeme sayısı:', regularPayments.length);
 
     // Harcamaları ve düzenli ödemeleri birleştir
-    let filtered = [...harcamalar];
+    let filtered = [...expenses];
 
     // Check if filter elements exist (only on harcama-listesi page)
     const filtreTarihElement = document.getElementById('filtreTarih');
@@ -421,7 +421,7 @@ function applyAllFilters() {
     // console.log('Seçilen ay:', selectedMonth);
 
     if (selectedMonth) {
-        const monthFiltered = filtered.filter(harcama => harcama.tarih.startsWith(selectedMonth));
+        const monthFiltered = filtered.filter(harcama => harcama.date.startsWith(selectedMonth));
         // console.log('Ay filtresinden sonra:', monthFiltered.length);
 
         const futureTaksits = getFutureTaksits(selectedMonth);
@@ -431,8 +431,8 @@ function applyAllFilters() {
 
         filtered = [...monthFiltered, ...futureTaksits, ...recurringPayments];
     } else {
-        filtered = [...harcamalar];
-        // console.log('Tarih filtresi yok, tüm harcamalar:', filtered.length);
+        filtered = [...expenses];
+        // console.log('Tarih filtresi yok, tüm expenses:', filtered.length);
     }
 
     // console.log('Tarih filtresinden sonra toplam:', filtered.length);
@@ -442,16 +442,16 @@ function applyAllFilters() {
     // console.log('Seçilen kullanıcı:', selectedUser);
     if (selectedUser) {
         const beforeCount = filtered.length;
-        filtered = filtered.filter(harcama => harcama.kullanici === selectedUser);
+        filtered = filtered.filter(harcama => harcama.person === selectedUser);
         // console.log(`Kullanıcı filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
 
     const filtreKartElement = document.getElementById('filtreKart');
     const selectedCard = filtreKartElement ? filtreKartElement.value : '';
-    // console.log('Seçilen kart:', selectedCard);
+    // console.log('Seçilen card:', selectedCard);
     if (selectedCard) {
         const beforeCount = filtered.length;
-        filtered = filtered.filter(harcama => harcama.kart === selectedCard);
+        filtered = filtered.filter(harcama => harcama.card === selectedCard);
         // console.log(`Kart filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
 
@@ -465,7 +465,7 @@ function applyAllFilters() {
     // console.log('Tutar aralığı:', minTutar, '-', maxTutar);
     if (minTutarValue || maxTutarValue) {
         const beforeCount = filtered.length;
-        filtered = filtered.filter(harcama => harcama.tutar >= minTutar && harcama.tutar <= maxTutar);
+        filtered = filtered.filter(harcama => harcama.amount >= minTutar && harcama.amount <= maxTutar);
         // console.log(`Tutar filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
 
@@ -483,20 +483,20 @@ function applyAllFilters() {
 
             switch (field) {
                 case 'tarih':
-                    valueA = new Date(a.tarih).getTime();
-                    valueB = new Date(b.tarih).getTime();
+                    valueA = new Date(a.date).getTime();
+                    valueB = new Date(b.date).getTime();
                     break;
                 case 'tutar':
-                    valueA = Number(a.tutar);
-                    valueB = Number(b.tutar);
+                    valueA = Number(a.amount);
+                    valueB = Number(b.amount);
                     break;
                 case 'kullanici':
-                    valueA = String(a.kullanici).toLowerCase();
-                    valueB = String(b.kullanici).toLowerCase();
+                    valueA = String(a.person).toLowerCase();
+                    valueB = String(b.person).toLowerCase();
                     break;
                 case 'kart':
-                    valueA = String(a.kart).toLowerCase();
-                    valueB = String(b.kart).toLowerCase();
+                    valueA = String(a.card).toLowerCase();
+                    valueB = String(b.card).toLowerCase();
                     break;
                 default:
                     return 0;
@@ -528,7 +528,7 @@ function applyAllFilters() {
 
 // Harcama İşlemleri
 function deleteHarcama(id) {
-    const harcama = harcamalar.find(h => h.id === id);
+    const harcama = expenses.find(h => h.id === id);
     if (!harcama) {
         showToast('Harcama bulunamadı', 'error');
         return;
@@ -538,11 +538,11 @@ function deleteHarcama(id) {
 
     // Otomatik oluşturulan düzenli ödeme ise uyarı ver
     if (harcama.isRegular) {
-        confirmMessage = `Bu otomatik oluşturulan düzenli ödemeyi silmek istediğinizden emin misiniz?\n\n"${harcama.aciklama}"\n\nNot: Gelecek ay tekrar otomatik olarak oluşturulacaktır.`;
+        confirmMessage = `Bu otomatik oluşturulan düzenli ödemeyi silmek istediğinizden emin misiniz?\n\n"${harcama.description}"\n\nNot: Gelecek ay tekrar otomatik olarak oluşturulacaktır.`;
     }
 
     if (confirm(confirmMessage)) {
-        harcamalar = harcamalar.filter(h => h.id !== id);
+        expenses = expenses.filter(h => h.id !== id);
         saveData();
         updateHarcamaTable();
         updateDashboard();
@@ -570,9 +570,9 @@ document.addEventListener('keydown', function (e) {
             return;
         }
 
-        if (keyNum >= 1 && keyNum <= 5 && keyNum <= kisiler.length) {
+        if (keyNum >= 1 && keyNum <= 5 && keyNum <= people.length) {
             e.preventDefault();
-            const selectedPerson = kisiler[keyNum - 1];
+            const selectedPerson = people[keyNum - 1];
             kullaniciSelect.value = selectedPerson;
             kullaniciSelect.dispatchEvent(new Event('change'));
             if (!isInUserSelect) {

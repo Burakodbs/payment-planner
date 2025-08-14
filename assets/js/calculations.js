@@ -3,15 +3,15 @@
 function calculateDebts() {
     const hesaplar = {};
 
-    kisiler.forEach(kisi => {
+    people.forEach(kisi => {
         hesaplar[kisi] = 0;
     });
 
-    harcamalar.forEach(harcama => {
-        if (!hesaplar[harcama.kullanici]) {
-            hesaplar[harcama.kullanici] = 0;
+    expenses.forEach(harcama => {
+        if (!hesaplar[harcama.person]) {
+            hesaplar[harcama.person] = 0;
         }
-        hesaplar[harcama.kullanici] += harcama.tutar;
+        hesaplar[harcama.person] += harcama.amount;
     });
 
     const gelecekTaksitler = {};
@@ -19,10 +19,10 @@ function calculateDebts() {
         gelecekTaksitler[kullanici] = 0;
     });
 
-    harcamalar.forEach(harcama => {
+    expenses.forEach(harcama => {
         if (harcama.isTaksit) {
             const kalanTaksit = harcama.toplamTaksit - harcama.taksitNo;
-            gelecekTaksitler[harcama.kullanici] += harcama.tutar * kalanTaksit;
+            gelecekTaksitler[harcama.person] += harcama.amount * kalanTaksit;
         }
     });
 
@@ -32,9 +32,9 @@ function calculateDebts() {
 function getMonthlyFutureTaksits() {
     const monthlyTaksits = {};
 
-    harcamalar.forEach(harcama => {
+    expenses.forEach(harcama => {
         if (harcama.isTaksit && harcama.toplamTaksit && harcama.taksitNo) {
-            const [harcamaYear, harcamaMonth, harcamaDay] = harcama.tarih.split('-').map(Number);
+            const [harcamaYear, harcamaMonth, harcamaDay] = harcama.date.split('-').map(Number);
             const kalanTaksit = harcama.toplamTaksit - harcama.taksitNo;
 
             for (let i = 1; i <= kalanTaksit; i++) {
@@ -52,17 +52,17 @@ function getMonthlyFutureTaksits() {
                     monthlyTaksits[monthKey] = {};
                 }
 
-                if (!monthlyTaksits[monthKey][harcama.kullanici]) {
-                    monthlyTaksits[monthKey][harcama.kullanici] = [];
+                if (!monthlyTaksits[monthKey][harcama.person]) {
+                    monthlyTaksits[monthKey][harcama.person] = [];
                 }
 
-                monthlyTaksits[monthKey][harcama.kullanici].push({
-                    aciklama: harcama.aciklama || 'Taksit',
-                    tutar: harcama.tutar,
+                monthlyTaksits[monthKey][harcama.person].push({
+                    description: harcama.description || 'Taksit',
+                    amount: harcama.amount,
                     taksitNo: harcama.taksitNo + i,
                     toplamTaksit: harcama.toplamTaksit,
-                    kart: harcama.kart,
-                    orijinalTarih: harcama.tarih
+                    card: harcama.card,
+                    orijinalTarih: harcama.date
                 });
             }
         }
@@ -75,13 +75,13 @@ function getFutureTaksits(selectedMonth) {
     const futureTaksits = [];
     const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
 
-    harcamalar.forEach(harcama => {
+    expenses.forEach(harcama => {
         if (harcama.isTaksit && harcama.toplamTaksit && harcama.taksitNo) {
-            const [harcamaYear, harcamaMonth, harcamaDay] = harcama.tarih.split('-').map(Number);
+            const [harcamaYear, harcamaMonth, harcamaDay] = harcama.date.split('-').map(Number);
 
             const kalanTaksit = harcama.toplamTaksit - harcama.taksitNo;
 
-            // console.log(`Harcama: ${harcama.aciklama}, Taksit: ${harcama.taksitNo}/${harcama.toplamTaksit}, Kalan: ${kalanTaksit}`);
+            // console.log(`Harcama: ${harcama.description}, Taksit: ${harcama.taksitNo}/${harcama.toplamTaksit}, Kalan: ${kalanTaksit}`);
 
             for (let i = 1; i <= kalanTaksit; i++) {
                 let taksitYear = harcamaYear;
@@ -99,7 +99,7 @@ function getFutureTaksits(selectedMonth) {
                     futureTaksits.push({
                         ...harcama,
                         taksitNo: harcama.taksitNo + i,
-                        tarih: `${taksitYear}-${taksitMonth.toString().padStart(2, '0')}-${harcamaDay.toString().padStart(2, '0')}`,
+                        date: `${taksitYear}-${taksitMonth.toString().padStart(2, '0')}-${harcamaDay.toString().padStart(2, '0')}`,
                         isFuture: true
                     });
                 }
@@ -116,7 +116,7 @@ function getRecurringPaymentsForMonth(selectedMonth) {
     const recurringPayments = [];
     const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
 
-    duzenliOdemeler.forEach(odeme => {
+    regularPayments.forEach(odeme => {
         if (!odeme.aktif || !odeme.baslangicTarihi) return;
 
         const baslangic = new Date(odeme.baslangicTarihi);
@@ -142,21 +142,21 @@ function getRecurringPaymentsForMonth(selectedMonth) {
         // Bu aya ait düzenli ödemeyi harcama formatına dönüştür
         const recurringExpense = {
             id: `recurring-${odeme.id}-${selectedMonth}`,
-            tarih: `${selectedYear}-${selectedMonthNum.toString().padStart(2, '0')}-${baslangic.getDate().toString().padStart(2, '0')}`,
-            kart: odeme.kart,
-            kullanici: odeme.kullanici,
+            date: `${selectedYear}-${selectedMonthNum.toString().padStart(2, '0')}-${baslangic.getDate().toString().padStart(2, '0')}`,
+            card: odeme.card,
+            person: odeme.person,
             kategori: odeme.kategori || 'Düzenli Ödeme',
-            aciklama: `${odeme.ad} (Düzenli)`,
-            tutar: parseFloat(odeme.tutar) || 0,
+            description: `${odeme.ad} (Düzenli)`,
+            amount: parseFloat(odeme.amount) || 0,
             isRegular: true,
             duzenliOdemeId: odeme.id
         };
 
-        // Eğer bu ödeme bu ay için zaten harcamalar listesinde yoksa ekle
-        const existingExpense = harcamalar.find(h =>
+        // Eğer bu ödeme bu ay için zaten expenses listesinde yoksa ekle
+        const existingExpense = expenses.find(h =>
             h.duzenliOdemeId === odeme.id &&
-            h.tarih &&
-            h.tarih.startsWith(selectedMonth)
+            h.date &&
+            h.date.startsWith(selectedMonth)
         );
 
         if (!existingExpense) {
@@ -176,7 +176,7 @@ function updateHesaplar() {
     tbody.innerHTML = '';
 
     // Tüm kişileri dahil et (mevcut harcama olmayanlar da)
-    const tumKisiler = [...new Set([...Object.keys(hesaplar), ...Object.keys(gelecekTaksitler), ...kisiler])];
+    const tumKisiler = [...new Set([...Object.keys(hesaplar), ...Object.keys(gelecekTaksitler), ...people])];
 
     tumKisiler.forEach(kisi => {
         if (!kisi) return; // Boş kişi adlarını atla
@@ -200,8 +200,8 @@ function updateHesaplar() {
 }
 
 // Aylık Özet Güncelleme
-function updateAylikOzet() {
-    const ozetTarih = document.getElementById('ozet_tarih');
+function updateMonthlySummary() {
+    const ozetTarih = document.getElementById('summaryDate');
     const aylikOzetContent = document.getElementById('aylikOzetContent');
 
     if (!ozetTarih || !aylikOzetContent) return;
@@ -212,9 +212,9 @@ function updateAylikOzet() {
         return;
     }
 
-    // Seçilen ayın mevcut harcamalarını filtrele
-    const monthlyExpenses = harcamalar.filter(harcama => {
-        return harcama.tarih && harcama.tarih.startsWith(selectedMonth);
+    // Seçilen ayın mevcut expensesını filtrele
+    const monthlyExpenses = expenses.filter(harcama => {
+        return harcama.date && harcama.date.startsWith(selectedMonth);
     });
 
     // Seçilen aya düşen gelecek taksitleri al
@@ -223,7 +223,7 @@ function updateAylikOzet() {
     // Seçilen aya düşen düzenli ödemeleri al
     const monthlyRecurringPayments = getRecurringPaymentsForMonth(selectedMonth);
 
-    // Tüm harcamaları birleştir (mevcut + gelecek taksitler + düzenli ödemeler)
+    // Tüm expensesı birleştir (mevcut + gelecek taksitler + düzenli ödemeler)
     const allMonthlyExpenses = [...monthlyExpenses, ...futureTaksits, ...monthlyRecurringPayments];
 
     if (allMonthlyExpenses.length === 0) {
@@ -243,23 +243,23 @@ function updateAylikOzet() {
     const monthName = monthNames[parseInt(month) - 1];
 
     // Toplam hesaplama (mevcut + gelecek taksitler + düzenli ödemeler)
-    const toplamTutar = allMonthlyExpenses.reduce((sum, exp) => sum + (parseFloat(exp.tutar) || 0), 0);
-    const mevcutTutar = monthlyExpenses.reduce((sum, exp) => sum + (parseFloat(exp.tutar) || 0), 0);
-    const gelecekTutar = futureTaksits.reduce((sum, exp) => sum + (parseFloat(exp.tutar) || 0), 0);
-    const duzenliTutar = monthlyRecurringPayments.reduce((sum, exp) => sum + (parseFloat(exp.tutar) || 0), 0);
+    const toplamTutar = allMonthlyExpenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+    const mevcutTutar = monthlyExpenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+    const gelecekTutar = futureTaksits.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+    const duzenliTutar = monthlyRecurringPayments.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
 
     // Kullanıcı bazında toplam
     const kullaniciToplamlar = {};
     allMonthlyExpenses.forEach(exp => {
-        const kullanici = exp.kullanici || 'Bilinmeyen';
-        kullaniciToplamlar[kullanici] = (kullaniciToplamlar[kullanici] || 0) + (parseFloat(exp.tutar) || 0);
+        const kullanici = exp.person || 'Bilinmeyen';
+        kullaniciToplamlar[kullanici] = (kullaniciToplamlar[kullanici] || 0) + (parseFloat(exp.amount) || 0);
     });
 
     // Kart bazında toplam
     const kartToplamlar = {};
     allMonthlyExpenses.forEach(exp => {
-        const kart = exp.kart || 'Bilinmeyen';
-        kartToplamlar[kart] = (kartToplamlar[kart] || 0) + (parseFloat(exp.tutar) || 0);
+        const kart = exp.card || 'Bilinmeyen';
+        kartToplamlar[kart] = (kartToplamlar[kart] || 0) + (parseFloat(exp.amount) || 0);
     });
 
     // HTML oluştur
@@ -320,7 +320,7 @@ function updateAylikOzet() {
             <h4 style="color: var(--text); margin: 0 0 16px 0;">📋 Detaylı Harcama Listesi</h4>
             <div style="display: grid; gap: 8px;">
                 ${allMonthlyExpenses
-            .sort((a, b) => new Date(b.tarih) - new Date(a.tarih))
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
             .map(exp => {
                 const taksitBilgi = exp.isTaksit ? `${exp.taksitNo}/${exp.toplamTaksit}` : '';
                 const futureLabel = exp.isFuture ? ' (Gelecek Taksit)' : '';
@@ -339,14 +339,14 @@ function updateAylikOzet() {
 
                 return `
                             <div style="display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 12px; padding: 12px; background: ${bgColor}; border-radius: var(--radius-sm); align-items: center;">
-                                <div style="font-size: 12px; color: var(--text-muted);">${exp.tarih.split('-').reverse().join('.')}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">${exp.date.split('-').reverse().join('.')}</div>
                                 <div style="color: ${textColor}; font-weight: 500;">
-                                    ${exp.aciklama || 'Açıklama yok'}${futureLabel}${regularLabel}
+                                    ${exp.description || 'Açıklama yok'}${futureLabel}${regularLabel}
                                     ${taksitBilgi ? `<span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">${taksitBilgi}</span>` : ''}
                                 </div>
-                                <div style="font-size: 12px; color: var(--text-secondary);">${exp.kullanici}</div>  
-                                <div style="font-size: 12px; color: var(--text-secondary);">${exp.kart}</div>
-                                <div style="color: var(--primary); font-weight: 600;">${(parseFloat(exp.tutar) || 0).toFixed(2)} TL</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">${exp.person}</div>  
+                                <div style="font-size: 12px; color: var(--text-secondary);">${exp.card}</div>
+                                <div style="color: var(--primary); font-weight: 600;">${(parseFloat(exp.amount) || 0).toFixed(2)} TL</div>
                             </div>
                         `;
             }).join('')}

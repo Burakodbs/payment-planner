@@ -64,7 +64,7 @@ function renderAuthContainer() {
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                        <p>Kredi kartı expensesınızı güvenle takip edin</p>
                     </div>
 
                     <div id="loginForm" class="auth-form">

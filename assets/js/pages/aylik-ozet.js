@@ -9,14 +9,14 @@ document.addEventListener('DOMContentLoaded', function () {
         initializePage('aylik-ozet');
     }
 
-    const ozetTarih = document.getElementById('ozet_tarih');
+    const ozetTarih = document.getElementById('summaryDate');
     if (ozetTarih) {
         ozetTarih.value = new Date().toISOString().slice(0, 7);
 
         // Kısa bir gecikme sonra özeti güncelle
         setTimeout(() => {
-            if (typeof updateAylikOzet === 'function') {
-                updateAylikOzet();
+            if (typeof updateMonthlySummary === 'function') {
+                updateMonthlySummary();
             }
         }, 500);
     }

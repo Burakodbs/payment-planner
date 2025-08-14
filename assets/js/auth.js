@@ -33,10 +33,10 @@ class AuthSystem {
                     theme: 'light'
                 },
                 data: {
-                    harcamalar: [],
-                    duzenliOdemeler: [],
-                    kredikartlari: [],
-                    kisiler: []
+                    expenses: [],
+                    regularPayments: [],
+                    creditCards: [],
+                    people: []
                 }
             };
             localStorage.setItem('app_users', JSON.stringify(this.users));
@@ -60,7 +60,7 @@ class AuthSystem {
                 // debug: rol eklendi
             }
             
-            // CreatedBy alanını ekle (migration)
+            // CreatedBy alanını add(migration)
             if (!user.createdBy) {
                 user.createdBy = 'migration';
             }
@@ -112,10 +112,10 @@ class AuthSystem {
     // Global verileri kontrol et ve kullanıcı hesabına aktar
     checkAndMigrateGlobalData() {
         // Eğer global veriler varsa ve hiçbir kullanıcı bunlara sahip değilse
-        const globalHarcamalar = JSON.parse(localStorage.getItem('harcamalar') || '[]');
-        const globalDuzenliOdemeler = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
-        const globalKredikartlari = JSON.parse(localStorage.getItem('kredikartlari') || '[]');
-        const globalKisiler = JSON.parse(localStorage.getItem('kisiler') || '[]');
+        const globalHarcamalar = JSON.parse(localStorage.getItem('expenses') || '[]');
+        const globalDuzenliOdemeler = JSON.parse(localStorage.getItem('regularPayments') || '[]');
+        const globalKredikartlari = JSON.parse(localStorage.getItem('creditCards') || '[]');
+        const globalKisiler = JSON.parse(localStorage.getItem('people') || '[]');
         
     // debug: migration kontrolü
     // if (this.debug) console.log('migration-check', { globalHarcamalar: globalHarcamalar.length, globalDuzenliOdemeler: globalDuzenliOdemeler.length, globalKredikartlari: globalKredikartlari.length, globalKisiler: globalKisiler.length });
@@ -141,10 +141,10 @@ class AuthSystem {
                     createdAt: new Date().toISOString(),
                     settings: { theme: 'light' },
                     data: {
-                        harcamalar: [],
-                        duzenliOdemeler: [],
-                        kredikartlari: [],
-                        kisiler: []
+                        expenses: [],
+                        regularPayments: [],
+                        creditCards: [],
+                        people: []
                     }
                 };
                 // debug: migration user oluşturuldu
@@ -153,20 +153,20 @@ class AuthSystem {
             // Verileri aktar - bütün veriler akıtırılsın
             // debug: veri aktarımı başlıyor
             this.users[targetUser].data = {
-                harcamalar: globalHarcamalar,
-                duzenliOdemeler: globalDuzenliOdemeler,
-                kredikartlari: globalKredikartlari,
-                kisiler: globalKisiler
+                expenses: globalHarcamalar,
+                regularPayments: globalDuzenliOdemeler,
+                creditCards: globalKredikartlari,
+                people: globalKisiler
             };
             
             // debug: aktarılan veri özeti
-            // if (this.debug) console.log('migration-transfer', { harcamalar: globalHarcamalar.length, duzenliOdemeler: globalDuzenliOdemeler.length, kredikartlari: globalKredikartlari.length, kisiler: globalKisiler.length });
+            // if (this.debug) console.log('migration-transfer', { expenses: globalHarcamalar.length, regularPayments: globalDuzenliOdemeler.length, creditCards: globalKredikartlari.length, people: globalKisiler.length });
             
             // Global verileri temizle
-            localStorage.removeItem('harcamalar');
-            localStorage.removeItem('duzenliOdemeler');
-            localStorage.removeItem('kredikartlari');
-            localStorage.removeItem('kisiler');
+            localStorage.removeItem('expenses');
+            localStorage.removeItem('regularPayments');
+            localStorage.removeItem('creditCards');
+            localStorage.removeItem('people');
             
             // Güncellenmiş kullanıcı verilerini kaydet
             localStorage.setItem('app_users', JSON.stringify(this.users));
@@ -184,7 +184,7 @@ class AuthSystem {
         } else {
             // debug: migration yapılacak veri yok
             
-            // Global veri yoksa da mevcut kullanıcının harcamalarını kontrol et
+            // Global veri yoksa da mevcut kullanıcının expensesını kontrol et
             if (this.currentUser) {
                 this.extractDataFromHarcamalar(this.currentUser);
             }
@@ -196,27 +196,27 @@ class AuthSystem {
         const userKey = `app_user_${username}`;
         const userData = JSON.parse(localStorage.getItem(userKey) || '{}');
         
-        if (userData.harcamalar && userData.harcamalar.length > 0) {
+        if (userData.expenses && userData.expenses.length > 0) {
             // debug: harcama taraması
             
             // Kredi kartlarını çıkar
-            const uniqueCards = [...new Set(userData.harcamalar
-                .filter(h => h.kart && h.kart.trim() !== '' && h.kart !== 'Nakit')
-                .map(h => h.kart.trim()))];
+            const uniqueCards = [...new Set(userData.expenses
+                .filter(h => h.card && h.card.trim() !== '' && h.card !== 'Nakit')
+                .map(h => h.card.trim()))];
             
             // Kişileri çıkar
-            const uniquePeople = [...new Set(userData.harcamalar
-                .filter(h => h.kullanici && h.kullanici.trim() !== '')
-                .map(h => h.kullanici.trim()))];
+            const uniquePeople = [...new Set(userData.expenses
+                .filter(h => h.person && h.person.trim() !== '')
+                .map(h => h.person.trim()))];
             
             // debug: çıkarılan kart/kullanıcı listeleri
             
             // Mevcut verileri güncelle
-            if (!userData.kredikartlari || userData.kredikartlari.length === 0) {
-                userData.kredikartlari = uniqueCards;
+            if (!userData.creditCards || userData.creditCards.length === 0) {
+                userData.creditCards = uniqueCards;
             }
-            if (!userData.kisiler || userData.kisiler.length === 0) {
-                userData.kisiler = uniquePeople;
+            if (!userData.people || userData.people.length === 0) {
+                userData.people = uniquePeople;
             }
             
             // Kaydet
@@ -363,10 +363,10 @@ class AuthSystem {
                 theme: 'light'
             },
             data: {
-                harcamalar: [],
-                duzenliOdemeler: [],
-                kredikartlari: [],
-                kisiler: []
+                expenses: [],
+                regularPayments: [],
+                creditCards: [],
+                people: []
             }
         };
 
@@ -452,39 +452,39 @@ class AuthSystem {
         const userData = this.users[this.currentUser].data;
 
         // Global değişkenleri güncelle - güvenli şekilde
-        if (typeof harcamalar !== 'undefined') {
-            harcamalar = userData.harcamalar || [];
+        if (typeof expenses !== 'undefined') {
+            expenses = userData.expenses || [];
         } else {
             // Global değişken henüz tanımlı değilse window'da tanımla
-            window.harcamalar = userData.harcamalar || [];
+            window.expenses = userData.expenses || [];
         }
         
-        if (typeof duzenliOdemeler !== 'undefined') {
-            duzenliOdemeler = userData.duzenliOdemeler || [];
+        if (typeof regularPayments !== 'undefined') {
+            regularPayments = userData.regularPayments || [];
         } else {
-            window.duzenliOdemeler = userData.duzenliOdemeler || [];
+            window.regularPayments = userData.regularPayments || [];
         }
         
-        if (typeof kredikartlari !== 'undefined') {
-            kredikartlari = userData.kredikartlari || [];
+        if (typeof creditCards !== 'undefined') {
+            creditCards = userData.creditCards || [];
         } else {
-            window.kredikartlari = userData.kredikartlari || [];
+            window.creditCards = userData.creditCards || [];
         }
         
-        if (typeof kisiler !== 'undefined') {
-            kisiler = userData.kisiler || [];
+        if (typeof people !== 'undefined') {
+            people = userData.people || [];
         } else {
-            window.kisiler = userData.kisiler || [];
+            window.people = userData.people || [];
         }
 
         // currentUserData property'sini de güncelle (uyumluluk için)
         this.currentUserData = userData;
         if (this.debug) {
             console.log('user-data-loaded', {
-                harcamalar: userData.harcamalar?.length || 0,
-                duzenliOdemeler: userData.duzenliOdemeler?.length || 0,
-                kredikartlari: userData.kredikartlari?.length || 0,
-                kisiler: userData.kisiler?.length || 0
+                expenses: userData.expenses?.length || 0,
+                regularPayments: userData.regularPayments?.length || 0,
+                creditCards: userData.creditCards?.length || 0,
+                people: userData.people?.length || 0
             });
         }
 
@@ -504,10 +504,10 @@ class AuthSystem {
         if (!this.currentUser || !this.users[this.currentUser]) return;
 
         this.users[this.currentUser].data = {
-            harcamalar: harcamalar || [],
-            duzenliOdemeler: duzenliOdemeler || [],
-            kredikartlari: kredikartlari || [],
-            kisiler: kisiler || []
+            expenses: expenses || [],
+            regularPayments: regularPayments || [],
+            creditCards: creditCards || [],
+            people: people || []
         };
 
         this.users[this.currentUser].settings = {
@@ -519,26 +519,26 @@ class AuthSystem {
 
     // Harcamalardan eksik kart ve kullanıcıları otomatik çıkar
     ensureCardUserExtraction() {
-        if (!Array.isArray(harcamalar)) return;
+        if (!Array.isArray(expenses)) return;
 
-        const existingCards = new Set(kredikartlari || []);
-        const existingUsers = new Set(kisiler || []);
+        const existingCards = new Set(creditCards || []);
+        const existingUsers = new Set(people || []);
         let added = false;
 
-        harcamalar.forEach(h => {
-            if (h && h.kart) {
-                const k = String(h.kart).trim();
+        expenses.forEach(h => {
+            if (h && h.card) {
+                const k = String(h.card).trim();
                 if (k && k !== 'Nakit' && !existingCards.has(k)) {
                     existingCards.add(k);
-                    kredikartlari.push(k);
+                    creditCards.push(k);
                     added = true;
                 }
             }
-            if (h && h.kullanici) {
-                const u = String(h.kullanici).trim();
+            if (h && h.person) {
+                const u = String(h.person).trim();
                 if (u && !existingUsers.has(u)) {
                     existingUsers.add(u);
-                    kisiler.push(u);
+                    people.push(u);
                     added = true;
                 }
             }
@@ -737,9 +737,9 @@ class AuthSystem {
     triggerPageUpdates() {
 
         // Data migration işlemi
-        if (typeof migrateDuzenliOdemeData === 'function') {
+        if (typeof migrateRegularPaymentData === 'function') {
             try {
-                migrateDuzenliOdemeData();
+                migrateRegularPaymentData();
             } catch (error) {
                 console.error('❌ Migration hatası:', error);
             }
@@ -765,14 +765,14 @@ class AuthSystem {
         }
 
         // Aylık özet güncellemeleri
-        if (typeof updateAylikOzet === 'function') {
+        if (typeof updateMonthlySummary === 'function') {
             try {
-                const ozetTarih = document.getElementById('ozet_tarih');
+                const ozetTarih = document.getElementById('summaryDate');
                 if (ozetTarih && !ozetTarih.value) {
                     const currentMonth = new Date().toISOString().slice(0, 7);
                     ozetTarih.value = currentMonth;
                 }
-                updateAylikOzet();
+                updateMonthlySummary();
             } catch (error) {
                 console.error('❌ Aylık özet güncelleme hatası:', error);
             }
@@ -819,8 +819,8 @@ class AuthSystem {
         
         // Sadece admin tarafından yeni oluşturulan ve hiç kart/kişi eklememış kullanıcılar
         return user.createdBy === 'admin' && 
-               user.data.kredikartlari.length === 0 && 
-               user.data.kisiler.length === 0 &&
+               user.data.creditCards.length === 0 && 
+               user.data.people.length === 0 &&
                !user.setupCompleted;
     }
 
@@ -834,12 +834,12 @@ class AuthSystem {
     completeSetup(cards, users) {
         if (!this.currentUser) return;
 
-        this.users[this.currentUser].data.kredikartlari = cards;
-        this.users[this.currentUser].data.kisiler = users;
+        this.users[this.currentUser].data.creditCards = cards;
+        this.users[this.currentUser].data.people = users;
         this.users[this.currentUser].setupCompleted = true;
 
-        kredikartlari = cards;
-        kisiler = users;
+        creditCards = cards;
+        people = users;
 
         this.saveUserData();
         localStorage.setItem('app_initialized', 'true');
@@ -1087,10 +1087,10 @@ function updateUsersList() {
 function finishSetup() {
     // Temporary data'yı global arrays'e aktar
     if (tempCards.length > 0) {
-        kredikartlari = [...tempCards];
+        creditCards = [...tempCards];
     }
     if (tempUsers.length > 0) {
-        kisiler = [...tempUsers];
+        people = [...tempUsers];
     }
     
     // Auth sistem üzerinden kaydet
