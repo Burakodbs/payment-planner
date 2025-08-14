@@ -29,7 +29,7 @@ class DataOperations {
 
         const a = document.createElement('a');
         a.href = url;
-        a.download = `kredi-karti-verileri-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `kredi-cardi-dataleri-${new Date().toISOString().slice(0, 10)}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -74,7 +74,7 @@ class DataOperations {
                     people: Array.isArray(data.people) ? data.people.length : 0
                 };
 
-                NotificationService.success(`Veriler içe aktarıldı: ${importCount.expenses} harcama, ${importCount.regularPayments} düzenli ödeme, ${importCount.creditCards} kart, ${importCount.people} kişi`);
+                NotificationService.success(`Veriler içe aktarıldı: ${importCount.expenses} expense, ${importCount.regularPayments} düzenli ödeme, ${importCount.creditCards} card, ${importCount.people} kişi`);
 
                 fileInput.value = '';
             } catch (error) {
@@ -86,7 +86,7 @@ class DataOperations {
     }
 
     static clearAllData() {
-        if (confirm('Tüm verileri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
+        if (confirm('Tüm dataleri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
             if (confirm('Bu işlem GERİ ALINAMAZ! Emin misiniz?')) {
                 if (authSystem && authSystem.currentUser) {
                     expenses = [];
@@ -104,10 +104,10 @@ class DataOperations {
     }
 
     static clearExpenseData() {
-        if (confirm('Sadece harcama verilerini silmek istediğinizden emin misiniz?')) {
+        if (confirm('Sadece expense datalerini silmek istediğinizden emin misiniz?')) {
             expenses = [];
             DataManager.save();
-            NotificationService.success('Harcama verileri silindi');
+            NotificationService.success('Expense data deleted');
             DataManager.updateAllViews();
         }
     }
@@ -126,9 +126,9 @@ class DataOperations {
             if (alreadyFlagged && regularPayments.length > 0) return;
 
             const isExpenseRegular = (h) => h && (
-                h.isRegular || h.isDuzenli || h.isDuzenliOtomatik ||
+                h.isRegular || h.isRegular || h.isRegularAutomatic ||
                 /(\(Düzenli\))/i.test(h.description || '') ||
-                (typeof h.id === 'string' && h.id.startsWith('duzenli_'))
+                (typeof h.id === 'string' && h.id.startsWith('regular_'))
             );
 
             const candidateRecords = expenses.filter(isExpenseRegular);
@@ -146,7 +146,7 @@ class DataOperations {
             const groups = new Map();
 
             candidateRecords.forEach(h => {
-                if (h.duzenliOdemeId && existingDefinitionIds.has(h.duzenliOdemeId)) return;
+                if (h.regularOdemeId && existingDefinitionIds.has(h.regularOdemeId)) return;
 
                 const baseName = (h.description || 'Düzenli Ödeme')
                     .replace(/\(Düzenli.*?\)/i, '')
@@ -157,8 +157,8 @@ class DataOperations {
                 const existing = groups.get(key);
                 
                 if (existing) {
-                    if (h.date && h.date < existing.baslangicTarihi) {
-                        existing.baslangicTarihi = h.date;
+                    if (h.date && h.date < existing.startDate) {
+                        existing.startDate = h.date;
                     }
                     existing.items.push(h);
                 } else {
@@ -167,7 +167,7 @@ class DataOperations {
                         card: h.card,
                         person: h.person,
                         amount: Number(h.amount) || 0,
-                        baslangicTarihi: h.date || new Date().toISOString().slice(0, 10),
+                        startDate: h.date || new Date().toISOString().slice(0, 10),
                         kategori: 'Düzenli Ödeme',
                         items: [h]
                     });
@@ -192,13 +192,13 @@ class DataOperations {
                     amount: group.amount,
                     card: group.card,
                     person: group.person,
-                    baslangicTarihi: group.baslangicTarihi,
+                    startDate: group.startDate,
                     kategori: group.kategori,
                     aktif: true
                 });
                 
                 group.items.forEach(h => { 
-                    h.duzenliOdemeId = newId; 
+                    h.regularOdemeId = newId; 
                 });
             });
 

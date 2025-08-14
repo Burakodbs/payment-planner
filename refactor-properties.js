@@ -3,12 +3,12 @@ const fs = require('fs');
 const path = require('path');
 
 const propertyReplacements = {
-    'tarih': 'date',
-    'tutar': 'amount',
-    'aciklama': 'description', 
-    'kart': 'card',
-    'kisi': 'person',
-    'kullanici': 'person', // Both kisi and kullanici become person
+    'date': 'date',
+    'amount': 'amount',
+    'description': 'description', 
+    'card': 'card',
+    'person': 'person',
+    'user': 'person', // Both person and user become person
     'durum': 'status'
 };
 

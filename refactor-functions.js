@@ -15,13 +15,13 @@ const functionReplacements = {
     'ekle': 'add',
     
     // More specific function names we might have
-    'harcamaEkle': 'addExpense',
-    'harcamaSil': 'deleteExpense',
-    'harcamaGuncelle': 'updateExpense',
-    'kartEkle': 'addCard',
-    'kartSil': 'deleteCard',
-    'kisiEkle': 'addPerson',
-    'kisiSil': 'deletePerson'
+    'expenseEkle': 'addExpense',
+    'expenseSil': 'deleteExpense',
+    'expenseGuncelle': 'updateExpense',
+    'cardEkle': 'addCard',
+    'cardSil': 'deleteCard',
+    'personEkle': 'addPerson',
+    'personSil': 'deletePerson'
 };
 
 function refactorFunctions(filePath) {

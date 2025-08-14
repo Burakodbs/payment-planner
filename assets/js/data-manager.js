@@ -22,16 +22,16 @@ class DataManager {
 
     static updateAllViews() {
         // Update table if exists
-        if (typeof updateHarcamaTable === 'function') updateHarcamaTable();
+        if (typeof updateExpenseTable === 'function') updateExpenseTable();
         
         // Update dashboard if exists
         if (typeof updateDashboard === 'function') updateDashboard();
         
         // Update accounts if exists
-        if (typeof updateHesaplar === 'function') updateHesaplar();
+        if (typeof updateAccounts === 'function') updateAccounts();
         
         // Update regular payments list if exists
-        if (typeof updateDuzenliOdemelerListesi === 'function') updateDuzenliOdemelerListesi();
+        if (typeof updateRegularPaymentsList === 'function') updateRegularPaymentsList();
         
         // Update statistics if exists
         if (typeof updateDataStats === 'function') updateDataStats();
@@ -46,7 +46,7 @@ class RegularPayments {
     static editingId = null;
 
     static showForm() {
-        const form = document.getElementById('duzenliOdemeForm');
+        const form = document.getElementById('regularOdemeForm');
         if (!form) return;
         form.style.display = 'block';
         const dateField = document.getElementById('regularStart');
@@ -55,17 +55,17 @@ class RegularPayments {
 
     static cancel() {
         this.editingId = null;
-        const form = document.getElementById('duzenliOdemeForm');
+        const form = document.getElementById('regularOdemeForm');
         if (form) {
             form.style.display = 'none';
-            ['duzenliAciklama', 'duzenliTutar', 'duzenliKart', 'duzenliKullanici', 'duzenliBaslangic'].forEach(id => {
+            ['regularDescription', 'regularAmount', 'regularCard', 'regularUser', 'regularStart'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
         }
-        const formTitle = document.getElementById('duzenliFormTitle');
+        const formTitle = document.getElementById('regularFormTitle');
         if (formTitle) formTitle.textContent = 'Yeni Düzenli Ödeme';
-        const submitBtn = document.getElementById('duzenliSubmitBtn');
+        const submitBtn = document.getElementById('regularSubmitBtn');
         if (submitBtn) {
             submitBtn.textContent = 'Ekle';
             submitBtn.className = 'btn';
@@ -75,26 +75,26 @@ class RegularPayments {
     static add() {
         if (this.editingId) return this.update();
         
-        const aciklama = document.getElementById('regularDescription')?.value?.trim();
-        const tutarVal = document.getElementById('regularAmount')?.value;
-        const kart = document.getElementById('duzenliKart')?.value;
-        const kullanici = document.getElementById('duzenliKullanici')?.value;
-        const baslangic = document.getElementById('regularStart')?.value;
+        const description = document.getElementById('regularDescription')?.value?.trim();
+        const amountVal = document.getElementById('regularAmount')?.value;
+        const card = document.getElementById('regularCard')?.value;
+        const user = document.getElementById('regularUser')?.value;
+        const start = document.getElementById('regularStart')?.value;
         
-        if (!aciklama || !tutarVal || !kart || !kullanici || !baslangic) {
+        if (!description || !amountVal || !card || !user || !start) {
             NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
         
         const regularPayment = {
             id: Date.now(),
-            aciklama,
-            amount: parseFloat(tutarVal),
-            kart,
-            kullanici,
-            baslangicTarihi: baslangic,
-            kategori: 'Düzenli Ödeme',
-            aktif: true
+            description,
+            amount: parseFloat(amountVal),
+            card,
+            user,
+            startDate: start,
+            category: 'Regular Payment',
+            active: true
         };
         
         regularPayments.push(regularPayment);
@@ -106,7 +106,7 @@ class RegularPayments {
     }
 
     static updateList() {
-        const container = document.getElementById('duzenliOdemelerListesi');
+        const container = document.getElementById('regularPaymentsList');
         if (!container) return;
         
         if (!regularPayments.length) {
@@ -119,14 +119,14 @@ class RegularPayments {
             const isActive = payment.aktif !== false;
             const statusStyle = isActive ? '' : 'opacity:0.6; background: var(--bg-muted);';
             const statusText = isActive ? '' : ' (Durduruldu)';
-            const endDate = payment.bitisTarihi ? ` - Bitiş: ${payment.bitisTarihi}` : '';
+            const endDate = payment.endDate ? ` - End: ${payment.endDate}` : '';
             
             html += `
                 <div style="background: var(--bg-secondary); padding:12px; border-radius: var(--radius); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; ${statusStyle}">
                     <div>
                         <div style="font-weight:600; color:var(--text);">${payment.description}${statusText}</div>
                         <div style="font-size:12px; color:var(--text-secondary);">${payment.amount} TL - ${payment.person} - ${payment.card}</div>
-                        <div style="font-size:12px; color:var(--text-muted);">Başlangıç: ${payment.baslangicTarihi}${endDate}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">Başlangıç: ${payment.startDate}${endDate}</div>
                     </div>
                     <div>
                         ${isActive ? 
@@ -151,18 +151,18 @@ class RegularPayments {
         }
         
         this.editingId = id;
-        const form = document.getElementById('duzenliOdemeForm');
+        const form = document.getElementById('regularOdemeForm');
         if (form) form.style.display = 'block';
         
         document.getElementById('regularDescription').value = payment.description;
         document.getElementById('regularAmount').value = payment.amount;
-        document.getElementById('duzenliKart').value = payment.card;
-        document.getElementById('duzenliKullanici').value = payment.person;
-        document.getElementById('regularStart').value = payment.baslangicTarihi;
+        document.getElementById('regularCard').value = payment.card;
+        document.getElementById('regularUser').value = payment.person;
+        document.getElementById('regularStart').value = payment.startDate;
         
-        const formTitle = document.getElementById('duzenliFormTitle');
+        const formTitle = document.getElementById('regularFormTitle');
         if (formTitle) formTitle.textContent = 'Düzenli Ödemeyi Düzenle';
-        const submitBtn = document.getElementById('duzenliSubmitBtn');
+        const submitBtn = document.getElementById('regularSubmitBtn');
         if (submitBtn) {
             submitBtn.textContent = 'Güncelle';
             submitBtn.className = 'btn btn-primary';
@@ -172,13 +172,13 @@ class RegularPayments {
     }
 
     static update() {
-        const aciklama = document.getElementById('regularDescription')?.value?.trim();
-        const tutarVal = document.getElementById('regularAmount')?.value;
-        const kart = document.getElementById('duzenliKart')?.value;
-        const kullanici = document.getElementById('duzenliKullanici')?.value;
-        const baslangic = document.getElementById('regularStart')?.value;
+        const description = document.getElementById('regularDescription')?.value?.trim();
+        const amountVal = document.getElementById('regularAmount')?.value;
+        const card = document.getElementById('regularCard')?.value;
+        const user = document.getElementById('regularUser')?.value;
+        const start = document.getElementById('regularStart')?.value;
         
-        if (!aciklama || !tutarVal || !kart || !kullanici || !baslangic) {
+        if (!description || !amountVal || !card || !user || !start) {
             NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
@@ -187,11 +187,11 @@ class RegularPayments {
         if (idx !== -1) {
             regularPayments[idx] = {
                 ...regularPayments[idx],
-                aciklama,
-                amount: parseFloat(tutarVal),
-                kart,
-                kullanici,
-                baslangicTarihi: baslangic
+                description,
+                amount: parseFloat(amountVal),
+                card,
+                user,
+                startDate: start
             };
             
             DataManager.save();
@@ -213,7 +213,7 @@ class RegularPayments {
             const today = new Date().toISOString().slice(0, 10);
             const idx = regularPayments.findIndex(o => o.id === id);
             if (idx !== -1) {
-                regularPayments[idx].bitisTarihi = today;
+                regularPayments[idx].endDate = today;
                 regularPayments[idx].aktif = false;
             }
             
@@ -228,7 +228,7 @@ class RegularPayments {
         const idx = regularPayments.findIndex(o => o.id === id);
         if (idx !== -1) {
             regularPayments[idx].aktif = true;
-            delete regularPayments[idx].bitisTarihi;
+            delete regularPayments[idx].endDate;
             
             DataManager.save();
             this.updateList();
@@ -253,73 +253,73 @@ class RegularPayments {
 }
 
 // Backward compatibility functions
-function showDuzenliOdemeForm() { RegularPayments.showForm(); }
-function cancelDuzenliOdeme() { RegularPayments.cancel(); }
-function addDuzenliOdeme() { RegularPayments.add(); }
-function updateDuzenliOdemelerListesi() { RegularPayments.updateList(); }
-function editDuzenliOdeme(id) { RegularPayments.edit(id); }
-function deleteDuzenliOdeme(id) { RegularPayments.delete(id); }
+function showRegularPaymentForm() { RegularPayments.showForm(); }
+function cancelRegularPayment() { RegularPayments.cancel(); }
+function addRegularPayment() { RegularPayments.add(); }
+function updateRegularPaymentsList() { RegularPayments.updateList(); }
+function editRegularPayment(id) { RegularPayments.edit(id); }
+function deleteRegularPayment(id) { RegularPayments.delete(id); }
 
 // Backward compatibility
 function saveData() {
     DataManager.save();
 }
 
-// Harcama Tablosu Güncelleme
-function updateHarcamaTable() {
-    const tbody = document.querySelector('#harcamaTable tbody');
+// Expense Table Update
+function updateExpenseTable() {
+    const tbody = document.querySelector('#expenseTable tbody');
 
-    // Check if table exists (only on harcama-listesi page)
+    // Check if table exists (only on expense-listesi page)
     if (!tbody) {
-        // console.log('Harcama table not found, skipping table update');
+        // console.log('Expense table not found, skipping table update');
         return;
     }
 
-    const filteredHarcamalar = applyAllFilters();
+    const filteredExpenses = applyAllFilters();
 
-    updateSonucSayisi(filteredHarcamalar);
+    updateResultCount(filteredExpenses);
 
     tbody.innerHTML = '';
 
-    // console.log('Filtrelenmiş harcama sayısı:', filteredHarcamalar.length);
-    // console.log('İlk 5 harcama:', filteredHarcamalar.slice(0, 5));
+    // console.log('Filtrelenmiş expense sayısı:', filteredExpenses.length);
+    // console.log('İlk 5 expense:', filteredExpenses.slice(0, 5));
     // console.log('Tüm expenses:', expenses.length);
 
-    filteredHarcamalar.forEach((harcama, index) => {
+    filteredExpenses.forEach((expense, index) => {
         const row = tbody.insertRow();
-        const taksitBilgi = harcama.isTaksit ? `${harcama.taksitNo}/${harcama.toplamTaksit}` : '-';
+        const taksitBilgi = expense.isTaksit ? `${expense.taksitNo}/${expense.toplamTaksit}` : '-';
 
         let rowStyle = '';
         let taksitEtiket = '';
         let actionButton = '';
 
-        if (harcama.isFuture) {
+        if (expense.isFuture) {
             rowStyle = 'background-color: #fff3cd; color: #856404;';
             taksitEtiket = '';
             actionButton = '<span style="color: #856404; font-size: 12px;">Gelecek Taksit</span>';
-        } else if (harcama.isRegular) {
+        } else if (expense.isRegular) {
             rowStyle = 'background-color: #e3f2fd; color: #1565c0;';
             taksitEtiket = '';
             actionButton = `
-                <button class="btn btn-sm btn-outline" onclick="editHarcama(${harcama.id || 'undefined'})" style="margin-right: 4px;">Düzenle</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteHarcama(${harcama.id || 'undefined'})">Sil</button>
+                <button class="btn btn-sm btn-outline" onclick="editExpense(${expense.id || 'undefined'})" style="margin-right: 4px;">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id || 'undefined'})">Delete</button>
             `;
         } else {
             actionButton = `
-                <button class="btn btn-sm btn-outline" onclick="editHarcama(${harcama.id || 'undefined'})" style="margin-right: 4px;">Düzenle</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteHarcama(${harcama.id || 'undefined'})">Sil</button>
+                <button class="btn btn-sm btn-outline" onclick="editExpense(${expense.id || 'undefined'})" style="margin-right: 4px;">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id || 'undefined'})">Delete</button>
             `;
         }
 
-        const tutarValue = harcama.amount ? Number(harcama.amount).toFixed(2) : '0.00';
+        const amountValue = expense.amount ? Number(expense.amount).toFixed(2) : '0.00';
 
         row.innerHTML = `
-            <td style="${rowStyle}">${new Date(harcama.date).toLocaleDateString('tr-TR')}</td>
-            <td style="${rowStyle}">${harcama.card || '-'}</td>
-            <td style="${rowStyle}">${harcama.person || '-'}</td>
-            <td style="${rowStyle}">${harcama.description || '-'}${taksitEtiket}</td>
+            <td style="${rowStyle}">${new Date(expense.date).toLocaleDateString('tr-TR')}</td>
+            <td style="${rowStyle}">${expense.card || '-'}</td>
+            <td style="${rowStyle}">${expense.person || '-'}</td>
+            <td style="${rowStyle}">${expense.description || '-'}${taksitEtiket}</td>
             <td style="${rowStyle}">${taksitBilgi}</td>
-            <td class="text-right" style="${rowStyle}">${tutarValue} TL</td>
+            <td class="text-right" style="${rowStyle}">${amountValue} TL</td>
             <td style="${rowStyle}">
                 ${actionButton}
             </td>
@@ -327,39 +327,39 @@ function updateHarcamaTable() {
     });
 }
 
-function updateSonucSayisi(filteredHarcamalar) {
-    const toplamHarcama = expenses.length;
-    const gosterilenSayi = filteredHarcamalar.length;
+function updateResultCount(filteredExpenses) {
+    const totalExpenses = expenses.length;
+    const shownCount = filteredExpenses.length;
 
-    const gercekHarcamalar = filteredHarcamalar.filter(h => !h.isFuture && !h.isRegular).length;
-    const gelecekTaksitler = filteredHarcamalar.filter(h => h.isFuture).length;
-    const duzenliOdemeSayisi = filteredHarcamalar.filter(h => h.isRegular).length;
+    const actualExpenses = filteredExpenses.filter(h => !h.isFuture && !h.isRegular).length;
+    const futurePayments = filteredExpenses.filter(h => h.isFuture).length;
+    const regularPaymentCount = filteredExpenses.filter(h => h.isRegular).length;
 
-    let mesaj = `${gosterilenSayi} kayıt gösteriliyor`;
+    let message = `${shownCount} records shown`;
 
-    if (gosterilenSayi < toplamHarcama) {
-        mesaj += ` (Toplam ${toplamHarcama} kayıttan)`;
+    if (shownCount < totalExpenses) {
+        message += ` (Total of ${totalExpenses} records)`;
     }
 
-    if (gelecekTaksitler > 0 || duzenliOdemeSayisi > 0) {
-        let detay = [];
-        if (gercekHarcamalar > 0) detay.push(`${gercekHarcamalar} harcama`);
-        if (duzenliOdemeSayisi > 0) detay.push(`${duzenliOdemeSayisi} düzenli ödeme`);
-        if (gelecekTaksitler > 0) detay.push(`${gelecekTaksitler} gelecek taksit`);
-        mesaj += ` | ${detay.join(' + ')}`;
+    if (futurePayments > 0 || regularPaymentCount > 0) {
+        let detail = [];
+        if (actualExpenses > 0) detail.push(`${actualExpenses} expense`);
+        if (regularPaymentCount > 0) detail.push(`${regularPaymentCount} regular payment`);
+        if (futurePayments > 0) detail.push(`${futurePayments} future installment`);
+        message += ` | ${detail.join(' + ')}`;
     }
 
-    const toplamTutar = filteredHarcamalar.reduce((sum, h) => sum + (Number(h.amount) || 0), 0);
-    mesaj += ` | Toplam: ${toplamTutar.toFixed(2)} TL`;
+    const totalAmount = filteredExpenses.reduce((sum, h) => sum + (Number(h.amount) || 0), 0);
+    message += ` | Total: ${totalAmount.toFixed(2)} TL`;
 
-    const sonucSayisiElement = document.getElementById('sonucSayisi');
-    if (sonucSayisiElement) {
-        sonucSayisiElement.textContent = mesaj;
+    const resultCountElement = document.getElementById('resultCount');
+    if (resultCountElement) {
+        resultCountElement.textContent = message;
     }
 }
 
 // Filtreleme ve Sıralama
-// Düzenli ödemeleri harcama formatına dönüştür
+// Düzenli ödemeleri expense formatına dönüştür
 function getDuzenliOdemelerAsHarcamalar() {
     const currentDate = new Date();
     const currentMonth = currentDate.toISOString().slice(0, 7); // YYYY-MM format
@@ -372,13 +372,13 @@ function getDuzenliOdemelerAsHarcamalar() {
             return false;
         }
 
-        // Bitiş tarihi varsa ve bugünden önce ise hariç tut
-    if ((odeme.bitisTarihi || odeme.birisTarihi) && (odeme.bitisTarihi || odeme.birisTarihi) <= today) {
+        // If end date exists and is before today, exclude it
+    if ((payment.endDate || payment.endDate) && (payment.endDate || payment.endDate) <= today) {
             return false;
         }
 
         // Başlangıç tarihi bugünden sonra ise henüz başlamamış, hariç tut
-        if (odeme.baslangicTarihi && odeme.baslangicTarihi > today) {
+        if (odeme.startDate && odeme.startDate > today) {
             return false;
         }
 
@@ -404,24 +404,24 @@ function getDuzenliOdemelerAsHarcamalar() {
 
 function applyAllFilters() {
     // console.log('--- FILTRE BAŞLANGICI ---');
-    // console.log('Toplam harcama sayısı:', expenses.length);
+    // console.log('Toplam expense sayısı:', expenses.length);
     // console.log('Düzenli ödeme sayısı:', regularPayments.length);
 
     // Harcamaları ve düzenli ödemeleri birleştir
     let filtered = [...expenses];
 
-    // Check if filter elements exist (only on harcama-listesi page)
-    const filtreTarihElement = document.getElementById('filtreTarih');
-    if (!filtreTarihElement) {
+    // Check if filter elements exist (only on expense-listesi page)
+    const filtreDateElement = document.getElementById('filtreTarih');
+    if (!filtreDateElement) {
         // console.log('Filter elements not found, skipping filtering');
         return filtered;
     }
 
-    const selectedMonth = filtreTarihElement.value;
+    const selectedMonth = filtreDateElement.value;
     // console.log('Seçilen ay:', selectedMonth);
 
     if (selectedMonth) {
-        const monthFiltered = filtered.filter(harcama => harcama.date.startsWith(selectedMonth));
+        const monthFiltered = filtered.filter(expense => expense.date.startsWith(selectedMonth));
         // console.log('Ay filtresinden sonra:', monthFiltered.length);
 
         const futureTaksits = getFutureTaksits(selectedMonth);
@@ -437,42 +437,42 @@ function applyAllFilters() {
 
     // console.log('Tarih filtresinden sonra toplam:', filtered.length);
 
-    const filtreKullaniciElement = document.getElementById('filtreKullanici');
-    const selectedUser = filtreKullaniciElement ? filtreKullaniciElement.value : '';
+    const filterUserElement = document.getElementById('filterUser');
+    const selectedUser = filterUserElement ? filterUserElement.value : '';
     // console.log('Seçilen kullanıcı:', selectedUser);
     if (selectedUser) {
         const beforeCount = filtered.length;
-        filtered = filtered.filter(harcama => harcama.person === selectedUser);
+        filtered = filtered.filter(expense => expense.person === selectedUser);
         // console.log(`Kullanıcı filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
 
-    const filtreKartElement = document.getElementById('filtreKart');
-    const selectedCard = filtreKartElement ? filtreKartElement.value : '';
+    const filterCardElement = document.getElementById('filterCard');
+    const selectedCard = filterCardElement ? filterCardElement.value : '';
     // console.log('Seçilen card:', selectedCard);
     if (selectedCard) {
         const beforeCount = filtered.length;
-        filtered = filtered.filter(harcama => harcama.card === selectedCard);
+        filtered = filtered.filter(expense => expense.card === selectedCard);
         // console.log(`Kart filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
 
-    const minTutarElement = document.getElementById('minTutar');
-    const maxTutarElement = document.getElementById('maxTutar');
-    const minTutarValue = minTutarElement ? minTutarElement.value : '';
-    const maxTutarValue = maxTutarElement ? maxTutarElement.value : '';
-    const minTutar = minTutarValue ? parseFloat(minTutarValue) : 0;
-    const maxTutar = maxTutarValue ? parseFloat(maxTutarValue) : Infinity;
+    const minAmountElement = document.getElementById('minAmount');
+    const maxAmountElement = document.getElementById('maxAmount');
+    const minAmountValue = minAmountElement ? minAmountElement.value : '';
+    const maxAmountValue = maxAmountElement ? maxAmountElement.value : '';
+    const minAmount = minAmountValue ? parseFloat(minAmountValue) : 0;
+    const maxAmount = maxAmountValue ? parseFloat(maxAmountValue) : Infinity;
 
-    // console.log('Tutar aralığı:', minTutar, '-', maxTutar);
-    if (minTutarValue || maxTutarValue) {
+    // console.log('Tutar aralığı:', minAmount, '-', maxAmount);
+    if (minAmountValue || maxAmountValue) {
         const beforeCount = filtered.length;
-        filtered = filtered.filter(harcama => harcama.amount >= minTutar && harcama.amount <= maxTutar);
+        filtered = filtered.filter(expense => expense.amount >= minAmount && expense.amount <= maxAmount);
         // console.log(`Tutar filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
     }
 
     // console.log('Sıralama öncesi kayıt sayısı:', filtered.length);
 
-    const siralamaKriteriElement = document.getElementById('siralamaKriteri');
-    const sortCriteria = siralamaKriteriElement ? siralamaKriteriElement.value : 'tarih-desc';
+    const sortCriteriaElement = document.getElementById('sortCriteria');
+    const sortCriteria = sortCriteriaElement ? sortCriteriaElement.value : 'date-desc';
     const [field, direction] = sortCriteria.split('-');
     // console.log('Sıralama kriteri:', field, direction);
 
@@ -482,19 +482,19 @@ function applyAllFilters() {
             let valueA, valueB;
 
             switch (field) {
-                case 'tarih':
+                case 'date':
                     valueA = new Date(a.date).getTime();
                     valueB = new Date(b.date).getTime();
                     break;
-                case 'tutar':
+                case 'amount':
                     valueA = Number(a.amount);
                     valueB = Number(b.amount);
                     break;
-                case 'kullanici':
+                case 'user':
                     valueA = String(a.person).toLowerCase();
                     valueB = String(b.person).toLowerCase();
                     break;
-                case 'kart':
+                case 'card':
                     valueA = String(a.card).toLowerCase();
                     valueB = String(b.card).toLowerCase();
                     break;
@@ -502,7 +502,7 @@ function applyAllFilters() {
                     return 0;
             }
 
-            if (field === 'tutar' || field === 'tarih') {
+            if (field === 'amount' || field === 'date') {
                 if (isNaN(valueA) && !isNaN(valueB)) return 1;
                 if (!isNaN(valueA) && isNaN(valueB)) return -1;
                 if (isNaN(valueA) && isNaN(valueB)) return 0;
@@ -528,26 +528,26 @@ function applyAllFilters() {
 
 // Harcama İşlemleri
 function deleteHarcama(id) {
-    const harcama = expenses.find(h => h.id === id);
-    if (!harcama) {
-        showToast('Harcama bulunamadı', 'error');
+    const expense = expenses.find(h => h.id === id);
+    if (!expense) {
+        showToast('Expense not found', 'error');
         return;
     }
 
-    let confirmMessage = 'Bu harcamayı silmek istediğinizden emin misiniz?';
+    let confirmMessage = 'Bu expenseyı silmek istediğinizden emin misiniz?';
 
     // Otomatik oluşturulan düzenli ödeme ise uyarı ver
-    if (harcama.isRegular) {
-        confirmMessage = `Bu otomatik oluşturulan düzenli ödemeyi silmek istediğinizden emin misiniz?\n\n"${harcama.description}"\n\nNot: Gelecek ay tekrar otomatik olarak oluşturulacaktır.`;
+    if (expense.isRegular) {
+        confirmMessage = `Bu otomatik oluşturulan düzenli ödemeyi silmek istediğinizden emin misiniz?\n\n"${expense.description}"\n\nNot: Gelecek ay tekrar otomatik olarak oluşturulacaktır.`;
     }
 
     if (confirm(confirmMessage)) {
         expenses = expenses.filter(h => h.id !== id);
         saveData();
-        updateHarcamaTable();
+        updateExpenseTable();
         updateDashboard();
 
-        if (harcama.isRegular) {
+        if (expense.isRegular) {
             showToast('Düzenli ödeme silindi (gelecek ay yeniden oluşturulacak)', 'info');
         } else {
             showToast('Harcama silindi', 'success');
@@ -558,27 +558,27 @@ function deleteHarcama(id) {
 // Form Event Listeners
 document.addEventListener('keydown', function (e) {
     const activeElement = document.activeElement;
-    const isInUserSelect = activeElement === document.getElementById('kullanici');
+    const isInUserSelect = activeElement === document.getElementById('user');
     const isInFormField = activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT';
 
     if (isInUserSelect || !isInFormField) {
-        const kullaniciSelect = document.getElementById('kullanici');
+        const userSelect = document.getElementById('user');
         const keyNum = parseInt(e.key);
 
-        // Check if kullanici select exists (only on harcama-ekle page)
-        if (!kullaniciSelect) {
+        // Check if user select exists (only on expense-ekle page)
+        if (!userSelect) {
             return;
         }
 
         if (keyNum >= 1 && keyNum <= 5 && keyNum <= people.length) {
             e.preventDefault();
             const selectedPerson = people[keyNum - 1];
-            kullaniciSelect.value = selectedPerson;
-            kullaniciSelect.dispatchEvent(new Event('change'));
+            userSelect.value = selectedPerson;
+            userSelect.dispatchEvent(new Event('change'));
             if (!isInUserSelect) {
-                const aciklamaElement = document.getElementById('aciklama');
-                if (aciklamaElement) {
-                    aciklamaElement.focus();
+                const descriptionElement = document.getElementById('description');
+                if (descriptionElement) {
+                    descriptionElement.focus();
                 }
             }
         }
@@ -586,9 +586,9 @@ document.addEventListener('keydown', function (e) {
 });
 
 // Form event listener - sadece form varsa ekle
-const harcamaForm = document.getElementById('harcamaForm');
-if (harcamaForm) {
-    harcamaForm.addEventListener('keydown', function (e) {
+const expenseForm = document.getElementById('expenseForm');
+if (expenseForm) {
+    expenseForm.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
             e.preventDefault();
             this.dispatchEvent(new Event('submit'));

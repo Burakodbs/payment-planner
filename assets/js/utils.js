@@ -4,9 +4,9 @@
 function migrateRegularPaymentData() {
     let migrationCount = 0;
     expenses.forEach(expense => {
-        if (expense.isDuzenliOtomatik && !expense.isRegular) {
+        if (expense.isRegularAutomatic && !expense.isRegular) {
             expense.isRegular = true;
-            delete expense.isDuzenliOtomatik;
+            delete expense.isRegularAutomatic;
             
             if (expense.description && expense.description.includes('(Otomatik)')) {
                 expense.description = expense.description.replace('(Otomatik)', '(Düzenli)');
@@ -43,9 +43,9 @@ function updateDashboardStats() {
     const thisMonthExpenses = expenses.filter(h => h.date && h.date.startsWith(thisMonth));
     const thisMonthTotal = thisMonthExpenses.reduce((sum, h) => sum + (parseFloat(h.amount) || 0), 0);
 
-    const { hesaplar, gelecekTaksitler } = calculateDebts();
-    const totalCurrentDebt = Object.values(hesaplar).reduce((sum, debt) => sum + debt, 0);
-    const totalFuturePayments = Object.values(gelecekTaksitler).reduce((sum, debt) => sum + debt, 0);
+    const { accounts, futurePayments } = calculateDebts();
+    const totalCurrentDebt = Object.values(accounts).reduce((sum, debt) => sum + debt, 0);
+    const totalFuturePayments = Object.values(futurePayments).reduce((sum, debt) => sum + debt, 0);
 
     thisMonthElement.textContent = thisMonthTotal.toFixed(2) + ' TL';
     totalCurrentDebtElement.textContent = totalCurrentDebt.toFixed(2) + ' TL';
@@ -61,7 +61,7 @@ function updateDashboardRecentExpenses() {
         .slice(0, 5);
 
     if (recentExpenses.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Henüz harcama yok</p>';
+        container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Henüz expense yok</p>';
         return;
     }
 
@@ -114,20 +114,20 @@ function syncAllDataAfterNameChange(type, oldName, newName) {
     let updateCount = 0;
 
     expenses.forEach(expense => {
-        if (type === 'kart' && expense.card === oldName) {
+        if (type === 'card' && expense.card === oldName) {
             expense.card = newName;
             updateCount++;
-        } else if (type === 'kullanici' && expense.person === oldName) {
+        } else if (type === 'user' && expense.person === oldName) {
             expense.person = newName;
             updateCount++;
         }
     });
 
     regularPayments.forEach(payment => {
-        if (type === 'kart' && payment.card === oldName) {
+        if (type === 'card' && payment.card === oldName) {
             payment.card = newName;
             updateCount++;
-        } else if (type === 'kullanici' && payment.person === oldName) {
+        } else if (type === 'user' && payment.person === oldName) {
             payment.person = newName;
             updateCount++;
         }
@@ -136,18 +136,18 @@ function syncAllDataAfterNameChange(type, oldName, newName) {
     if (updateCount > 0) {
         DataManager.save();
         DataManager.updateAllViews();
-        NotificationService.success(`${updateCount} kayıt güncellendi: ${oldName} → ${newName}`);
+        NotificationService.success(`${updateCount} records updated: ${oldName} → ${newName}`);
     }
 }
 
 // Card and User editing functions
 function editCard(oldCardName) {
-    const newCardName = prompt(`"${oldCardName}" kartının yeni adını girin:`, oldCardName);
+    const newCardName = prompt(`Enter new name for "${oldCardName}" card:`, oldCardName);
     if (newCardName && newCardName.trim() && newCardName.trim() !== oldCardName) {
         const newName = newCardName.trim();
 
         if (creditCards.includes(newName)) {
-            NotificationService.error('Bu kart adı zaten mevcut');
+            NotificationService.error('This card name already exists');
             return;
         }
 
@@ -156,7 +156,7 @@ function editCard(oldCardName) {
             creditCards[cardIndex] = newName;
         }
 
-        syncAllDataAfterNameChange('kart', oldCardName, newName);
+        syncAllDataAfterNameChange('card', oldCardName, newName);
         FormHandlers.updateCardOptions();
         
         if (typeof updateCardAndUserManagement === 'function') updateCardAndUserManagement();
@@ -165,7 +165,7 @@ function editCard(oldCardName) {
 }
 
 function editUser(oldUserName) {
-    const newUserName = prompt(`"${oldUserName}" kullanıcısının yeni adını girin:`, oldUserName);
+    const newUserName = prompt(`Enter new name for "${oldUserName}" user:`, oldUserName);
     if (newUserName && newUserName.trim() && newUserName.trim() !== oldUserName) {
         const newName = newUserName.trim();
 
@@ -179,7 +179,7 @@ function editUser(oldUserName) {
             people[userIndex] = newName;
         }
 
-        syncAllDataAfterNameChange('kullanici', oldUserName, newName);
+        syncAllDataAfterNameChange('user', oldUserName, newName);
         FormHandlers.updateUserOptions();
         
         if (typeof updateCardAndUserManagement === 'function') updateCardAndUserManagement();

@@ -9,7 +9,7 @@ function renderHeader() {
                     <div class="header-icon">💳</div>
                     <div>
                         <h1>Harcama Takip</h1>
-                        <div class="header-subtitle">Kredi kartı harcama yönetimi</div>
+                        <div class="header-subtitle">Kredi cardı expense yönetimi</div>
                     </div>
                 </a>
                 
@@ -29,11 +29,11 @@ function renderHeader() {
 function renderNavigation(activePage = '') {
     const navItems = [
         { href: 'index.html', icon: '📊', text: 'Gösterge Paneli', id: 'dashboard' },
-        { href: 'harcama-ekle.html', icon: '➕', text: 'Harcama Ekle', id: 'harcama-ekle' },
-        { href: 'harcama-listesi.html', icon: '📋', text: 'Harcama Listesi', id: 'harcama-listesi' },
-        { href: 'hesaplar.html', icon: '💰', text: 'Hesaplar', id: 'hesaplar' },
-        { href: 'aylik-ozet.html', icon: '📅', text: 'Aylık Özet', id: 'aylik-ozet' },
-        { href: 'veri-yonetimi.html', icon: '⚙️', text: 'Veri Yönetimi', id: 'veri-yonetimi' }
+        { href: 'expense-ekle.html', icon: '➕', text: 'Add Expense', id: 'expense-ekle' },
+        { href: 'expense-listesi.html', icon: '📋', text: 'Harcama Listesi', id: 'expense-listesi' },
+        { href: 'accounts.html', icon: '💰', text: 'Hesaplar', id: 'accounts' },
+        { href: 'aylik-ozet.html', icon: '📅', text: 'Aylık Özet', id: 'monthly-summary' },
+        { href: 'data-yonetimi.html', icon: '⚙️', text: 'Veri Yönetimi', id: 'data-yonetimi' }
     ];
 
     const navHTML = navItems.map(item => {
@@ -64,7 +64,7 @@ function renderAuthContainer() {
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi kartı expensesınızı güvenle takip edin</p>
+                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
                     </div>
 
                     <div id="loginForm" class="auth-form">
@@ -110,7 +110,7 @@ function renderSetupWizard() {
                                 </div>
                                 <button type="button" class="btn btn-secondary" onclick="addCard()">Kart Ekle</button>
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">En az bir kart eklemeniz önerilir.</p>
+                                    <p class="setup-help">En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
                         </div>

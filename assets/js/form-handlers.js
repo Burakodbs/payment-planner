@@ -6,12 +6,12 @@ class FormHandlers {
         const formData = new FormData(event.target);
         const expense = {
             id: Date.now(),
-            date: formData.get('tarih'),
-            card: formData.get('kart'),
-            person: formData.get('kullanici'),
+            date: formData.get('date'),
+            card: formData.get('card'),
+            person: formData.get('user'),
             kategori: formData.get('kategori'),
-            description: formData.get('aciklama'),
-            amount: parseFloat(formData.get('tutar')),
+            description: formData.get('description'),
+            amount: parseFloat(formData.get('amount')),
             taksitNo: formData.get('taksitNo') ? parseInt(formData.get('taksitNo')) : null,
             toplamTaksit: formData.get('toplamTaksit') ? parseInt(formData.get('toplamTaksit')) : null,
             isTaksit: formData.get('taksitNo') && formData.get('toplamTaksit')
@@ -26,18 +26,18 @@ class FormHandlers {
         FormHandlers.applyStickyValues();
 
         // Focus on amount input
-        const tutarInput = document.getElementById('tutar');
-        if (tutarInput) {
-            tutarInput.focus();
-            tutarInput.select();
+        const amountInput = document.getElementById('amount');
+        if (amountInput) {
+            amountInput.focus();
+            amountInput.select();
         }
 
         DataManager.updateAllViews();
-        NotificationService.success('Harcama başarıyla eklendi!');
+        NotificationService.success('Expense successfully added!');
     }
 
     static preserveStickyValues() {
-        const stickyFields = ['kart', 'kullanici'];
+        const stickyFields = ['card', 'user'];
         const stickyValues = {};
         
         stickyFields.forEach(field => {
@@ -72,7 +72,7 @@ class FormHandlers {
     }
 
     static updateCardOptions() {
-        const selects = document.querySelectorAll('#kart, #filtreKart, #editKart');
+        const selects = document.querySelectorAll('#card, #filterCard, #editCard');
         
         selects.forEach(select => {
             const currentValue = select.value;
@@ -80,10 +80,10 @@ class FormHandlers {
             options.forEach(option => option.remove());
 
             const cardList = DataManager.getCards();
-            cardList.forEach(kart => {
+            cardList.forEach(card => {
                 const option = document.createElement('option');
-                option.value = kart;
-                option.textContent = kart;
+                option.value = card;
+                option.textContent = card;
                 select.appendChild(option);
             });
 
@@ -92,17 +92,17 @@ class FormHandlers {
     }
 
     static updateUserOptions() {
-        const selects = document.querySelectorAll('#kullanici, #filtreKullanici, #editKullanici');
+        const selects = document.querySelectorAll('#user, #filterUser, #editUser');
         
         selects.forEach(select => {
             const currentValue = select.value;
             select.querySelectorAll('option:not([value=""])').forEach(o => o.remove());
             
             const userList = DataManager.getUsers();
-            userList.forEach(kisi => {
+            userList.forEach(person => {
                 const option = document.createElement('option');
-                option.value = kisi;
-                option.textContent = kisi;
+                option.value = person;
+                option.textContent = person;
                 select.appendChild(option);
             });
 
@@ -112,6 +112,6 @@ class FormHandlers {
 }
 
 // Global backward compatibility
-window.handleHarcamaSubmit = FormHandlers.handleExpenseSubmit;
+window.handleExpenseSubmit = FormHandlers.handleExpenseSubmit;
 window.updateCardOptions = FormHandlers.updateCardOptions;
 window.updateUserOptions = FormHandlers.updateUserOptions;

@@ -43,15 +43,15 @@ class AuthSystem {
         }
     }
 
-    // Eski kullanıcı verilerini yeni sisteme geçir
+    // Eski kullanıcı datalerini yeni sisteme geçir
     migrateOldUserData() {
         // Eski current_user kontrolü
         const oldCurrentUser = localStorage.getItem('current_user');
         
         if (oldCurrentUser && this.users[oldCurrentUser]) {
-            // debug: mevcut kullanıcı verisi bulundu
+            // debug: mevcut kullanıcı datasi bulundu
             
-            // Eski kullanıcı verisi varsa yeni formata çevir
+            // Eski kullanıcı datasi varsa yeni formata çevir
             const user = this.users[oldCurrentUser];
             
             // Eski format kontrolü - role yoksa ekle
@@ -93,7 +93,7 @@ class AuthSystem {
             // Eski current_user kaydını temizle
             localStorage.removeItem('current_user');
             
-            // debug: kullanıcı verisi güncellendi
+            // debug: kullanıcı datasi güncellendi
             
             // Kullanıcıya bilgi ver
             setTimeout(() => {
@@ -105,28 +105,28 @@ class AuthSystem {
             }, 1000);
         }
         
-        // Diğer eski verileri kontrol et
+        // Diğer eski dataleri kontrol et
         this.checkAndMigrateGlobalData();
     }
 
-    // Global verileri kontrol et ve kullanıcı hesabına aktar
+    // Global dataleri kontrol et ve kullanıcı hesabına aktar
     checkAndMigrateGlobalData() {
-        // Eğer global veriler varsa ve hiçbir kullanıcı bunlara sahip değilse
+        // Eğer global dataler varsa ve hiçbir kullanıcı bunlara sahip değilse
         const globalHarcamalar = JSON.parse(localStorage.getItem('expenses') || '[]');
         const globalDuzenliOdemeler = JSON.parse(localStorage.getItem('regularPayments') || '[]');
-        const globalKredikartlari = JSON.parse(localStorage.getItem('creditCards') || '[]');
+        const globalKredicardsi = JSON.parse(localStorage.getItem('creditCards') || '[]');
         const globalKisiler = JSON.parse(localStorage.getItem('people') || '[]');
         
     // debug: migration kontrolü
-    // if (this.debug) console.log('migration-check', { globalHarcamalar: globalHarcamalar.length, globalDuzenliOdemeler: globalDuzenliOdemeler.length, globalKredikartlari: globalKredikartlari.length, globalKisiler: globalKisiler.length });
+    // if (this.debug) console.log('migration-check', { globalHarcamalar: globalHarcamalar.length, globalDuzenliOdemeler: globalDuzenliOdemeler.length, globalKredicardsi: globalKredicardsi.length, globalKisiler: globalKisiler.length });
         
         const hasGlobalData = globalHarcamalar.length > 0 || 
                             globalDuzenliOdemeler.length > 0 || 
-                            globalKredikartlari.length > 0 || 
+                            globalKredicardsi.length > 0 || 
                             globalKisiler.length > 0;
         
         if (hasGlobalData) {
-            // debug: global veriler migration başlıyor
+            // debug: global dataler migration başlıyor
             
             // İlk kullanıcı bulunursa ona aktar, yoksa 'migrated_user' oluştur
             let targetUser = Object.keys(this.users).find(u => u !== 'admin');
@@ -150,56 +150,56 @@ class AuthSystem {
                 // debug: migration user oluşturuldu
             }
             
-            // Verileri aktar - bütün veriler akıtırılsın
-            // debug: veri aktarımı başlıyor
+            // Verileri aktar - bütün dataler akıtırılsın
+            // debug: data aktarımı başlıyor
             this.users[targetUser].data = {
                 expenses: globalHarcamalar,
                 regularPayments: globalDuzenliOdemeler,
-                creditCards: globalKredikartlari,
+                creditCards: globalKredicardsi,
                 people: globalKisiler
             };
             
-            // debug: aktarılan veri özeti
-            // if (this.debug) console.log('migration-transfer', { expenses: globalHarcamalar.length, regularPayments: globalDuzenliOdemeler.length, creditCards: globalKredikartlari.length, people: globalKisiler.length });
+            // debug: aktarılan data özeti
+            // if (this.debug) console.log('migration-transfer', { expenses: globalHarcamalar.length, regularPayments: globalDuzenliOdemeler.length, creditCards: globalKredicardsi.length, people: globalKisiler.length });
             
-            // Global verileri temizle
+            // Global dataleri temizle
             localStorage.removeItem('expenses');
             localStorage.removeItem('regularPayments');
             localStorage.removeItem('creditCards');
             localStorage.removeItem('people');
             
-            // Güncellenmiş kullanıcı verilerini kaydet
+            // Güncellenmiş kullanıcı datalerini kaydet
             localStorage.setItem('app_users', JSON.stringify(this.users));
             
-            // Harcamalardan kart ve kişi bilgilerini çıkar
+            // Harcamalardan card ve kişi bilgilerini çıkar
             this.extractDataFromHarcamalar(targetUser);
             
             // debug: migration tamamlandı
             
             setTimeout(() => {
-                alert(`📊 Mevcut verileriniz "${targetUser}" hesabına aktarıldı!\n\n` +
+                alert(`📊 Mevcut dataleriniz "${targetUser}" hesabına aktarıldı!\n\n` +
                       `🔑 Giriş bilgileri: ${targetUser} / 123456\n\n` +
                       `Lütfen bu bilgilerle giriş yapın ve şifrenizi değiştirin.`);
             }, 1500);
         } else {
-            // debug: migration yapılacak veri yok
+            // debug: migration yapılacak data yok
             
-            // Global veri yoksa da mevcut kullanıcının expensesını kontrol et
+            // Global data yoksa da mevcut kullanıcının expensesını kontrol et
             if (this.currentUser) {
                 this.extractDataFromHarcamalar(this.currentUser);
             }
         }
     }
 
-    // Harcamalardan kart ve kişi bilgilerini çıkar
+    // Harcamalardan card ve kişi bilgilerini çıkar
     extractDataFromHarcamalar(username) {
         const userKey = `app_user_${username}`;
         const userData = JSON.parse(localStorage.getItem(userKey) || '{}');
         
         if (userData.expenses && userData.expenses.length > 0) {
-            // debug: harcama taraması
+            // debug: expense taraması
             
-            // Kredi kartlarını çıkar
+            // Kredi cardsını çıkar
             const uniqueCards = [...new Set(userData.expenses
                 .filter(h => h.card && h.card.trim() !== '' && h.card !== 'Nakit')
                 .map(h => h.card.trim()))];
@@ -209,9 +209,9 @@ class AuthSystem {
                 .filter(h => h.person && h.person.trim() !== '')
                 .map(h => h.person.trim()))];
             
-            // debug: çıkarılan kart/kullanıcı listeleri
+            // debug: çıkarılan card/kullanıcı listeleri
             
-            // Mevcut verileri güncelle
+            // Mevcut dataleri güncelle
             if (!userData.creditCards || userData.creditCards.length === 0) {
                 userData.creditCards = uniqueCards;
             }
@@ -222,7 +222,7 @@ class AuthSystem {
             // Kaydet
             localStorage.setItem(userKey, JSON.stringify(userData));
             
-            // Global verileri de güncelle
+            // Global dataleri de güncelle
             if (this.currentUser === username) {
                 this.currentUserData = userData;
                 // debug: current user data güncellendi
@@ -326,7 +326,7 @@ class AuthSystem {
     // Admin kullanıcısı oluşturma (sadece admin yapabilir)
     createUser(username, password, email = '', role = 'user') {
         if (!this.currentUser || this.users[this.currentUser].role !== 'admin') {
-            throw new Error('Bu işlem için admin yetkisi gerekli');
+            throw new Error('Bu işlem için admin yetperson gerekli');
         }
 
         if (!username || !password) {
@@ -445,7 +445,7 @@ class AuthSystem {
         this.showAuth();
     }
 
-    // Kullanıcı verilerini yükle
+    // Kullanıcı datalerini yükle
     loadUserData() {
         if (!this.currentUser || !this.users[this.currentUser]) return;
 
@@ -491,7 +491,7 @@ class AuthSystem {
         // Simple light theme - no theme loading needed
         // Theme management disabled - using simple default theme
 
-        // Mevcut harcamalardan kart ve kullanıcı çıkar (eksikse)
+        // Mevcut expensesdan card ve kullanıcı çıkar (eksikse)
         try {
             this.ensureCardUserExtraction();
         } catch (e) {
@@ -499,7 +499,7 @@ class AuthSystem {
         }
     }
 
-    // Kullanıcı verilerini kaydet
+    // Kullanıcı datalerini kaydet
     saveUserData() {
         if (!this.currentUser || !this.users[this.currentUser]) return;
 
@@ -517,7 +517,7 @@ class AuthSystem {
         localStorage.setItem('app_users', JSON.stringify(this.users));
     }
 
-    // Harcamalardan eksik kart ve kullanıcıları otomatik çıkar
+    // Harcamalardan eksik card ve kullanıcıları otomatik çıkar
     ensureCardUserExtraction() {
         if (!Array.isArray(expenses)) return;
 
@@ -545,7 +545,7 @@ class AuthSystem {
         });
 
         if (added) {
-            // debug: yeni kart/kullanıcı çıkarıldı
+            // debug: yeni card/kullanıcı çıkarıldı
             this.saveUserData();
             if (typeof updateCardOptions === 'function') updateCardOptions();
             if (typeof updateUserOptions === 'function') updateUserOptions();
@@ -676,7 +676,7 @@ class AuthSystem {
     // Kullanıcı sil
     deleteUser(username) {
         if (!this.currentUser || this.users[this.currentUser].role !== 'admin') {
-            throw new Error('Bu işlem için admin yetkisi gerekli');
+            throw new Error('Bu işlem için admin yetperson gerekli');
         }
 
         if (username === 'admin') {
@@ -755,22 +755,22 @@ class AuthSystem {
         }
 
         // Harcama tablosu güncellemeleri
-        if (typeof updateHarcamaTable === 'function') {
-            updateHarcamaTable();
+        if (typeof updateExpenseTable === 'function') {
+            updateExpenseTable();
         }
 
         // Hesaplar güncellemeleri
-        if (typeof updateHesaplar === 'function') {
-            updateHesaplar();
+        if (typeof updateAccounts === 'function') {
+            updateAccounts();
         }
 
         // Aylık özet güncellemeleri
         if (typeof updateMonthlySummary === 'function') {
             try {
-                const ozetTarih = document.getElementById('summaryDate');
-                if (ozetTarih && !ozetTarih.value) {
+                const summaryTarih = document.getElementById('summaryDate');
+                if (summaryTarih && !summaryTarih.value) {
                     const currentMonth = new Date().toISOString().slice(0, 7);
-                    ozetTarih.value = currentMonth;
+                    summaryTarih.value = currentMonth;
                 }
                 updateMonthlySummary();
             } catch (error) {
@@ -778,10 +778,10 @@ class AuthSystem {
             }
         }
 
-        // Veri yönetimi güncellemeleri (istatistikler kaldırıldı)
-        if (typeof updateDuzenliOdemelerListesi === 'function') {
+        // Veri yönetimi güncellemeleri (statistics kaldırıldı)
+        if (typeof updateRegularPaymentsList === 'function') {
             try {
-                updateDuzenliOdemelerListesi();
+                updateRegularPaymentsList();
             } catch (error) {
                 console.error('❌ Düzenli ödemeler güncelleme hatası:', error);
             }
@@ -817,7 +817,7 @@ class AuthSystem {
         // Migration ile gelen kullanıcılar için setup wizard gösterme
         if (user.createdBy === 'migration' || user.email === 'migrated@paymentplanner.com') return false;
         
-        // Sadece admin tarafından yeni oluşturulan ve hiç kart/kişi eklememış kullanıcılar
+        // Sadece admin tarafından yeni oluşturulan ve hiç card/kişi eklememış kullanıcılar
         return user.createdBy === 'admin' && 
                user.data.creditCards.length === 0 && 
                user.data.people.length === 0 &&
@@ -887,7 +887,7 @@ class AuthSystem {
     // Admin şifre sıfırlama
     resetUserPassword(username, newPassword) {
         if (!this.currentUser || this.users[this.currentUser].role !== 'admin') {
-            throw new Error('Bu işlem için admin yetkisi gerekli');
+            throw new Error('Bu işlem için admin yetperson gerekli');
         }
 
         if (!this.users[username]) {
@@ -907,7 +907,7 @@ class AuthSystem {
     // Session bilgilerini temizle
     clearAllSessions() {
         if (!this.currentUser || this.users[this.currentUser].role !== 'admin') {
-            throw new Error('Bu işlem için admin yetkisi gerekli');
+            throw new Error('Bu işlem için admin yetperson gerekli');
         }
 
         this.sessions = {};
@@ -1055,7 +1055,7 @@ function updateCardsList() {
     if (!container) return;
     
     if (tempCards.length === 0) {
-        container.innerHTML = '<p class="setup-help">En az bir kart eklemeniz önerilir.</p>';
+        container.innerHTML = '<p class="setup-help">En az bir card eklemeniz önerilir.</p>';
         return;
     }
     
@@ -1114,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', function () {
     authSystem.startAutoSave();
 });
 
-// Sayfa kapanmadan önce verileri kaydet
+// Sayfa kapanmadan önce dataleri kaydet
 window.addEventListener('beforeunload', function () {
     if (authSystem && authSystem.currentUser) {
         authSystem.saveUserData();

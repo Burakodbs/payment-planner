@@ -2,7 +2,7 @@
 
 // Cache versioning
 const CACHE_VERSION = '2024-01-06';
-const CACHE_NAME = `harcama-takip-${CACHE_VERSION}`;
+const CACHE_NAME = `expense-takip-${CACHE_VERSION}`;
 
 // Development mode detection
 const isDevMode = () => {
@@ -53,11 +53,12 @@ const getResourceStrategy = (url) => {
 const ESSENTIAL_FILES = [
   './',
   './index.html',
-  './harcama-ekle.html',
-  './harcama-listesi.html',
-  './hesaplar.html',
-  './aylik-ozet.html',
-  './veri-yonetimi.html',
+  './add-expense.html',
+  './expense-list.html',
+  './accounts.html',
+  './monthly-summary.html',
+  './data-management.html',
+  './statistics.html',
   './manifest.json',
   './assets/css/variables.css',
   './assets/css/base.css',

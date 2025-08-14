@@ -4,24 +4,24 @@ const path = require('path');
 
 const replacements = {
     // Global Variables
-    'harcamalar': 'expenses',
-    'duzenliOdemeler': 'regularPayments', 
-    'kredikartlari': 'creditCards',
-    'kisiler': 'people',
+    'expenses': 'expenses',
+    'regularOdemeler': 'regularPayments', 
+    'kredicardsi': 'creditCards',
+    'people': 'people',
     
     // Object Properties - will be handled with more precision
-    // 'tarih': 'date',
-    // 'tutar': 'amount', 
-    // 'aciklama': 'description',
-    // 'kart': 'card',
-    // 'kisi': 'person',
-    // 'kullanici': 'person',
+    // 'date': 'date',
+    // 'amount': 'amount', 
+    // 'description': 'description',
+    // 'card': 'card',
+    // 'person': 'person',
+    // 'user': 'person',
     
     // Function Names
     'migrateDuzenliOdemeData': 'migrateRegularPaymentData',
-    'duzenliOdemeEkle': 'addRegularPayment',
-    'duzenliOdemeSil': 'deleteRegularPayment',
-    'duzenliOdemeGuncelle': 'updateRegularPayment',
+    'regularOdemeEkle': 'addRegularPayment',
+    'regularOdemeSil': 'deleteRegularPayment',
+    'regularOdemeGuncelle': 'updateRegularPayment',
     
     // Turkish comments and strings will remain for UI
 };

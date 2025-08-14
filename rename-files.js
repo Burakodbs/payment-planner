@@ -5,15 +5,15 @@ const path = require('path');
 const fileRenamings = {
     // HTML files
     'aylik-ozet.html': 'monthly-summary.html',
-    'harcama-ekle.html': 'add-expense.html',
-    'harcama-listesi.html': 'expense-list.html',
-    'veri-yonetimi.html': 'data-management.html',
+    'expense-ekle.html': 'add-expense.html',
+    'expense-listesi.html': 'expense-list.html',
+    'data-yonetimi.html': 'data-management.html',
     
     // JS files
     'assets/js/pages/aylik-ozet.js': 'assets/js/pages/monthly-summary.js',
-    'assets/js/pages/harcama-ekle.js': 'assets/js/pages/add-expense.js',
-    'assets/js/pages/harcama-listesi.js': 'assets/js/pages/expense-list.js',
-    'assets/js/pages/veri-yonetimi.js': 'assets/js/pages/data-management.js'
+    'assets/js/pages/expense-ekle.js': 'assets/js/pages/add-expense.js',
+    'assets/js/pages/expense-listesi.js': 'assets/js/pages/expense-list.js',
+    'assets/js/pages/data-yonetimi.js': 'assets/js/pages/data-management.js'
 };
 
 function updateReferences(filePath, oldName, newName) {

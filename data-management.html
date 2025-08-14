@@ -3,12 +3,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Aylık Özet - Kredi Kartı Harcama Takip Sistemi</title>
+        <title>Veri Yönetimi - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+            content="Kredi cardı expensesınızı ve düzenli ödemelerinizi profesyonelce takip edin">
         <meta name="keywords"
-            content="kredi kartı, harcama takip, fatura, ödeme, finans">
+            content="kredi cardı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
 
         <meta name="theme-color" content="#007bff">
@@ -47,7 +47,7 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
+                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
                     </div>
 
                     <!-- Login Form Only -->
@@ -74,9 +74,6 @@
                 </div>
             </div>
         </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Setup Wizard - Sadece yeni kullanıcılar için -->
         <div id="setupWizard" style="display: none;">
@@ -92,7 +89,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi kartlarını
+                            <p>Takip etmek istediğiniz kredi cardsını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -105,8 +102,8 @@
                                     onclick="addCard()">Kart Ekle</button>
 
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz kart eklenmedi.
-                                        En az bir kart eklemeniz önerilir.</p>
+                                    <p class="setup-help">Henüz card eklenmedi.
+                                        En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
                         </div>
@@ -156,8 +153,8 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi kartı
-                                    harcamalarınızı profesyonelce yönetin</div>
+                                <div class="header-subtitle">Kredi cardı
+                                    expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
                     </div>
@@ -175,44 +172,136 @@
                 </div>
                 <div class="tabs">
                     <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-                    <a href="harcama-ekle.html" class="tab">➕ Harcama Ekle</a>
-                    <a href="harcama-listesi.html" class="tab">📋 Harcama
+                    <a href="add-expense.html" class="tab">➕ Add Expense</a>
+                    <a href="expense-list.html" class="tab">📋 Harcama
                         Listesi</a>
-                    <a href="hesaplar.html" class="tab">💰 Hesaplar</a>
-                    <a href="aylik-ozet.html" class="tab active">📅 Aylık
-                        Özet</a>
-                    <a href="istatistikler.html" class="tab">📊
+                    <a href="accounts.html" class="tab">💰 Hesaplar</a>
+                    <a href="monthly-summary.html" class="tab">📅 Aylık Özet</a>
+                    <a href="statistics.html" class="tab">📊
                         İstatistikler</a>
-                    <a href="veri-yonetimi.html" class="tab">⚙️ Veri
+                    <a href="data-management.html" class="tab active">⚙️ Veri
                         Yönetimi</a>
                 </div>
 
                 <div class="content">
-                    <!-- Aylık Özet Content -->
+                    <!-- Veri Yönetimi Content -->
                     <div class="page-content">
-                        <h2>Aylık Özet</h2>
+                        <h2>Veri Yönetimi</h2>
 
-                        <div class="month-selector">
-                            <div class="form-group">
-                                <label for="summaryDate">Hangi Ay?</label>
-                                <input type="month" id="summaryDate"
-                                    onchange="updateAylikOzet()">
+                        <div class="data-management-grid">
+                            <!-- Veri Yedekleme & Geri Yükleme -->
+                            <div class="data-management-card" style="order: 1;">
+                                <h3>💾 Veri Yedekleme & Geri Yükleme</h3>
+                                <p>Verilerinizi güvenle yedekleyin veya daha
+                                    önce aldığınız yedeği geri yükleyin.</p>
+
+                                <!-- Dışa Aktarma Bölümü -->
+                                <div style="margin-bottom: 24px;">
+                                    <h4
+                                        style="color: var(--text); font-size: 16px; margin-bottom: 8px; font-weight: 600;">📤
+                                        Yedek Al</h4>
+                                    <p
+                                        style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">Tüm
+                                        datalerinizi JSON formatında
+                                        kaydedin</p>
+                                    <button class="btn btn-primary"
+                                        onclick="exportData()"
+                                        style="width: 100%;">
+                                        <span>💾</span> Yedek Dosyası Oluştur
+                                    </button>
+                                </div>
+
+                                <!-- İçe Aktarma Bölümü -->
+                                <div>
+                                    <h4
+                                        style="color: var(--text); font-size: 16px; margin-bottom: 8px; font-weight: 600;">📥
+                                        Yedek Yükle</h4>
+                                    <p
+                                        style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">Yedek
+                                        dosyanızı seçin ve datalerinizi geri
+                                        yükleyin</p>
+                                    <div style="margin-bottom: 12px;">
+                                        <input type="file" id="fileInput"
+                                            accept=".json"
+                                            placeholder="JSON dosyanızı seçin...">
+                                    </div>
+                                    <button class="btn btn-secondary"
+                                        onclick="importData()"
+                                        style="width: 100%;">
+                                        <span>📂</span> Yedeği Geri Yükle
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <div id="aylikOzetContent">
-                            <div
-                                style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                <h3>Ay seçin ve özet görüntülensin</h3>
-                                <p>Yukarıdaki tarih seçiciden hangi ayı görmek
-                                    istediğinizi seçin.</p>
+                            <!-- Kart ve Kullanıcı Yönetimi -->
+                            <div class="data-management-card" style="order: 2;">
+                                <h3>👥 Kart ve Kullanıcı Yönetimi</h3>
+                                <p>Kredi cardsınızı ve kullanıcılarınızı
+                                    kolayca ekleyin, düzenleyin ve silin.</p>
+
+                                <div style="margin-bottom: 24px;">
+                                    <h4
+                                        style="color: var(--text); font-size: 16px; margin-bottom: 12px; font-weight: 600;">💳
+                                        Kartlar</h4>
+                                    <div id="cardManagementList"></div>
+                                    <div
+                                        style="display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 12px; align-items: center;">
+                                        <input type="text" id="newCardInput"
+                                            placeholder="Yeni card adı"
+                                            style="padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 14px; width: 100%;">
+                                        <button class="btn btn-primary"
+                                            onclick="addNewCard()"
+                                            style="padding: 12px 20px; white-space: nowrap; min-width: 90px; font-size: 14px;">➕
+                                            Ekle</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4
+                                        style="color: var(--text); font-size: 16px; margin-bottom: 12px; font-weight: 600;">👤
+                                        Kullanıcılar</h4>
+                                    <div id="userManagementList"></div>
+                                    <div
+                                        style="display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 12px; align-items: center;">
+                                        <input type="text" id="newUserInput"
+                                            placeholder="Yeni kullanıcı adı"
+                                            style="padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 14px; width: 100%;">
+                                        <button class="btn btn-primary"
+                                            onclick="addNewUser()"
+                                            style="padding: 12px 20px; white-space: nowrap; min-width: 90px; font-size: 14px;">➕
+                                            Ekle</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Veri Silme -->
+                            <div class="data-management-card"
+                                style="border-color: var(--danger); background: linear-gradient(135deg, var(--bg), var(--danger-bg)); order: 3;">
+                                <h3 style="color: var(--danger);">🗑️ Veri
+                                    Silme</h3>
+                                <p><strong>⚠️ Dikkat:</strong> Bu işlemler geri
+                                    alınamaz! Veri silmeden önce mutlaka yedek
+                                    alın.</p>
+                                <div
+                                    style="display: flex; flex-direction: column; gap: 12px;">
+                                    <button class="btn btn-danger"
+                                        onclick="clearAllData()"
+                                        style="font-weight: 600;">
+                                        <span>🗑️</span> Tüm Verileri Sil
+                                    </button>
+                                    <button class="btn btn-danger"
+                                        onclick="clearExpenseData()"
+                                        style="font-weight: 600;">
+                                        <span>💸</span> Sadece Harcamaları Sil
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
+        
         <!-- JavaScript Files - Refactored -->
         <script src="./assets/js/notifications.js"></script>
         <script src="./assets/js/form-handlers.js"></script>
@@ -227,6 +316,6 @@
         <script src="./assets/js/utils.js"></script>
 
         <!-- Page Specific Scripts -->
-        <script src="./assets/js/pages/aylik-ozet.js"></script>
+        <script src="./assets/js/pages/data-management.js"></script>
     </body>
 </html>

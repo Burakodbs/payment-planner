@@ -3,15 +3,15 @@ const fs = require('fs');
 const path = require('path');
 
 const htmlIdReplacements = {
-    'harcamaTarih': 'expenseDate',
-    'harcamaTutar': 'expenseAmount', 
-    'harcamaAciklama': 'expenseDescription',
-    'harcamaKart': 'expenseCard',
-    'harcamaKullanici': 'expensePerson',
+    'expenseTarih': 'expenseDate',
+    'expenseTutar': 'expenseAmount', 
+    'expenseAciklama': 'expenseDescription',
+    'expenseKart': 'expenseCard',
+    'expenseKullanici': 'expensePerson',
     'ozet_tarih': 'summaryDate',
-    'duzenliBaslangic': 'regularStart',
-    'duzenliTutar': 'regularAmount',
-    'duzenliAciklama': 'regularDescription'
+    'regularBaslangic': 'regularStart',
+    'regularTutar': 'regularAmount',
+    'regularAciklama': 'regularDescription'
 };
 
 function refactorHtmlIds(filePath) {

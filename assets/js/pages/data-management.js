@@ -1,28 +1,28 @@
-// Veri Yönetimi sayfasına özel JavaScript kodları
+// Data Management page specific JavaScript code
 
 
 // Sayfa yüklendiğinde ortak component'leri initialize et
 document.addEventListener('DOMContentLoaded', function () {
     // Ortak component'leri initialize et
     if (typeof initializePage === 'function') {
-        initializePage('veri-yonetimi');
+        initializePage('data-yonetimi');
     }
 });
 
 function updateDataStats() {
-    // İstatistikler kartı kaldırıldı, fonksiyon geriye uyumluluk için boş bırakıldı
+    // İstatistikler cardı kaldırıldı, fonksiyon geriye uyumluluk için boş bırakıldı
 }
 
 function updateCardAndUserManagement() {
-    // Kart yönetimi
+    // Card management
     const cardList = document.getElementById('cardManagementList');
     if (cardList) {
-        cardList.innerHTML = creditCards.map(kart => `
+        cardList.innerHTML = creditCards.map(card => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
-                <span>${kart}</span>
+                <span>${card}</span>
                 <div style="display: flex; gap: 4px;">
-                    <button class="btn btn-sm btn-outline" onclick="editCard('${kart}')">Düzenle</button>
-                    <button class="btn btn-sm btn-danger" onclick="removeCard('${kart}')">Sil</button>
+                    <button class="btn btn-sm btn-outline" onclick="editCard('${card}')">Düzenle</button>
+                    <button class="btn btn-sm btn-danger" onclick="removeCard('${card}')">Sil</button>
                 </div>
             </div>
         `).join('');
@@ -31,46 +31,46 @@ function updateCardAndUserManagement() {
     // Kullanıcı yönetimi
     const userList = document.getElementById('userManagementList');
     if (userList) {
-        userList.innerHTML = people.map(kisi => `
+        userList.innerHTML = people.map(person => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
-                <span>${kisi}</span>
+                <span>${person}</span>
                 <div style="display: flex; gap: 4px;">
-                    <button class="btn btn-sm btn-outline" onclick="editUser('${kisi}')">Düzenle</button>
-                    <button class="btn btn-sm btn-danger" onclick="removeUser('${kisi}')">Sil</button>
+                    <button class="btn btn-sm btn-outline" onclick="editUser('${person}')">Düzenle</button>
+                    <button class="btn btn-sm btn-danger" onclick="removeUser('${person}')">Sil</button>
                 </div>
             </div>
         `).join('');
     }
 
     // Düzenli ödeme form seçeneklerini güncelle
-    const duzenliKartSelect = document.getElementById('duzenliKart');
-    const duzenliKullaniciSelect = document.getElementById('duzenliKullanici');
+    const regularCardSelect = document.getElementById('regularCard');
+    const regularUserSelect = document.getElementById('regularUser');
 
-    if (duzenliKartSelect) {
+    if (regularCardSelect) {
         // Mevcut seçenekleri clear(ilk option hariç)
-        const options = duzenliKartSelect.querySelectorAll('option:not([value=""])');
+        const options = regularCardSelect.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
 
         // Yeni seçenekleri ekle
-        creditCards.forEach(kart => {
+        creditCards.forEach(card => {
             const option = document.createElement('option');
-            option.value = kart;
-            option.textContent = kart;
-            duzenliKartSelect.appendChild(option);
+            option.value = card;
+            option.textContent = card;
+            regularCardSelect.appendChild(option);
         });
     }
 
-    if (duzenliKullaniciSelect) {
+    if (regularUserSelect) {
         // Mevcut seçenekleri clear(ilk option hariç)
-        const options = duzenliKullaniciSelect.querySelectorAll('option:not([value=""])');
+        const options = regularUserSelect.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
 
         // Yeni seçenekleri ekle
-        people.forEach(kisi => {
+        people.forEach(person => {
             const option = document.createElement('option');
-            option.value = kisi;
-            option.textContent = kisi;
-            duzenliKullaniciSelect.appendChild(option);
+            option.value = person;
+            option.textContent = person;
+            regularUserSelect.appendChild(option);
         });
     }
 }
@@ -84,7 +84,7 @@ function addNewCard() {
         updateCardOptions();
         updateCardAndUserManagement();
         input.value = '';
-        showToast('Kart başarıyla eklendi', 'success');
+        showToast('Card successfully added', 'success');
     }
 }
 
@@ -102,12 +102,12 @@ function addNewUser() {
 }
 
 function removeCard(cardName) {
-    if (confirm(`"${cardName}" kartını silmek istediğinizden emin misiniz?`)) {
+    if (confirm(`"${cardName}" cardını silmek istediğinizden emin misiniz?`)) {
         creditCards = creditCards.filter(k => k !== cardName);
         authSystem.saveUserData();
         updateCardOptions();
         updateCardAndUserManagement();
-        showToast('Kart silindi', 'success');
+        showToast('Card deleted', 'success');
     }
 }
 
