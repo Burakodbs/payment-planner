@@ -1,30 +1,341 @@
-// Kullanıcı Yetkilendirme Sistemi
+// Gelişmiş Kullanıcı Yetkilendirme Sistemi
 class AuthSystem {
     constructor() {
         this.currentUser = null;
         this.users = JSON.parse(localStorage.getItem('app_users') || '{}');
+        this.sessions = JSON.parse(localStorage.getItem('app_sessions') || '{}');
+        this.loginAttempts = JSON.parse(localStorage.getItem('login_attempts') || '{}');
         this.isFirstTime = !localStorage.getItem('app_initialized');
+        this.sessionTimeout = 24 * 60 * 60 * 1000; // 24 saat
+        this.maxLoginAttempts = 5;
+        this.lockoutDuration = 15 * 60 * 1000; // 15 dakika
         this.init();
     }
 
     init() {
+        this.migrateOldUserData();
+        this.createAdminUser();
+        this.cleanExpiredSessions();
         this.checkAuth();
+    }
+
+    createAdminUser() {
+        if (!this.users['admin']) {
+            const adminPassword = this.generateSecureHash('admin123', 'admin');
+            this.users['admin'] = {
+                password: adminPassword,
+                email: 'admin@paymentplanner.com',
+                role: 'admin',
+                createdAt: new Date().toISOString(),
+                settings: {
+                    theme: 'light'
+                },
+                data: {
+                    harcamalar: [],
+                    duzenliOdemeler: [],
+                    kredikartlari: [],
+                    kisiler: []
+                }
+            };
+            localStorage.setItem('app_users', JSON.stringify(this.users));
+        }
+    }
+
+    // Eski kullanıcı verilerini yeni sisteme geçir
+    migrateOldUserData() {
+        // Eski current_user kontrolü
+        const oldCurrentUser = localStorage.getItem('current_user');
+        
+        if (oldCurrentUser && this.users[oldCurrentUser]) {
+            console.log('🔄 Mevcut kullanıcı verisi bulundu:', oldCurrentUser);
+            
+            // Eski kullanıcı verisi varsa yeni formata çevir
+            const user = this.users[oldCurrentUser];
+            
+            // Eski format kontrolü - role yoksa ekle
+            if (!user.role) {
+                user.role = 'user';
+                console.log('✅ Kullanıcıya "user" rolü eklendi');
+            }
+            
+            // CreatedBy alanını ekle (migration)
+            if (!user.createdBy) {
+                user.createdBy = 'migration';
+            }
+            
+            // Setup tamamlanmış olarak işaretle
+            user.setupCompleted = true;
+            
+            // Eski şifre formatını kontrol et (btoa ile hash'lenmişse)
+            if (user.password && !user.password.includes('payment_planner_secret_key')) {
+                // Eski btoa formatından yeni güvenli formata geçir
+                // Not: Eski şifre bilinmediği için varsayılan şifre atayacağız
+                console.log('⚠️ Eski şifre formatı tespit edildi. Varsayılan şifre atanıyor.');
+                user.password = this.generateSecureHash('123456', oldCurrentUser);
+                console.log(`🔑 ${oldCurrentUser} kullanıcısı için yeni şifre: 123456`);
+            }
+            
+            // Eksik alanları tamamla
+            if (!user.createdAt) {
+                user.createdAt = new Date().toISOString();
+            }
+            
+            if (!user.settings) {
+                user.settings = { theme: 'light' };
+            }
+            
+            // Verileri kaydet
+            this.users[oldCurrentUser] = user;
+            localStorage.setItem('app_users', JSON.stringify(this.users));
+            
+            // Eski current_user kaydını temizle
+            localStorage.removeItem('current_user');
+            
+            console.log('✅ Kullanıcı verisi başarıyla güncellendi');
+            
+            // Kullanıcıya bilgi ver
+            setTimeout(() => {
+                if (document.getElementById('authContainer').style.display !== 'none') {
+                    alert(`🎉 Mevcut kullanıcınız (${oldCurrentUser}) yeni sisteme aktarıldı!\n\n` +
+                          `🔑 Yeni şifreniz: 123456\n\n` +
+                          `Güvenlik için lütfen şifrenizi değiştirin.`);
+                }
+            }, 1000);
+        }
+        
+        // Diğer eski verileri kontrol et
+        this.checkAndMigrateGlobalData();
+    }
+
+    // Global verileri kontrol et ve kullanıcı hesabına aktar
+    checkAndMigrateGlobalData() {
+        // Eğer global veriler varsa ve hiçbir kullanıcı bunlara sahip değilse
+        const globalHarcamalar = JSON.parse(localStorage.getItem('harcamalar') || '[]');
+        const globalDuzenliOdemeler = JSON.parse(localStorage.getItem('duzenliOdemeler') || '[]');
+        const globalKredikartlari = JSON.parse(localStorage.getItem('kredikartlari') || '[]');
+        const globalKisiler = JSON.parse(localStorage.getItem('kisiler') || '[]');
+        
+        console.log('🔍 Migration kontrolü:', {
+            globalHarcamalar: globalHarcamalar.length,
+            globalDuzenliOdemeler: globalDuzenliOdemeler.length,
+            globalKredikartlari: globalKredikartlari.length,
+            globalKisiler: globalKisiler.length
+        });
+        
+        const hasGlobalData = globalHarcamalar.length > 0 || 
+                            globalDuzenliOdemeler.length > 0 || 
+                            globalKredikartlari.length > 0 || 
+                            globalKisiler.length > 0;
+        
+        if (hasGlobalData) {
+            console.log('📊 Global veriler tespit edildi, migration başlatılıyor...');
+            
+            // İlk kullanıcı bulunursa ona aktar, yoksa 'migrated_user' oluştur
+            let targetUser = Object.keys(this.users).find(u => u !== 'admin');
+            
+            if (!targetUser) {
+                // Yeni kullanıcı oluştur
+                targetUser = 'migrated_user';
+                this.users[targetUser] = {
+                    password: this.generateSecureHash('123456', targetUser),
+                    email: 'migrated@paymentplanner.com',
+                    role: 'user',
+                    createdAt: new Date().toISOString(),
+                    settings: { theme: 'light' },
+                    data: {
+                        harcamalar: [],
+                        duzenliOdemeler: [],
+                        kredikartlari: [],
+                        kisiler: []
+                    }
+                };
+                console.log('👤 Yeni migration kullanıcısı oluşturuldu: migrated_user');
+            }
+            
+            // Verileri aktar - bütün veriler akıtırılsın
+            console.log('📋 Veri aktarımı başlatılıyor:', targetUser);
+            this.users[targetUser].data = {
+                harcamalar: globalHarcamalar,
+                duzenliOdemeler: globalDuzenliOdemeler,
+                kredikartlari: globalKredikartlari,
+                kisiler: globalKisiler
+            };
+            
+            console.log('✅ Aktarılan veriler:', {
+                harcamalar: globalHarcamalar.length,
+                duzenliOdemeler: globalDuzenliOdemeler.length,
+                kredikartlari: globalKredikartlari.length,
+                kisiler: globalKisiler.length
+            });
+            
+            // Global verileri temizle
+            localStorage.removeItem('harcamalar');
+            localStorage.removeItem('duzenliOdemeler');
+            localStorage.removeItem('kredikartlari');
+            localStorage.removeItem('kisiler');
+            
+            // Güncellenmiş kullanıcı verilerini kaydet
+            localStorage.setItem('app_users', JSON.stringify(this.users));
+            
+            // Harcamalardan kart ve kişi bilgilerini çıkar
+            this.extractDataFromHarcamalar(targetUser);
+            
+            console.log('✅ Global veriler başarıyla kullanıcı hesabına aktarıldı:', targetUser);
+            
+            setTimeout(() => {
+                alert(`📊 Mevcut verileriniz "${targetUser}" hesabına aktarıldı!\n\n` +
+                      `🔑 Giriş bilgileri: ${targetUser} / 123456\n\n` +
+                      `Lütfen bu bilgilerle giriş yapın ve şifrenizi değiştirin.`);
+            }, 1500);
+        } else {
+            console.log('ℹ️ Migration edilecek global veri bulunamadı');
+            
+            // Global veri yoksa da mevcut kullanıcının harcamalarını kontrol et
+            if (this.currentUser) {
+                this.extractDataFromHarcamalar(this.currentUser);
+            }
+        }
+    }
+
+    // Harcamalardan kart ve kişi bilgilerini çıkar
+    extractDataFromHarcamalar(username) {
+        const userKey = `app_user_${username}`;
+        const userData = JSON.parse(localStorage.getItem(userKey) || '{}');
+        
+        if (userData.harcamalar && userData.harcamalar.length > 0) {
+            console.log('🔍 Harcamalardan veri çıkarılıyor...', userData.harcamalar.length, 'harcama');
+            
+            // Kredi kartlarını çıkar
+            const uniqueCards = [...new Set(userData.harcamalar
+                .filter(h => h.kart && h.kart.trim() !== '' && h.kart !== 'Nakit')
+                .map(h => h.kart.trim()))];
+            
+            // Kişileri çıkar
+            const uniquePeople = [...new Set(userData.harcamalar
+                .filter(h => h.kullanici && h.kullanici.trim() !== '')
+                .map(h => h.kullanici.trim()))];
+            
+            console.log('💳 Çıkarılan kartlar:', uniqueCards);
+            console.log('👥 Çıkarılan kişiler:', uniquePeople);
+            
+            // Mevcut verileri güncelle
+            if (!userData.kredikartlari || userData.kredikartlari.length === 0) {
+                userData.kredikartlari = uniqueCards;
+            }
+            if (!userData.kisiler || userData.kisiler.length === 0) {
+                userData.kisiler = uniquePeople;
+            }
+            
+            // Kaydet
+            localStorage.setItem(userKey, JSON.stringify(userData));
+            
+            // Global verileri de güncelle
+            if (this.currentUser === username) {
+                this.currentUserData = userData;
+                console.log('✅ Current user data güncellendi');
+                
+                // Dropdown'ları güncelle
+                setTimeout(() => {
+                    if (typeof updateCardOptions === 'function') {
+                        updateCardOptions();
+                    }
+                    if (typeof updateUserOptions === 'function') {
+                        updateUserOptions();
+                    }
+                }, 100);
+            }
+        }
+    }
+
+    // Güvenli hash fonksiyonu
+    generateSecureHash(password, salt) {
+        // Basit ama güvenli hash (gerçek uygulamada bcrypt kullanılmalı)
+        let hash = 0;
+        const combined = password + salt + 'payment_planner_secret_key_2025';
+        for (let i = 0; i < combined.length; i++) {
+            const char = combined.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 32bit integer'a dönüştür
+        }
+        return btoa(hash.toString() + salt);
+    }
+
+    // Session temizliği
+    cleanExpiredSessions() {
+        const now = new Date().getTime();
+        for (const sessionId in this.sessions) {
+            if (now - this.sessions[sessionId].timestamp > this.sessionTimeout) {
+                delete this.sessions[sessionId];
+            }
+        }
+        localStorage.setItem('app_sessions', JSON.stringify(this.sessions));
     }
 
     // Oturum kontrolü
     checkAuth() {
-        const savedUser = localStorage.getItem('current_user');
-        if (savedUser && this.users[savedUser]) {
-            this.currentUser = savedUser;
-            this.loadUserData();
-            this.showMainApp();
-        } else {
-            this.showAuth();
+        const sessionId = localStorage.getItem('session_id');
+        if (sessionId && this.sessions[sessionId]) {
+            const session = this.sessions[sessionId];
+            const now = new Date().getTime();
+            
+            if (now - session.timestamp < this.sessionTimeout) {
+                this.currentUser = session.username;
+                // Session'ı yenile
+                session.timestamp = now;
+                localStorage.setItem('app_sessions', JSON.stringify(this.sessions));
+                this.loadUserData();
+                
+                if (this.users[this.currentUser].role === 'admin') {
+                    this.showAdminPanel();
+                } else {
+                    this.showAuthenticatedContent();
+                }
+                return;
+            } else {
+                // Session süresi dolmuş
+                this.logout();
+                return;
+            }
         }
+        this.showAuth();
     }
 
-    // Kullanıcı kaydı
-    register(username, password, email = '') {
+    // Giriş denemesi kontrolü
+    isAccountLocked(username) {
+        const attempts = this.loginAttempts[username];
+        if (!attempts) return false;
+        
+        const now = new Date().getTime();
+        if (attempts.count >= this.maxLoginAttempts && 
+            now - attempts.lastAttempt < this.lockoutDuration) {
+            const remainingTime = Math.ceil((this.lockoutDuration - (now - attempts.lastAttempt)) / 60000);
+            return { locked: true, remainingMinutes: remainingTime };
+        }
+        return { locked: false };
+    }
+
+    // Giriş denemesi kaydet
+    recordLoginAttempt(username, success) {
+        if (!this.loginAttempts[username]) {
+            this.loginAttempts[username] = { count: 0, lastAttempt: 0 };
+        }
+        
+        if (success) {
+            delete this.loginAttempts[username];
+        } else {
+            this.loginAttempts[username].count++;
+            this.loginAttempts[username].lastAttempt = new Date().getTime();
+        }
+        
+        localStorage.setItem('login_attempts', JSON.stringify(this.loginAttempts));
+    }
+
+    // Admin kullanıcısı oluşturma (sadece admin yapabilir)
+    createUser(username, password, email = '', role = 'user') {
+        if (!this.currentUser || this.users[this.currentUser].role !== 'admin') {
+            throw new Error('Bu işlem için admin yetkisi gerekli');
+        }
+
         if (!username || !password) {
             throw new Error('Kullanıcı adı ve şifre gereklidir');
         }
@@ -37,19 +348,26 @@ class AuthSystem {
             throw new Error('Kullanıcı adı en az 3 karakter olmalıdır');
         }
 
-        if (password.length < 6) {
-            throw new Error('Şifre en az 6 karakter olmalıdır');
+        if (password.length < 8) {
+            throw new Error('Şifre en az 8 karakter olmalıdır');
         }
 
-        // Basit şifre hash'i (gerçek uygulamada daha güvenli olmalı)
-        const hashedPassword = btoa(password + username);
+        // Şifre karmaşıklık kontrolü
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/.test(password)) {
+            throw new Error('Şifre en az bir küçük harf, bir büyük harf ve bir rakam içermelidir');
+        }
+
+        const hashedPassword = this.generateSecureHash(password, username);
 
         this.users[username] = {
             password: hashedPassword,
             email: email,
+            role: role,
             createdAt: new Date().toISOString(),
+            createdBy: 'admin',
+            setupCompleted: false,
             settings: {
-                theme: 'light' // Simple light theme
+                theme: 'light'
             },
             data: {
                 harcamalar: [],
@@ -63,28 +381,74 @@ class AuthSystem {
         return true;
     }
 
+    // Kullanıcı kaydı (eski fonksiyon - devre dışı)
+    register(username, password, email = '') {
+        throw new Error('Yeni kullanıcı kaydı sadece admin tarafından yapılabilir');
+    }
+
     // Kullanıcı girişi
     login(username, password) {
+        if (!username || !password) {
+            throw new Error('Kullanıcı adı ve şifre gereklidir');
+        }
+
+        // Hesap kilitli mi kontrol et
+        const lockStatus = this.isAccountLocked(username);
+        if (lockStatus.locked) {
+            throw new Error(`Hesap geçici olarak kilitli. ${lockStatus.remainingMinutes} dakika sonra tekrar deneyin.`);
+        }
+
         if (!this.users[username]) {
+            this.recordLoginAttempt(username, false);
             throw new Error('Kullanıcı bulunamadı');
         }
 
-        const hashedPassword = btoa(password + username);
+        const hashedPassword = this.generateSecureHash(password, username);
         if (this.users[username].password !== hashedPassword) {
-            throw new Error('Hatalı şifre');
+            this.recordLoginAttempt(username, false);
+            const attempts = this.loginAttempts[username]?.count || 0;
+            const remaining = this.maxLoginAttempts - attempts;
+            throw new Error(`Hatalı şifre. ${remaining} deneme hakkınız kaldı.`);
         }
 
+        // Başarılı giriş
+        this.recordLoginAttempt(username, true);
         this.currentUser = username;
-        localStorage.setItem('current_user', username);
+        
+        // Session oluştur
+        const sessionId = this.generateSessionId();
+        this.sessions[sessionId] = {
+            username: username,
+            timestamp: new Date().getTime(),
+            userAgent: navigator.userAgent,
+            ip: 'localhost' // Gerçek uygulamada IP adresi alınmalı
+        };
+        
+        localStorage.setItem('session_id', sessionId);
+        localStorage.setItem('app_sessions', JSON.stringify(this.sessions));
+        
         this.loadUserData();
         return true;
+    }
+
+    // Session ID oluştur
+    generateSessionId() {
+        return btoa(Date.now() + Math.random() + navigator.userAgent).replace(/[^a-zA-Z0-9]/g, '');
     }
 
     // Çıkış
     logout() {
         this.saveUserData();
+        
+        // Session'ı temizle
+        const sessionId = localStorage.getItem('session_id');
+        if (sessionId && this.sessions[sessionId]) {
+            delete this.sessions[sessionId];
+            localStorage.setItem('app_sessions', JSON.stringify(this.sessions));
+        }
+        
+        localStorage.removeItem('session_id');
         this.currentUser = null;
-        localStorage.removeItem('current_user');
         this.showAuth();
     }
 
@@ -94,11 +458,40 @@ class AuthSystem {
 
         const userData = this.users[this.currentUser].data;
 
-        // Global değişkenleri güncelle
-        harcamalar = userData.harcamalar || [];
-        duzenliOdemeler = userData.duzenliOdemeler || [];
-        kredikartlari = userData.kredikartlari || [];
-        kisiler = userData.kisiler || [];
+        // Global değişkenleri güncelle - güvenli şekilde
+        if (typeof harcamalar !== 'undefined') {
+            harcamalar = userData.harcamalar || [];
+        } else {
+            // Global değişken henüz tanımlı değilse window'da tanımla
+            window.harcamalar = userData.harcamalar || [];
+        }
+        
+        if (typeof duzenliOdemeler !== 'undefined') {
+            duzenliOdemeler = userData.duzenliOdemeler || [];
+        } else {
+            window.duzenliOdemeler = userData.duzenliOdemeler || [];
+        }
+        
+        if (typeof kredikartlari !== 'undefined') {
+            kredikartlari = userData.kredikartlari || [];
+        } else {
+            window.kredikartlari = userData.kredikartlari || [];
+        }
+        
+        if (typeof kisiler !== 'undefined') {
+            kisiler = userData.kisiler || [];
+        } else {
+            window.kisiler = userData.kisiler || [];
+        }
+
+        // currentUserData property'sini de güncelle (uyumluluk için)
+        this.currentUserData = userData;
+
+        console.log('📊 Kullanıcı verileri yüklendi:', {
+            harcamalar: userData.harcamalar?.length || 0,
+            kredikartlari: userData.kredikartlari?.length || 0,
+            kisiler: userData.kisiler?.length || 0
+        });
 
         // Simple light theme - no theme loading needed
         // Theme management disabled - using simple default theme
@@ -122,10 +515,159 @@ class AuthSystem {
         localStorage.setItem('app_users', JSON.stringify(this.users));
     }
 
-    // Ana uygulamayı göster
-    showMainApp() {
+    // Admin panelini göster
+    showAdminPanel() {
         document.getElementById('authContainer').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+
+        // Admin kullanıcı bilgisini göster
+        const adminInfo = document.getElementById('currentAdminInfo');
+        if (adminInfo) {
+            adminInfo.textContent = this.currentUser;
+        }
+
+        // Kullanıcı listesini güncelle
+        this.updateUsersList();
+    }
+
+    // Kimlik doğrulanmış içeriği göster (tüm sayfalar için)
+    showAuthenticatedContent() {
+        // Auth container'ı gizle
+        const authContainer = document.getElementById('authContainer');
+        if (authContainer) {
+            authContainer.style.display = 'none';
+        }
+
+        // Admin panelini gizle
+        const adminPanel = document.getElementById('adminPanel');
+        if (adminPanel) {
+            adminPanel.style.display = 'none';
+        }
+
+        // Ana sayfa mı kontrol et (sadece index.html'de adminPanel var)
+        const mainApp = document.getElementById('mainApp');
+        
+        if (mainApp && adminPanel) {
+            this.showMainApp();
+            return;
+        } else if (mainApp) {
+            this.showNormalPageContent();
+            return;
+        }
+    }
+
+    // Normal sayfa içeriğini göster (index.html dışındaki sayfalar)
+    showNormalPageContent() {
+        // Ana uygulamayı göster
+        const mainApp = document.getElementById('mainApp');
+        if (mainApp) {
+            mainApp.style.display = 'block';
+        }
+
+        // Kullanıcı bilgisini güncelle (eğer header varsa)
+        const userInfo = document.getElementById('currentUserInfo');
+        if (userInfo) {
+            userInfo.textContent = this.currentUser;
+        }
+
+        // Tema sistemini başlat
+        if (typeof initializeTheme === 'function') {
+            initializeTheme();
+        }
+
+        // UI güncellemeleri - önce hemen, sonra geciktirilmiş
+        this.updateUIElements();
+
+        // Sayfa-özel içerik güncellemelerini tetikle
+        setTimeout(() => {
+            this.triggerPageUpdates();
+            // Dropdown'ları yeniden güncelle
+            this.updateUIElements();
+        }, 100);
+    }
+
+    // UI elementlerini güncelle
+    updateUIElements() {
+        if (typeof updateCardOptions === 'function') {
+            updateCardOptions();
+        }
+        if (typeof updateUserOptions === 'function') {
+            updateUserOptions();
+        }
+    }
+
+    // Kullanıcıları listele
+    updateUsersList() {
+        const usersList = document.getElementById('usersList');
+        if (!usersList) return;
+
+        const users = Object.keys(this.users).filter(username => username !== 'admin');
+        
+        if (users.length === 0) {
+            usersList.innerHTML = '<div class="no-data">Henüz kullanıcı bulunmuyor</div>';
+            return;
+        }
+
+        usersList.innerHTML = users.map(username => {
+            const user = this.users[username];
+            const isOnline = Object.values(this.sessions).some(session => session.username === username);
+            const loginAttempts = this.loginAttempts[username] || { count: 0 };
+            
+            return `
+                <div class="user-item">
+                    <div class="user-info">
+                        <h4>${username} ${isOnline ? '🟢' : '⚫'}</h4>
+                        <p>${user.email || 'E-posta yok'}</p>
+                        <small>Oluşturulma: ${new Date(user.createdAt).toLocaleDateString('tr-TR')}</small>
+                        ${loginAttempts.count > 0 ? `<small style="color: var(--danger);">Başarısız giriş: ${loginAttempts.count}</small>` : ''}
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn btn-warning btn-sm" onclick="resetUserPassword('${username}')">
+                            🔑 Şifre Sıfırla
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="authSystem.deleteUser('${username}')">
+                            🗑️ Sil
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Kullanıcı sil
+    deleteUser(username) {
+        if (!this.currentUser || this.users[this.currentUser].role !== 'admin') {
+            throw new Error('Bu işlem için admin yetkisi gerekli');
+        }
+
+        if (username === 'admin') {
+            throw new Error('Admin kullanıcısı silinemez');
+        }
+
+        if (confirm(`${username} kullanıcısını silmek istediğinizden emin misiniz?`)) {
+            delete this.users[username];
+            localStorage.setItem('app_users', JSON.stringify(this.users));
+            this.updateUsersList();
+        }
+    }
+
+    // Ana uygulamayı göster  
+    showMainApp() {
+        const authContainer = document.getElementById('authContainer');
+        if (authContainer) {
+            authContainer.style.display = 'none';
+        }
+        
+        const adminPanel = document.getElementById('adminPanel');
+        if (adminPanel) {
+            adminPanel.style.display = 'none';
+        }
+        
+        const mainApp = document.getElementById('mainApp');
+        if (mainApp) {
+            mainApp.style.display = 'block';
+        }
 
         // Kullanıcı bilgisini göster
         const userInfo = document.getElementById('currentUserInfo');
@@ -139,12 +681,12 @@ class AuthSystem {
         }
 
         // UI güncellemeleri
-        if (typeof updateCardOptions === 'function') updateCardOptions();
-        if (typeof updateUserOptions === 'function') updateUserOptions();
+        this.updateUIElements();
 
-        // Sayfa-özel içerik güncellemelerini tetikle
+        // Dashboard özel güncellemeleri
         setTimeout(() => {
             this.triggerPageUpdates();
+            this.updateUIElements(); // Dropdown'ları yeniden güncelle
         }, 100);
 
         // Eğer yeni kullanıcıysa setup wizard'ı göster
@@ -221,15 +763,27 @@ class AuthSystem {
     showAuth() {
         document.getElementById('authContainer').style.display = 'block';
         document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'none';
         document.getElementById('setupWizard').style.display = 'none';
     }
 
-    // İlk kez kullanıcı kontrolü
+    // İlk kez kullanıcı kontrolü (sadece yeni oluşturulan kullanıcılar için)
     isFirstTimeUser() {
-        return this.currentUser &&
-            this.users[this.currentUser] &&
-            this.users[this.currentUser].data.kredikartlari.length === 0 &&
-            this.users[this.currentUser].data.kisiler.length === 0;
+        if (!this.currentUser || !this.users[this.currentUser]) return false;
+        
+        const user = this.users[this.currentUser];
+        
+        // Admin kullanıcısı için setup wizard gösterme
+        if (user.role === 'admin') return false;
+        
+        // Migration ile gelen kullanıcılar için setup wizard gösterme
+        if (user.createdBy === 'migration' || user.email === 'migrated@paymentplanner.com') return false;
+        
+        // Sadece admin tarafından yeni oluşturulan ve hiç kart/kişi eklememış kullanıcılar
+        return user.createdBy === 'admin' && 
+               user.data.kredikartlari.length === 0 && 
+               user.data.kisiler.length === 0 &&
+               !user.setupCompleted;
     }
 
     // Setup wizard'ı göster
@@ -244,6 +798,7 @@ class AuthSystem {
 
         this.users[this.currentUser].data.kredikartlari = cards;
         this.users[this.currentUser].data.kisiler = users;
+        this.users[this.currentUser].setupCompleted = true;
 
         kredikartlari = cards;
         kisiler = users;
@@ -264,13 +819,78 @@ class AuthSystem {
         return this.currentUser;
     }
 
+    // Şifre değiştir (kullanıcı kendi şifresini değiştirebilir)
+    changePassword(currentPassword, newPassword) {
+        if (!this.currentUser) {
+            throw new Error('Giriş yapılmamış');
+        }
+
+        const user = this.users[this.currentUser];
+        const currentHash = this.generateSecureHash(currentPassword, this.currentUser);
+        
+        if (user.password !== currentHash) {
+            throw new Error('Mevcut şifre yanlış');
+        }
+
+        if (newPassword.length < 8) {
+            throw new Error('Yeni şifre en az 8 karakter olmalıdır');
+        }
+
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/.test(newPassword)) {
+            throw new Error('Yeni şifre en az bir küçük harf, bir büyük harf ve bir rakam içermelidir');
+        }
+
+        user.password = this.generateSecureHash(newPassword, this.currentUser);
+        localStorage.setItem('app_users', JSON.stringify(this.users));
+        
+        return true;
+    }
+
+    // Admin şifre sıfırlama
+    resetUserPassword(username, newPassword) {
+        if (!this.currentUser || this.users[this.currentUser].role !== 'admin') {
+            throw new Error('Bu işlem için admin yetkisi gerekli');
+        }
+
+        if (!this.users[username]) {
+            throw new Error('Kullanıcı bulunamadı');
+        }
+
+        if (newPassword.length < 8) {
+            throw new Error('Yeni şifre en az 8 karakter olmalıdır');
+        }
+
+        this.users[username].password = this.generateSecureHash(newPassword, username);
+        localStorage.setItem('app_users', JSON.stringify(this.users));
+        
+        return true;
+    }
+
+    // Session bilgilerini temizle
+    clearAllSessions() {
+        if (!this.currentUser || this.users[this.currentUser].role !== 'admin') {
+            throw new Error('Bu işlem için admin yetkisi gerekli');
+        }
+
+        this.sessions = {};
+        localStorage.setItem('app_sessions', JSON.stringify(this.sessions));
+        
+        return true;
+    }
+
     // Otomatik kaydetme için interval
     startAutoSave() {
+        // Veri kaydetme
         setInterval(() => {
             if (this.currentUser) {
                 this.saveUserData();
             }
         }, 30000); // 30 saniyede bir kaydet
+
+        // Session temizleme
+        setInterval(() => {
+            this.cleanExpiredSessions();
+        }, 60000); // 1 dakikada bir temizle
     }
 }
 

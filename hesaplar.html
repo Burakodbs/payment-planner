@@ -50,7 +50,7 @@
                         <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
                     </div>
 
-                    <!-- Login Form -->
+                    <!-- Login Form Only -->
                     <div id="loginForm" class="auth-form">
                         <h2>Giriş Yap</h2>
                         <form onsubmit="handleLogin(event)">
@@ -64,60 +64,18 @@
                                 <input type="password" id="loginPassword"
                                     required autocomplete="current-password">
                             </div>
-                            <button type="submit" class="btn btn-primary">Giriş
-                                Yap</button>
+                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
                         </form>
-                        <p class="auth-switch">
-                            Hesabınız yok mu? <a href="#"
-                                onclick="showRegister()">Kayıt olun</a>
-                        </p>
-                    </div>
-
-                    <!-- Register Form -->
-                    <div id="registerForm" class="auth-form"
-                        style="display: none;">
-                        <h2>Kayıt Ol</h2>
-                        <form onsubmit="handleRegister(event)">
-                            <div class="form-group">
-                                <label for="registerUsername">Kullanıcı
-                                    Adı</label>
-                                <input type="text" id="registerUsername"
-                                    required minlength="3"
-                                    autocomplete="username">
-                                <small>En az 3 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="registerEmail">E-posta
-                                    (Opsiyonel)</label>
-                                <input type="email" id="registerEmail"
-                                    autocomplete="email">
-                            </div>
-                            <div class="form-group">
-                                <label for="registerPassword">Şifre</label>
-                                <input type="password" id="registerPassword"
-                                    required minlength="6"
-                                    autocomplete="new-password">
-                                <small>En az 6 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Şifre
-                                    Tekrar</label>
-                                <input type="password" id="confirmPassword"
-                                    required autocomplete="new-password">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Kayıt
-                                Ol</button>
-                        </form>
-                        <p class="auth-switch">
-                            Zaten hesabınız var mı? <a href="#"
-                                onclick="showLogin()">Giriş yapın</a>
-                        </p>
+                        <div class="auth-info">
+                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
+                            <small>Yeni kullanıcılar sadece admin tarafından oluşturulabilir</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Setup Wizard -->
+        <!-- Setup Wizard - Sadece yeni kullanıcılar için -->
         <div id="setupWizard" style="display: none;">
             <div class="setup-wrapper">
                 <div class="setup-container">
@@ -138,49 +96,51 @@
                                 <div class="form-group">
                                     <label for="newCardName">Kart Adı</label>
                                     <input type="text" id="newCardName"
-                                        placeholder="örn: Axess, Maksimum, World...">
+                                        placeholder="Örn: Akbank Maximum"
+                                        required>
                                 </div>
-                                <button type="button" class="btn btn-secondary"
-                                    onclick="addCard()">Kart Ekle</button>
-
-                                <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz kart eklenmedi.
-                                        En az bir kart eklemeniz önerilir.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step 2: Kişi Ekleme -->
-                        <div id="setupStep2" class="setup-step">
-                            <h2>2. Kullanıcıları Ekleyin</h2>
-                            <p>Harcama yapabilecek kişileri tanımlayın</p>
-
-                            <div class="setup-form">
                                 <div class="form-group">
-                                    <label for="newUserName">Kişi Adı</label>
-                                    <input type="text" id="newUserName"
-                                        placeholder="örn: Ben, Eşim, Çocuğum...">
+                                    <label for="newCardLimit">Limit</label>
+                                    <input type="number" id="newCardLimit"
+                                        placeholder="Örn: 10000" step="0.01"
+                                        min="0" required>
                                 </div>
-                                <button type="button" class="btn btn-secondary"
-                                    onclick="addUser()">Kişi Ekle</button>
-
-                                <div id="usersList" class="setup-list">
-                                    <p class="setup-help">Henüz kişi eklenmedi.
-                                        En az bir kişi eklemeniz önerilir.</p>
+                                <div class="form-group">
+                                    <label for="newCardCutoffDay">Kesim Tarihi
+                                        (Gün)</label>
+                                    <input type="number" id="newCardCutoffDay"
+                                        placeholder="Örn: 15" min="1" max="31"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newCardDueDay">Son Ödeme
+                                        Tarihi (Gün)</label>
+                                    <input type="number" id="newCardDueDay"
+                                        placeholder="Örn: 5" min="1" max="31"
+                                        required>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button"
+                                        onclick="addCardFromSetup()"
+                                        class="btn btn-primary">Kart Ekle</button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="setup-navigation">
-                        <button id="prevStep" class="btn btn-outline"
-                            onclick="previousStep()"
-                            style="display: none;">Önceki</button>
-                        <button id="nextStep" class="btn btn-primary"
-                            onclick="nextStep()">Sonraki</button>
-                        <button id="finishSetup" class="btn btn-success"
-                            onclick="finishSetup()"
-                            style="display: none;">Kurulumu Tamamla</button>
+                            <div id="setupCardList" class="setup-card-list">
+                                <!-- Kartlar burada listelenecek -->
+                            </div>
+
+                            <div class="setup-actions">
+                                <button type="button"
+                                    onclick="finishSetup()"
+                                    class="btn btn-success">Kurulumu
+                                    Tamamla</button>
+                                <button type="button"
+                                    onclick="skipSetup()"
+                                    class="btn btn-secondary">Şimdilik
+                                    Atla</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

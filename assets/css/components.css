@@ -1010,3 +1010,69 @@ tr:hover {
     margin-top: 8px;
     border-left: 3px solid var(--accent);
 }
+
+/* Personal Statistics Styles */
+.personal-stats {
+    margin-top: 2rem;
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.stats-header h3 {
+    color: var(--text);
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.personal-charts {
+    margin-top: 1rem;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.personal-stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.personal-stats-cards .summary-card h4 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.personal-stats-cards .amount {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+/* Responsive design for personal stats */
+@media (max-width: 768px) {
+    .stats-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .personal-stats-cards {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
