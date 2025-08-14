@@ -1,0 +1,1 @@
+console.log('LocalStorage kredikartlari:', JSON.parse(localStorage.getItem('kredikartlari') || '[]')); console.log('LocalStorage kisiler:', JSON.parse(localStorage.getItem('kisiler') || '[]')); console.log('App users:', JSON.parse(localStorage.getItem('app_users') || '{}'));

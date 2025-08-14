@@ -50,7 +50,7 @@
                         <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
                     </div>
 
-                    <!-- Login Form -->
+                    <!-- Login Form Only -->
                     <div id="loginForm" class="auth-form">
                         <h2>Giriş Yap</h2>
                         <form onsubmit="handleLogin(event)">
@@ -64,60 +64,21 @@
                                 <input type="password" id="loginPassword"
                                     required autocomplete="current-password">
                             </div>
-                            <button type="submit" class="btn btn-primary">Giriş
-                                Yap</button>
+                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
                         </form>
-                        <p class="auth-switch">
-                            Hesabınız yok mu? <a href="#"
-                                onclick="showRegister()">Kayıt olun</a>
-                        </p>
-                    </div>
-
-                    <!-- Register Form -->
-                    <div id="registerForm" class="auth-form"
-                        style="display: none;">
-                        <h2>Kayıt Ol</h2>
-                        <form onsubmit="handleRegister(event)">
-                            <div class="form-group">
-                                <label for="registerUsername">Kullanıcı
-                                    Adı</label>
-                                <input type="text" id="registerUsername"
-                                    required minlength="3"
-                                    autocomplete="username">
-                                <small>En az 3 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="registerEmail">E-posta
-                                    (Opsiyonel)</label>
-                                <input type="email" id="registerEmail"
-                                    autocomplete="email">
-                            </div>
-                            <div class="form-group">
-                                <label for="registerPassword">Şifre</label>
-                                <input type="password" id="registerPassword"
-                                    required minlength="6"
-                                    autocomplete="new-password">
-                                <small>En az 6 karakter</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Şifre
-                                    Tekrar</label>
-                                <input type="password" id="confirmPassword"
-                                    required autocomplete="new-password">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Kayıt
-                                Ol</button>
-                        </form>
-                        <p class="auth-switch">
-                            Zaten hesabınız var mı? <a href="#"
-                                onclick="showLogin()">Giriş yapın</a>
-                        </p>
+                        <div class="auth-info">
+                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
+                            <small>Yeni kullanıcılar sadece admin tarafından oluşturulabilir</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Setup Wizard -->
+        <!-- Setup Wizard - Sadece yeni kullanıcılar için -->
         <div id="setupWizard" style="display: none;">
             <div class="setup-wrapper">
                 <div class="setup-container">

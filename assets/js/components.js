@@ -136,9 +136,10 @@ function renderAuthContainer() {
                             </div>
                             <button type="submit" class="btn btn-primary">Giriş Yap</button>
                         </form>
-                        <p class="auth-switch">
-                            Hesabınız yok mu? <a href="#" onclick="showRegister()">Kayıt olun</a>
-                        </p>
+                        <div class="auth-info">
+                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
+                            <small>Yeni kullanıcılar sadece admin tarafından oluşturulabilir</small>
+                        </div>
                     </div>
 
                     <!-- Register Form -->

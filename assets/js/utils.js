@@ -208,12 +208,25 @@ function showToast(message, type = 'info') {
 
 // Data Export/Import
 function exportData() {
+    // Auth sistem verisini kaynağından al (güncel değilse önce çıkarım yap)
+    if (typeof authSystem !== 'undefined' && authSystem && typeof authSystem.ensureCardUserExtraction === 'function') {
+        try { authSystem.ensureCardUserExtraction(); } catch (_) {}
+    }
+
     const data = {
-        harcamalar,
-        duzenliOdemeler,
-        kredikartlari,
-        kisiler,
-        exportDate: new Date().toISOString()
+        version: 2,
+        user: (authSystem && authSystem.currentUser) || null,
+        exportDate: new Date().toISOString(),
+        counts: {
+            harcamalar: harcamalar.length,
+            duzenliOdemeler: duzenliOdemeler.length,
+            kredikartlari: kredikartlari.length,
+            kisiler: kisiler.length
+        },
+        harcamalar: harcamalar,
+        duzenliOdemeler: duzenliOdemeler,
+        kredikartlari: kredikartlari,
+        kisiler: kisiler
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -227,27 +240,34 @@ function exportData() {
     document.body.removeChild(a);
 
     URL.revokeObjectURL(url);
-    showToast('Veriler başarıyla dışa aktarıldı!', 'success');
+    showToast('Veriler (kart & kullanıcı dahil) dışa aktarıldı', 'success');
 }
 
-function importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
+// Button tıklamasında çalışacak şekilde düzenlendi
+function importData() {
+    const input = document.getElementById('fileInput');
+    if (!input || !input.files || input.files.length === 0) {
+        showToast('Lütfen önce bir yedek dosyası seçin', 'error');
+        return;
+    }
+    const file = input.files[0];
     const reader = new FileReader();
     reader.onload = function (e) {
         try {
             const data = JSON.parse(e.target.result);
 
             // Veri kontrolü ve geri yükleme
-            if (data.harcamalar && Array.isArray(data.harcamalar)) {
+            if (Array.isArray(data.harcamalar)) {
                 harcamalar = data.harcamalar;
-                localStorage.setItem('harcamalar', JSON.stringify(harcamalar));
             }
-
-            if (data.duzenliOdemeler && Array.isArray(data.duzenliOdemeler)) {
+            if (Array.isArray(data.duzenliOdemeler)) {
                 duzenliOdemeler = data.duzenliOdemeler;
-                localStorage.setItem('duzenliOdemeler', JSON.stringify(duzenliOdemeler));
+            }
+            if (Array.isArray(data.kredikartlari)) {
+                kredikartlari = data.kredikartlari;
+            }
+            if (Array.isArray(data.kisiler)) {
+                kisiler = data.kisiler;
             }
 
             if (data.kredikartlari && Array.isArray(data.kredikartlari)) {
@@ -284,17 +304,103 @@ function importData(event) {
 
 // Kart ve kullanıcı seçeneklerini güncelle
 function updateCardOptions() {
+    console.log('🔄 updateCardOptions çağırıldı');
+    
     const kartSelects = document.querySelectorAll('#kart, #filtreKart');
+    console.log('📋 Bulunan select elementleri:', kartSelects.length);
+    
     kartSelects.forEach(select => {
         const currentValue = select.value;
         const options = select.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
 
-        kredikartlari.forEach(kart => {
+        // AuthSystem'den kart listesini al - birden fazla yol dene
+        let kartListesi = [];
+        
+        // 1. AuthSystem'den al
+        if (typeof authSystem !== 'undefined' && authSystem && authSystem.currentUserData) {
+            kartListesi = authSystem.currentUserData.kredikartlari || [];
+            console.log('✅ AuthSystem.currentUserData.kredikartlari:', kartListesi);
+        }
+        // 2. Global değişkenden al (fallback)
+        else if (typeof kredikartlari !== 'undefined' && kredikartlari) {
+            kartListesi = kredikartlari;
+            console.log('✅ Global kredikartlari:', kartListesi);
+        }
+        // 3. Window objesi kontrol et
+        else if (typeof window.kredikartlari !== 'undefined' && window.kredikartlari) {
+            kartListesi = window.kredikartlari;
+            console.log('✅ Window.kredikartlari:', kartListesi);
+        }
+        // 4. localStorage'dan doğrudan al (eski sistem uyumluluk)
+        else {
+            const storedKartlar = JSON.parse(localStorage.getItem('kredikartlari') || '[]');
+            if (storedKartlar.length > 0) {
+                kartListesi = storedKartlar;
+                console.log('✅ localStorage kredikartlari:', kartListesi);
+            }
+        }
+
+        console.log('📊 Final kart listesi:', kartListesi);
+
+        kartListesi.forEach(kart => {
             const option = document.createElement('option');
             option.value = kart;
             option.textContent = kart;
             select.appendChild(option);
+            console.log('➕ Kart eklendi:', kart);
+        });
+
+        select.value = currentValue;
+    });
+}
+
+function updateUserOptions() {
+    console.log('🔄 updateUserOptions çağırıldı');
+    
+    const kullaniciSelects = document.querySelectorAll('#kullanici, #filtreKullanici');
+    console.log('👥 Bulunan select elementleri:', kullaniciSelects.length);
+    
+    kullaniciSelects.forEach(select => {
+        const currentValue = select.value;
+        const options = select.querySelectorAll('option:not([value=""])');
+        options.forEach(option => option.remove());
+
+        // AuthSystem'den kişi listesini al - birden fazla yol dene
+        let kisiListesi = [];
+        
+        // 1. AuthSystem'den al
+        if (typeof authSystem !== 'undefined' && authSystem && authSystem.currentUserData) {
+            kisiListesi = authSystem.currentUserData.kisiler || [];
+            console.log('✅ AuthSystem.currentUserData.kisiler:', kisiListesi);
+        }
+        // 2. Global değişkenden al (fallback)
+        else if (typeof kisiler !== 'undefined' && kisiler) {
+            kisiListesi = kisiler;
+            console.log('✅ Global kisiler:', kisiListesi);
+        }
+        // 3. Window objesi kontrol et
+        else if (typeof window.kisiler !== 'undefined' && window.kisiler) {
+            kisiListesi = window.kisiler;
+            console.log('✅ Window.kisiler:', kisiListesi);
+        }
+        // 4. localStorage'dan doğrudan al (eski sistem uyumluluk)
+        else {
+            const storedKisiler = JSON.parse(localStorage.getItem('kisiler') || '[]');
+            if (storedKisiler.length > 0) {
+                kisiListesi = storedKisiler;
+                console.log('✅ localStorage kisiler:', kisiListesi);
+            }
+        }
+
+        console.log('📊 Final kişi listesi:', kisiListesi);
+
+        kisiListesi.forEach(kisi => {
+            const option = document.createElement('option');
+            option.value = kisi;
+            option.textContent = kisi;
+            select.appendChild(option);
+            console.log('➕ Kişi eklendi:', kisi);
         });
 
         select.value = currentValue;
@@ -308,7 +414,26 @@ function updateUserOptions() {
         const options = select.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
 
-        kisiler.forEach(kisi => {
+        // AuthSystem'den kişi listesini al - birden fazla yol dene
+        let kisiListesi = [];
+        
+        // 1. AuthSystem'den al
+        if (typeof authSystem !== 'undefined' && authSystem && authSystem.currentUserData) {
+            kisiListesi = authSystem.currentUserData.kisiler || [];
+        }
+        // 2. Global değişkenden al (fallback)
+        else if (typeof kisiler !== 'undefined' && kisiler) {
+            kisiListesi = kisiler;
+        }
+        // 3. localStorage'dan doğrudan al (eski sistem uyumluluk)
+        else {
+            const storedKisiler = JSON.parse(localStorage.getItem('kisiler') || '[]');
+            if (storedKisiler.length > 0) {
+                kisiListesi = storedKisiler;
+            }
+        }
+
+        kisiListesi.forEach(kisi => {
             const option = document.createElement('option');
             option.value = kisi;
             option.textContent = kisi;

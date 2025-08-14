@@ -502,3 +502,332 @@ function showEmptyDataMessage() {
         `;
     }
 }
+
+// Kişiye Özel İstatistikler
+let personalTrendChart = null;
+let personalCategoryChart = null;
+let personalCardChart = null;
+let personalComparisonChart = null;
+
+// Sayfa yüklendiğinde kişi listesini doldur
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        loadPersonalStatsInit();
+    }, 500);
+});
+
+function loadPersonalStatsInit() {
+    const personFilter = document.getElementById('personFilter');
+    if (!personFilter || !kisiler) return;
+    
+    // Kişiler listesini doldur
+    personFilter.innerHTML = '<option value="">Tüm Kişiler</option>';
+    kisiler.forEach(kisi => {
+        const option = document.createElement('option');
+        option.value = kisi;
+        option.textContent = kisi;
+        personFilter.appendChild(option);
+    });
+    
+    // İlk yüklemede tüm kişiler için istatistik göster
+    updatePersonalStats();
+}
+
+function updatePersonalStats() {
+    const selectedPerson = document.getElementById('personFilter').value;
+    
+    // Seçili kişiye göre harcamaları filtrele
+    let filteredHarcamalar = harcamalar;
+    if (selectedPerson) {
+        filteredHarcamalar = harcamalar.filter(h => h.kisi === selectedPerson);
+    }
+    
+    if (filteredHarcamalar.length === 0) {
+        showNoPersonalDataMessage();
+        return;
+    }
+    
+    // Kişisel istatistik kartlarını güncelle
+    updatePersonalStatsCards(filteredHarcamalar, selectedPerson);
+    
+    // Kişisel grafikleri oluştur
+    createPersonalCharts(filteredHarcamalar, selectedPerson);
+}
+
+function updatePersonalStatsCards(filteredHarcamalar, person) {
+    const totalAmount = filteredHarcamalar.reduce((sum, h) => sum + h.tutar, 0);
+    const totalCount = filteredHarcamalar.length;
+    const avgAmount = totalCount > 0 ? totalAmount / totalCount : 0;
+    
+    // En yüksek harcamayı bul
+    let maxExpense = { tutar: 0, tarih: '-' };
+    if (filteredHarcamalar.length > 0) {
+        maxExpense = filteredHarcamalar.reduce((max, h) => h.tutar > max.tutar ? h : max);
+    }
+    
+    // Bu ay harcamalarını hesapla
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const thisMonthExpenses = filteredHarcamalar.filter(h => h.tarih.startsWith(currentMonth));
+    const thisMonthAmount = thisMonthExpenses.reduce((sum, h) => sum + h.tutar, 0);
+    
+    // Kartları güncelle
+    document.getElementById('personalTotalAmount').textContent = formatCurrency(totalAmount);
+    document.getElementById('personalTotalCount').textContent = `${totalCount} harcama`;
+    document.getElementById('personalAvgAmount').textContent = formatCurrency(avgAmount);
+    document.getElementById('personalMaxAmount').textContent = formatCurrency(maxExpense.tutar);
+    document.getElementById('personalMaxDate').textContent = formatDate(maxExpense.tarih);
+    document.getElementById('personalThisMonth').textContent = formatCurrency(thisMonthAmount);
+    document.getElementById('personalThisMonthCount').textContent = `${thisMonthExpenses.length} harcama`;
+}
+
+function createPersonalCharts(filteredHarcamalar, person) {
+    // Grafikleri temizle
+    if (personalTrendChart) personalTrendChart.destroy();
+    if (personalCategoryChart) personalCategoryChart.destroy();
+    if (personalCardChart) personalCardChart.destroy();
+    if (personalComparisonChart) personalComparisonChart.destroy();
+    
+    // Kişisel trend grafiği
+    createPersonalTrendChart(filteredHarcamalar);
+    
+    // Kategori dağılım grafiği
+    createPersonalCategoryChart(filteredHarcamalar);
+    
+    // Kart kullanım grafiği
+    createPersonalCardChart(filteredHarcamalar);
+    
+    // Karşılaştırma grafiği
+    createPersonalComparisonChart(filteredHarcamalar, person);
+}
+
+function createPersonalTrendChart(filteredHarcamalar) {
+    const ctx = document.getElementById('personalTrendChart');
+    if (!ctx) return;
+    
+    // Aylık verileri hazırla
+    const monthlyData = {};
+    filteredHarcamalar.forEach(h => {
+        const month = h.tarih.slice(0, 7);
+        monthlyData[month] = (monthlyData[month] || 0) + h.tutar;
+    });
+    
+    const sortedMonths = Object.keys(monthlyData).sort();
+    const amounts = sortedMonths.map(m => monthlyData[m]);
+    
+    personalTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: sortedMonths.map(m => formatMonth(m)),
+            datasets: [{
+                label: 'Aylık Harcama',
+                data: amounts,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createPersonalCategoryChart(filteredHarcamalar) {
+    const ctx = document.getElementById('personalCategoryChart');
+    if (!ctx) return;
+    
+    // Kategori verilerini hazırla
+    const categoryData = {};
+    filteredHarcamalar.forEach(h => {
+        const category = h.aciklama.split(' ')[0] || 'Diğer';
+        categoryData[category] = (categoryData[category] || 0) + h.tutar;
+    });
+    
+    const categories = Object.keys(categoryData);
+    const amounts = Object.values(categoryData);
+    const colors = generateColors(categories.length);
+    
+    personalCategoryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: categories,
+            datasets: [{
+                data: amounts,
+                backgroundColor: colors,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function createPersonalCardChart(filteredHarcamalar) {
+    const ctx = document.getElementById('personalCardChart');
+    if (!ctx) return;
+    
+    // Kart verilerini hazırla
+    const cardData = {};
+    filteredHarcamalar.forEach(h => {
+        const card = h.kart || 'Bilinmeyen';
+        cardData[card] = (cardData[card] || 0) + h.tutar;
+    });
+    
+    const cards = Object.keys(cardData);
+    const amounts = Object.values(cardData);
+    const colors = generateColors(cards.length);
+    
+    personalCardChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: cards,
+            datasets: [{
+                data: amounts,
+                backgroundColor: colors,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function createPersonalComparisonChart(filteredHarcamalar, selectedPerson) {
+    const ctx = document.getElementById('personalComparisonChart');
+    if (!ctx) return;
+    
+    // Son 6 ayın verilerini hazırla
+    const months = [];
+    const personalAmounts = [];
+    const totalAmounts = [];
+    
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthKey = date.toISOString().slice(0, 7);
+        months.push(formatMonth(monthKey));
+        
+        // Kişisel harcama
+        const personalAmount = filteredHarcamalar
+            .filter(h => h.tarih.startsWith(monthKey))
+            .reduce((sum, h) => sum + h.tutar, 0);
+        personalAmounts.push(personalAmount);
+        
+        // Toplam harcama
+        const totalAmount = harcamalar
+            .filter(h => h.tarih.startsWith(monthKey))
+            .reduce((sum, h) => sum + h.tutar, 0);
+        totalAmounts.push(totalAmount);
+    }
+    
+    personalComparisonChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: selectedPerson || 'Seçili',
+                    data: personalAmounts,
+                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                    borderColor: '#6366f1',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Toplam',
+                    data: totalAmounts,
+                    backgroundColor: 'rgba(156, 163, 175, 0.7)',
+                    borderColor: '#9ca3af',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function showNoPersonalDataMessage() {
+    const container = document.getElementById('personalChartsContainer');
+    if (container) {
+        container.innerHTML = `
+            <div class="summary-card" style="text-align: center; padding: 48px 24px;">
+                <h3>📊 Bu kişi için veri bulunamadı</h3>
+                <p>Seçili kişi için henüz harcama verisi bulunmuyor.</p>
+            </div>
+        `;
+    }
+}
+
+function generateColors(count) {
+    const colors = [
+        '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#ef4444',
+        '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#64748b'
+    ];
+    
+    while (colors.length < count) {
+        colors.push(`hsl(${Math.random() * 360}, 70%, 60%)`);
+    }
+    
+    return colors.slice(0, count);
+}
+
+function formatMonth(monthKey) {
+    const [year, month] = monthKey.split('-');
+    const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+        'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    return `${monthNames[parseInt(month) - 1]} ${year}`;
+}
+
+function formatDate(dateStr) {
+    if (!dateStr || dateStr === '-') return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('tr-TR');
+}
