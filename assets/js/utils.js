@@ -7,7 +7,7 @@ function migrateRegularPaymentData() {
             expense.isRegular = true;
             delete expense.isRegularAutomatic;
             if (expense.description && expense.description.includes('(Otomatik)')) {
-                expense.description = expense.description.replace('(Otomatik)', '(DÃ¼zenli)');
+                expense.description = expense.description.replace('(Otomatik)', '(Düzenli)');
             }
             migrationCount++;
         }
@@ -15,7 +15,7 @@ function migrateRegularPaymentData() {
     if (migrationCount > 0) {
         DataManager.save();
         DataManager.updateAllViews();
-        NotificationService.success(`${migrationCount} dÃ¼zenli Ã¶deme gÃ¼ncellendi`);
+        NotificationService.success(`${migrationCount} düzenli ödeme güncellendi`);
     }
 }
 // Dashboard update functions - Essential only
@@ -49,7 +49,7 @@ function updateDashboardRecentExpenses() {
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 5);
     if (recentExpenses.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">HenÃ¼z expense yok</p>';
+        container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Henüz expense yok</p>';
         return;
     }
     const html = recentExpenses.map(expense => {
@@ -57,7 +57,7 @@ function updateDashboardRecentExpenses() {
         return `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
                 <div>
-                    <div style="font-weight: 600; color: var(--text-primary);">${expense.description || 'AÃ§Ä±klama yok'}</div>
+                    <div style="font-weight: 600; color: var(--text-primary);">${expense.description || 'Açıklama yok'}</div>
                     <div style="font-size: 12px; color: var(--text-secondary);">${date} - ${expense.person} - ${expense.card}</div>
                 </div>
                 <div style="font-weight: 600; color: var(--primary);">${(parseFloat(expense.amount) || 0).toFixed(2)} TL</div>
@@ -78,7 +78,7 @@ function updateDashboardUpcomingInstallments() {
         return;
     }
     const html = upcomingInstallments.slice(0, 5).map(installment => {
-        // Hem eski hem yeni taksit alanlarÄ±nÄ± destekle
+        // Hem eski hem yeni taksit alanlarını destekle
         const installmentNumber = installment.installmentNumber || installment.taksitNo;
         const totalInstallments = installment.totalInstallments || installment.toplamTaksit;
         return `
@@ -144,7 +144,7 @@ function editUser(oldUserName) {
     if (newUserName && newUserName.trim() && newUserName.trim() !== oldUserName) {
         const newName = newUserName.trim();
         if (people.includes(newName)) {
-            NotificationService.error('Bu kullanÄ±cÄ± adÄ± zaten mevcut');
+            NotificationService.error('Bu kullanıcı adı zaten mevcut');
             return;
         }
         const userIndex = people.indexOf(oldUserName);

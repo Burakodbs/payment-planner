@@ -1,4 +1,4 @@
-﻿// Hesaplama FonksiyonlarÄ±
+// Hesaplama Fonksiyonları
 function calculateDebts() {
     const accounts = {};
     people.forEach(person => {
@@ -15,7 +15,7 @@ function calculateDebts() {
         futurePayments[user] = 0;
     });
     expenses.forEach(expense => {
-        // Yeni Ä°ngilizce alanlarÄ± ve eski TÃ¼rkÃ§e alanlarÄ± destekle
+        // Yeni İngilizce alanları ve eski Türkçe alanları destekle
         const isInstallment = expense.isInstallment || expense.isTaksit;
         const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
         const installmentNumber = expense.installmentNumber || expense.taksitNo;
@@ -26,243 +26,193 @@ function calculateDebts() {
     });
     return { accounts, futurePayments };
 }
+
 function getMonthlyFutureTaksits() {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
     const monthlyTaksits = {};
     expenses.forEach(expense => {
-        // Yeni Ä°ngilizce alanlarÄ± ve eski TÃ¼rkÃ§e alanlarÄ± destekle
+        // Yeni İngilizce alanları ve eski Türkçe alanları destekle
         const isInstallment = expense.isInstallment || expense.isTaksit;
         const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
         const installmentNumber = expense.installmentNumber || expense.taksitNo;
         if (isInstallment && totalInstallments && installmentNumber) {
-            const [expenseYear, expenseMonth, expenseDay] = expense.date.split('-').map(Number);
-            const kalanTaksit = totalInstallments - installmentNumber;
-            for (let i = 1; i <= kalanTaksit; i++) {
-                let taksitYear = expenseYear;
-                let taksitMonth = expenseMonth + i;
-                while (taksitMonth > 12) {
-                    taksitMonth -= 12;
-                    taksitYear += 1;
+            const startDate = new Date(expense.date);
+            for (let i = 0; i < totalInstallments; i++) {
+                const taksitDate = new Date(startDate);
+                taksitDate.setMonth(startDate.getMonth() + i);
+                const taksitYear = taksitDate.getFullYear();
+                const taksitMonth = taksitDate.getMonth() + 1;
+                if (taksitYear > currentYear || (taksitYear === currentYear && taksitMonth > currentMonth)) {
+                    const key = `${taksitYear}-${taksitMonth.toString().padStart(2, '0')}`;
+                    if (!monthlyTaksits[key]) {
+                        monthlyTaksits[key] = {};
+                    }
+                    if (!monthlyTaksits[key][expense.person]) {
+                        monthlyTaksits[key][expense.person] = 0;
+                    }
+                    monthlyTaksits[key][expense.person] += expense.amount;
                 }
-                const monthKey = `${taksitYear}-${taksitMonth.toString().padStart(2, '0')}`;
-                if (!monthlyTaksits[monthKey]) {
-                    monthlyTaksits[monthKey] = {};
-                }
-                if (!monthlyTaksits[monthKey][expense.person]) {
-                    monthlyTaksits[monthKey][expense.person] = [];
-                }
-                monthlyTaksits[monthKey][expense.person].push({
-                    description: expense.description || 'Taksit',
-                    amount: expense.amount,
-                    taksitNo: installmentNumber + i,
-                    toplamTaksit: totalInstallments,
-                    card: expense.card,
-                    orijinalTarih: expense.date
-                });
             }
         }
     });
     return monthlyTaksits;
 }
-function getFutureTaksits(selectedMonth) {
-    const futureTaksits = [];
-    const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
+
+function getMonthlyRegularPayments() {
+    const monthlyRegular = {};
+    regularPayments.forEach(payment => {
+        if (payment.isActive !== false) {
+            if (!monthlyRegular[payment.person]) {
+                monthlyRegular[payment.person] = 0;
+            }
+            monthlyRegular[payment.person] += payment.amount;
+        }
+    });
+    return monthlyRegular;
+}
+
+function calculateTotalBudget() {
+    const accounts = {};
+    people.forEach(person => {
+        accounts[person] = 0;
+    });
+    // Harcamalar
     expenses.forEach(expense => {
-        // Yeni Ä°ngilizce alanlarÄ± ve eski TÃ¼rkÃ§e alanlarÄ± destekle
-        const isInstallment = expense.isInstallment || expense.isTaksit;
-        const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
-        const installmentNumber = expense.installmentNumber || expense.taksitNo;
-        if (isInstallment && totalInstallments && installmentNumber) {
-            const [expenseYear, expenseMonth, expenseDay] = expense.date.split('-').map(Number);
-            const kalanTaksit = totalInstallments - installmentNumber;
-            for (let i = 1; i <= kalanTaksit; i++) {
-                let taksitYear = expenseYear;
-                let taksitMonth = expenseMonth + i;
-                while (taksitMonth > 12) {
-                    taksitMonth -= 12;
-                    taksitYear += 1;
-                }
-                if (taksitYear === selectedYear && taksitMonth === selectedMonthNum) {
-                    futureTaksits.push({
-                        ...expense,
-                        taksitNo: installmentNumber + i,
-                        installmentNumber: installmentNumber + i,
-                        date: `${taksitYear}-${taksitMonth.toString().padStart(2, '0')}-${expenseDay.toString().padStart(2, '0')}`,
-                        isFuture: true
-                    });
-                }
+        if (!accounts[expense.person]) {
+            accounts[expense.person] = 0;
+        }
+        accounts[expense.person] += expense.amount;
+    });
+    // Düzenli ödemeler - aktif olan ay sayısı kadar ekle
+    regularPayments.forEach(payment => {
+        if (payment.isActive !== false) {
+            if (!accounts[payment.person]) {
+                accounts[payment.person] = 0;
             }
+            accounts[payment.person] += payment.amount;
         }
     });
-    return futureTaksits;
+    return accounts;
 }
-// SeÃ§ilen aya dÃ¼ÅŸen dÃ¼zenli Ã¶demeleri getir
-function getRecurringPaymentsForMonth(selectedMonth) {
-    const recurringPayments = [];
-    const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
-    regularPayments.forEach((odeme, index) => {
-        // Active field compatibility: support both 'active' and 'aktif' 
-        const isActive = odeme.active !== false && odeme.aktif !== false;
-        if (!isActive || !odeme.startDate) {
-            return;
-        }
-        const start = new Date(odeme.startDate);
-        const startYear = start.getFullYear();
-        const startMonth = start.getMonth() + 1;
-        // EÄŸer seÃ§ilen ay baÅŸlangÄ±Ã§ tarihinden Ã¶nceyse, dÃ¼zenli Ã¶deme henÃ¼z baÅŸlamamÄ±ÅŸ
-        if (selectedYear < startYear || (selectedYear === startYear && selectedMonthNum < startMonth)) {
-            return;
-        }
-        // EÄŸer bitiÅŸ tarihi varsa ve seÃ§ilen ay bitiÅŸ tarihinden sonraysa, dÃ¼zenli Ã¶deme bitmiÅŸ
-        const endDate = odeme.endDate || odeme.bitisTarihi || odeme.birisTarihi;
-        if (endDate) {
-            const bitis = new Date(endDate);
-            const bitisYear = bitis.getFullYear();
-            const bitisMonth = bitis.getMonth() + 1;
-            if (selectedYear > bitisYear || (selectedYear === bitisYear && selectedMonthNum > bitisMonth)) {
-                return;
-            }
-        }
-        // Support both old and new field names for compatibility
-        const description = odeme.description || odeme.ad || 'DÃ¼zenli Ã–deme';
-        const person = odeme.person || odeme.user || 'Unknown'; // Standardize to person
-        // Bu aya ait dÃ¼zenli Ã¶demeyi expense formatÄ±na dÃ¶nÃ¼ÅŸtÃ¼r
-        const recurringExpense = {
-            id: `recurring-${odeme.id}-${selectedMonth}`,
-            date: `${selectedYear}-${selectedMonthNum.toString().padStart(2, '0')}-${start.getDate().toString().padStart(2, '0')}`,
-            card: odeme.card,
-            person: person,
-            kategori: odeme.kategori || odeme.category || 'DÃ¼zenli Ã–deme',
-            description: `${description} (DÃ¼zenli)`,
-            amount: parseFloat(odeme.amount) || 0,
-            isRegular: true,
-            regularOdemeId: odeme.id
-        };
-        // EÄŸer bu Ã¶deme bu ay iÃ§in zaten expenses listesinde yoksa ekle
-        const existingExpense = expenses.find(h => {
-            // Ã–nce regularOdemeId kontrolÃ¼
-            if (h.regularOdemeId === odeme.id && h.date && h.date.startsWith(selectedMonth)) {
-                return true;
-            }
-            // Alternatif kontrol: AynÄ± aÃ§Ä±klama, tutar ve ay
-            if (h.description && h.description.includes(description) && 
-                h.date && h.date.startsWith(selectedMonth) &&
-                Math.abs(parseFloat(h.amount) - parseFloat(odeme.amount)) < 0.01) {
-                return true;
-            }
-            return false;
-        });
-        if (!existingExpense) {
-            recurringPayments.push(recurringExpense);
-        }
-    });
-    return recurringPayments;
-}
-// Hesaplar GÃ¼ncelleme
-function updateAccounts() {
-    const tbody = document.querySelector('#accountsTable tbody');
-    if (!tbody) return;
-    const { accounts, futurePayments } = calculateDebts();
-    tbody.innerHTML = '';
-    // TÃ¼m kiÅŸileri dahil et (mevcut expense olmayanlar da)
-    const tumKisiler = [...new Set([...Object.keys(accounts), ...Object.keys(futurePayments), ...people])];
-    tumKisiler.forEach(person => {
-        if (!person) return; // BoÅŸ kiÅŸi adlarÄ±nÄ± atla
-        const row = tbody.insertRow();
-        const mevcutHarcama = accounts[person] || 0;
-        const gelecekOdeme = futurePayments[person] || 0;
-        const toplam = mevcutHarcama + gelecekOdeme;
-        let debtClass = '';
-        if (toplam > 0) debtClass = 'debt-positive';
-        else if (toplam < 0) debtClass = 'debt-negative';
-        row.innerHTML = `
-            <td style="color: var(--text); font-weight: 500;">${person}</td>
-            <td class="text-right" style="color: var(--text-secondary);">${mevcutHarcama.toFixed(2)} TL</td>
-            <td class="text-right" style="color: var(--text-secondary);">${gelecekOdeme.toFixed(2)} TL</td>
-            <td class="text-right ${debtClass}" style="font-weight: 600;">${toplam.toFixed(2)} TL</td>
-        `;
-    });
-}
-// AylÄ±k Ã–zet GÃ¼ncelleme
-function updateMonthlySummary() {
-    const summaryTarih = document.getElementById('summaryDate');
-    const monthlySummaryContent = document.getElementById('monthlySummaryContent');
-    if (!summaryTarih || !monthlySummaryContent) return;
-    const selectedMonth = summaryTarih.value;
+
+function isInCurrentMonth(expense, selectedMonth) {
     if (!selectedMonth) {
-        monthlySummaryContent.innerHTML = '<p style="color: var(--text-muted);">Tarih seÃ§in ve Ã¶zet gÃ¶sterilsin.</p>';
-        return;
+        const now = new Date();
+        selectedMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
     }
-    // SeÃ§ilen ayÄ±n mevcut expensesÄ±nÄ± filtrele
-    const monthlyExpenses = expenses.filter(expense => {
-        return expense.date && expense.date.startsWith(selectedMonth);
+    const expenseDate = new Date(expense.date);
+    const expenseMonth = `${expenseDate.getFullYear()}-${(expenseDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    // Taksitli harcamalarda bu ayda taksiti var mı kontrol et
+    const isInstallment = expense.isInstallment || expense.isTaksit;
+    const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
+    const installmentNumber = expense.installmentNumber || expense.taksitNo;
+    if (isInstallment && totalInstallments && installmentNumber) {
+        const startDate = new Date(expense.date);
+        for (let i = 0; i < totalInstallments; i++) {
+            const taksitDate = new Date(startDate);
+            taksitDate.setMonth(startDate.getMonth() + i);
+            const taksitMonth = `${taksitDate.getFullYear()}-${(taksitDate.getMonth() + 1).toString().padStart(2, '0')}`;
+            if (taksitMonth === selectedMonth) {
+                return true;
+            }
+        }
+        return false;
+    } else {
+        return expenseMonth === selectedMonth;
+    }
+}
+
+function getMonthlyExpenses(selectedMonth) {
+    if (!selectedMonth) {
+        const now = new Date();
+        selectedMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
+    const monthlyExpenses = expenses.filter(expense => isInCurrentMonth(expense, selectedMonth));
+    const monthlyRegular = regularPayments.filter(payment => payment.isActive !== false);
+    return { monthlyExpenses, monthlyRegular };
+}
+
+function getMonthlyTotal(selectedMonth) {
+    const { monthlyExpenses, monthlyRegular } = getMonthlyExpenses(selectedMonth);
+    let total = 0;
+    monthlyExpenses.forEach(expense => {
+        total += expense.amount;
     });
-    // SeÃ§ilen aya dÃ¼ÅŸen gelecek taksitleri al
-    const futureTaksits = getFutureTaksits(selectedMonth);
-    // SeÃ§ilen aya dÃ¼ÅŸen dÃ¼zenli Ã¶demeleri al
-    const monthlyRecurringPayments = getRecurringPaymentsForMonth(selectedMonth);
-    // TÃ¼m expensesÄ± birleÅŸtir (mevcut + gelecek taksitler + dÃ¼zenli Ã¶demeler)
-    const allMonthlyExpenses = [...monthlyExpenses, ...futureTaksits, ...monthlyRecurringPayments];
-    if (allMonthlyExpenses.length === 0) {
-        monthlySummaryContent.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                <h3>Bu ay iÃ§in expense bulunamadÄ±</h3>
-                <p>${selectedMonth} ayÄ±nda henÃ¼z expense kaydÄ± veya gelecek taksit yok.</p>
-            </div>
-        `;
-        return;
+    monthlyRegular.forEach(payment => {
+        total += payment.amount;
+    });
+    return total;
+}
+
+function updateMonthlySummary(selectedMonth) {
+    if (!selectedMonth) {
+        const now = new Date();
+        selectedMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
     }
-    // Ay bilgisini gÃ¼zel formatta gÃ¶ster
-    const [year, month] = selectedMonth.split('-');
-    const monthNames = ['Ocak', 'Åubat', 'Mart', 'Nisan', 'MayÄ±s', 'Haziran',
-        'Temmuz', 'AÄŸustos', 'EylÃ¼l', 'Ekim', 'KasÄ±m', 'AralÄ±k'];
-    const monthName = monthNames[parseInt(month) - 1];
-    // Toplam hesaplama (mevcut + gelecek taksitler + dÃ¼zenli Ã¶demeler)
-    const toplamTutar = allMonthlyExpenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
-    const mevcutTutar = monthlyExpenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
-    const gelecekTutar = futureTaksits.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
-    const regularTutar = monthlyRecurringPayments.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
-    // KullanÄ±cÄ± bazÄ±nda toplam
+    const monthlySummaryContent = document.getElementById('monthly-summary-content');
+    if (!monthlySummaryContent) return;
+    
+    const { monthlyExpenses, monthlyRegular } = getMonthlyExpenses(selectedMonth);
+    
+    // Tüm aylık harcamaları birleştir (harcamalar + düzenli ödemeler)
+    const allMonthlyExpenses = [...monthlyExpenses];
+    
+    // Düzenli ödemeleri de ekle
+    monthlyRegular.forEach(payment => {
+        allMonthlyExpenses.push({
+            ...payment,
+            date: selectedMonth + '-01',
+            category: payment.category || 'Düzenli Ödeme',
+            description: payment.description || payment.name,
+            isDuzenli: true
+        });
+    });
+    
+    // Kullanıcı bazında toplamlar
     const userToplamlar = {};
-    allMonthlyExpenses.forEach(exp => {
-        const user = exp.person || 'Bilinmeyen';
-        userToplamlar[user] = (userToplamlar[user] || 0) + (parseFloat(exp.amount) || 0);
-    });
-    // Kart bazÄ±nda toplam
+    // Kart bazında toplamlar
     const cardToplamlar = {};
+    
     allMonthlyExpenses.forEach(exp => {
-        const card = exp.card || 'Bilinmeyen';
-        cardToplamlar[card] = (cardToplamlar[card] || 0) + (parseFloat(exp.amount) || 0);
+        // Kullanıcı toplamları
+        if (!userToplamlar[exp.person]) {
+            userToplamlar[exp.person] = 0;
+        }
+        userToplamlar[exp.person] += parseFloat(exp.amount) || 0;
+        
+        // Kart toplamları
+        const cardName = exp.card || 'Diğer';
+        if (!cardToplamlar[cardName]) {
+            cardToplamlar[cardName] = 0;
+        }
+        cardToplamlar[cardName] += parseFloat(exp.amount) || 0;
     });
-    // HTML oluÅŸtur
-    let html = `
-        <div style="background: var(--bg-secondary); padding: 20px; border-radius: var(--radius); margin-bottom: 24px;">
-            <h3 style="color: var(--text); margin: 0 0 16px 0;">${monthName} ${year} Ã–zeti</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px;">
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: var(--text-secondary);">Total Expenses</div>
-                    <div style="font-size: 28px; font-weight: 700; color: var(--primary);">${toplamTutar.toFixed(2)} TL</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: var(--text-secondary);">Mevcut Harcama</div>
-                    <div style="font-size: 20px; font-weight: 600; color: var(--success);">${mevcutTutar.toFixed(2)} TL</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: var(--text-secondary);">Gelecek Taksit</div>
-                    <div style="font-size: 20px; font-weight: 600; color: var(--warning);">${gelecekTutar.toFixed(2)} TL</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: var(--text-secondary);">DÃ¼zenli Ã–deme</div>
-                    <div style="font-size: 20px; font-weight: 600; color: var(--info);">${regularTutar.toFixed(2)} TL</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: var(--text-secondary);">Toplam Ä°ÅŸlem</div>
-                    <div style="font-size: 20px; font-weight: 600; color: var(--text-muted);">${allMonthlyExpenses.length}</div>
+    
+    // Ay bilgisini güzel formatta göster
+    const [year, month] = selectedMonth.split('-');
+    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const monthName = monthNames[parseInt(month) - 1];
+    
+    // Toplam hesaplama (mevcut + gelecek taksitler + düzenli ödemeler)
+    const toplamTutar = allMonthlyExpenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+    
+    const html = `
+        <div style="display: grid; gap: 20px;">
+            <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
+                <h3 style="color: var(--text); margin: 0 0 16px 0;">${monthName} ${year} Özeti</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--primary-subtle); border-radius: var(--radius);">
+                    <span style="color: var(--primary); font-weight: 600;">Toplam Harcama:</span>
+                    <span style="color: var(--primary); font-weight: 700; font-size: 18px;">${toplamTutar.toFixed(2)} TL</span>
                 </div>
             </div>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
+            
+            <div style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                
             <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
-                <h4 style="color: var(--text); margin: 0 0 16px 0;">ğŸ‘¥ KullanÄ±cÄ± BazÄ±nda</h4>
+                <h4 style="color: var(--text); margin: 0 0 16px 0;">👥 Kullanıcı Bazında</h4>
                 ${Object.entries(userToplamlar)
             .sort((a, b) => b[1] - a[1])
             .map(([user, tutar]) => `
@@ -272,8 +222,9 @@ function updateMonthlySummary() {
                         </div>
                     `).join('')}
             </div>
+            
             <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
-                <h4 style="color: var(--text); margin: 0 0 16px 0;">ğŸ’³ Kart BazÄ±nda</h4>
+                <h4 style="color: var(--text); margin: 0 0 16px 0;">💳 Kart Bazında</h4>
                 ${Object.entries(cardToplamlar)
             .sort((a, b) => b[1] - a[1])
             .map(([card, tutar]) => `
@@ -283,30 +234,31 @@ function updateMonthlySummary() {
                         </div>
                     `).join('')}
             </div>
+            
         </div>
+        
         <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
-            <h4 style="color: var(--text); margin: 0 0 16px 0;">ğŸ“‹ DetaylÄ± Harcama Listesi</h4>
+            <h4 style="color: var(--text); margin: 0 0 16px 0;">📋 Detaylı Harcama Listesi</h4>
             <div style="display: grid; gap: 8px;">
                 ${allMonthlyExpenses
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .map(exp => {
-                const taksitBilgi = exp.isTaksit ? `${exp.taksitNo}/${exp.toplamTaksit}` : '';
-                const futureLabel = exp.isFuture ? ' (Gelecek Taksit)' : '';
-                const regularLabel = exp.isRegular ? ' (DÃ¼zenli)' : '';
-                let bgColor = 'var(--bg-secondary)';
-                let textColor = 'var(--text)';
-                if (exp.isFuture) {
-                    bgColor = 'var(--warning-bg)';
-                    textColor = 'var(--warning)';
-                } else if (exp.isRegular) {
-                    bgColor = 'var(--info-bg)';
-                    textColor = 'var(--info)';
+                const isInstallment = exp.isInstallment || exp.isTaksit;
+                const totalInstallments = exp.totalInstallments || exp.toplamTaksit;
+                const installmentNumber = exp.installmentNumber || exp.taksitNo;
+                
+                let taksitBilgi = '';
+                if (isInstallment && totalInstallments && installmentNumber) {
+                    taksitBilgi = `(${installmentNumber}/${totalInstallments})`;
+                } else if (exp.isDuzenli) {
+                    taksitBilgi = '(Düzenli Ödeme)';
                 }
+                
                 return `
-                            <div style="display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 12px; padding: 12px; background: ${bgColor}; border-radius: var(--radius-sm); align-items: center;">
-                                <div style="font-size: 12px; color: var(--text-muted);">${exp.date.split('-').reverse().join('.')}</div>
-                                <div style="color: ${textColor}; font-weight: 500;">
-                                    ${exp.description || 'AÃ§Ä±klama yok'}${futureLabel}${regularLabel}
+                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 12px; padding: 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); align-items: center;">
+                                <div>
+                                    <div style="font-weight: 500; color: var(--text);">${exp.description || exp.name || 'Harcama'}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted);">${exp.category || 'Genel'}</div>
                                     ${taksitBilgi ? `<span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">${taksitBilgi}</span>` : ''}
                                 </div>
                                 <div style="font-size: 12px; color: var(--text-secondary);">${exp.person}</div>  

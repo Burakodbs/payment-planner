@@ -1,4 +1,4 @@
-﻿// JSON File Based Storage System
+// JSON File Based Storage System
 class FileStorage {
     constructor() {
         this.currentUser = null;
@@ -7,64 +7,74 @@ class FileStorage {
         this.autoSaveDelay = 2000; // 2 saniye sonra otomatik kaydet
         this.pendingSave = false;
     }
-    // KullanÄ±cÄ± oturum aÃ§tÄ±ÄŸÄ±nda Ã§aÄŸrÄ±lÄ±r
+
+    // Kullanıcı oturum açtığında çağrılır
     async initUser(username) {
         this.currentUser = username;
         this.userDataPath = `user_data_${username}.json`;
-        // KullanÄ±cÄ± JSON dosyasÄ±nÄ± yÃ¼kle
+        // Kullanıcı JSON dosyasını yükle
         await this.loadUserData();
-        // Otomatik kaydetmeyi baÅŸlat
+        // Otomatik kaydetmeyi başlat
         this.startAutoSave();
     }
-    // KullanÄ±cÄ± verilerini JSON dosyasÄ±ndan yÃ¼kle
+
+    // Kullanıcı verilerini JSON dosyasından yükle
     async loadUserData() {
         try {
-            // DosyayÄ± okumak iÃ§in file input kullan
+            // Dosyayı okumak için file input kullan
             const userData = await this.readJSONFile();
             if (userData) {
                 this.applyUserData(userData);
                 return userData;
             } else {
-                // EÄŸer dosya yoksa boÅŸ veri yapÄ±sÄ± oluÅŸtur
+                // Eğer dosya yoksa boş veri yapısı oluştur
                 await this.createEmptyUserData();
             }
         } catch (error) {
-            console.error('KullanÄ±cÄ± verileri yÃ¼klenirken hata:', error);
+            console.error('Kullanıcı verileri yüklenirken hata:', error);
             await this.createEmptyUserData();
         }
     }
+
     // Dosyadan JSON veri oku
     async readJSONFile() {
         return new Promise((resolve) => {
-            // IndexedDB kullanarak dosyalarÄ± saklayalÄ±m
+            // IndexedDB kullanarak dosyaları saklayalım
             const dbRequest = indexedDB.open('PaymentPlannerFiles', 1);
+            
             dbRequest.onerror = () => {
                 resolve(null);
             };
+            
             dbRequest.onupgradeneeded = (event) => {
                 const db = event.target.result;
                 if (!db.objectStoreNames.contains('userFiles')) {
                     db.createObjectStore('userFiles', { keyPath: 'username' });
                 }
             };
+            
             dbRequest.onsuccess = (event) => {
                 const db = event.target.result;
                 const transaction = db.transaction(['userFiles'], 'readonly');
                 const store = transaction.objectStore('userFiles');
                 const getRequest = store.get(this.currentUser);
+                
                 getRequest.onsuccess = () => {
                     const result = getRequest.result;
                     resolve(result ? result.data : null);
                 };
+                
                 getRequest.onerror = () => {
                     resolve(null);
                 };
             };
         });
     }
-    // JSON dosyasÄ±na veri kaydet
+
+    // JSON dosyasına veri kaydet
     async saveUserData() {
         if (!this.currentUser) return;
+        
         const userData = {
             username: this.currentUser,
             lastUpdated: new Date().toISOString(),
@@ -76,30 +86,35 @@ class FileStorage {
                 theme: document.body.className.includes('dark-theme') ? 'dark' : 'light'
             }
         };
+
         try {
             // IndexedDB'ye kaydet
             await this.writeJSONFile(userData);
-            // Yedek dosyasÄ± da oluÅŸtur
+            // Yedek dosyası da oluştur
             this.createBackupFile(userData);
             this.pendingSave = false;
-            // UI'da kaydetme durumunu gÃ¶ster
+            // UI'da kaydetme durumunu göster
             this.showSaveStatus('Veriler kaydedildi', 'success');
         } catch (error) {
-            console.error('Veri kaydetme hatasÄ±:', error);
-            this.showSaveStatus('Kaydetme hatasÄ±!', 'error');
+            console.error('Veri kaydetme hatası:', error);
+            this.showSaveStatus('Kaydetme hatası!', 'error');
         }
     }
+
     // IndexedDB'ye dosya yaz
     async writeJSONFile(userData) {
         return new Promise((resolve, reject) => {
             const dbRequest = indexedDB.open('PaymentPlannerFiles', 1);
-            dbRequest.onerror = () => reject(new Error('IndexedDB aÃ§Ä±lamadÄ±'));
+            
+            dbRequest.onerror = () => reject(new Error('IndexedDB açılamadı'));
+            
             dbRequest.onupgradeneeded = (event) => {
                 const db = event.target.result;
                 if (!db.objectStoreNames.contains('userFiles')) {
                     db.createObjectStore('userFiles', { keyPath: 'username' });
                 }
             };
+            
             dbRequest.onsuccess = (event) => {
                 const db = event.target.result;
                 const transaction = db.transaction(['userFiles'], 'readwrite');
@@ -109,43 +124,50 @@ class FileStorage {
                     data: userData,
                     savedAt: new Date().toISOString()
                 });
+                
                 putRequest.onsuccess = () => resolve();
-                putRequest.onerror = () => reject(new Error('IndexedDB yazma hatasÄ±'));
+                putRequest.onerror = () => reject(new Error('IndexedDB yazma hatası'));
             };
         });
     }
-    // Yedek dosya oluÅŸtur ve ana klasÃ¶rÃ¼n iÃ§indeki backups klasÃ¶rÃ¼ne kaydet
+
+    // Yedek dosya oluştur ve ana klasörün içindeki backups klasörüne kaydet
     createBackupFile(userData) {
         const filename = `${this.currentUser}-backup-${new Date().toISOString().slice(0, 10)}.json`;
         const dataStr = JSON.stringify(userData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        // Ana klasÃ¶r iÃ§indeki backups klasÃ¶rÃ¼ne kaydet
+        
+        // Ana klasör içindeki backups klasörüne kaydet
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
         link.download = filename;
         link.style.display = 'none';
-        // TarayÄ±cÄ±dan dosya sistemi eriÅŸimi iÃ§in manuel indirme
+        
+        // Tarayıcıdan dosya sistemi erişimi için manuel indirme
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
-        // KullanÄ±cÄ±ya backup klasÃ¶rÃ¼ oluÅŸturmasÄ± iÃ§in bilgi ver
-        // Backup klasÃ¶rÃ¼ kontrolÃ¼ ve oluÅŸturma Ã¶nerisi
+        
+        // Kullanıcıya backup klasörü oluşturması için bilgi ver
+        // Backup klasörü kontrolü ve oluşturma önerisi
         this.suggestBackupFolder(filename);
     }
-    // Backup klasÃ¶rÃ¼ Ã¶nerisi
+
+    // Backup klasörü önerisi
     suggestBackupFolder(filename) {
-        // LocalStorage'da backup folder Ã¶nerisi gÃ¶sterildi mi kontrol et
+        // LocalStorage'da backup folder önerisi gösterildi mi kontrol et
         const backupSuggestionShown = localStorage.getItem('backup_folder_suggestion_shown');
+        
         if (!backupSuggestionShown) {
             setTimeout(() => {
-                const message = `ğŸ“ YEDEK KLASÃ–RÃœ Ã–NERÄ°SÄ°\n\n` +
-                               `Yedek dosyalarÄ±nÄ±zÄ± daha dÃ¼zenli tutmak iÃ§in:\n\n` +
-                               `1. Ana klasÃ¶rÃ¼nÃ¼zde 'backups' klasÃ¶rÃ¼ oluÅŸturun\n` +
-                               `2. Ä°ndirilen yedek dosyalarÄ±nÄ± oraya taÅŸÄ±yÄ±n\n` +
-                               `3. Bu klasÃ¶rÃ¼ .gitignore'a ekleyebilirsiniz\n\n` +
+                const message = `📂 YEDEK KLASÖRÜ ÖNERİSİ\n\n` +
+                               `Yedek dosyalarınızı daha düzenli tutmak için:\n\n` +
+                               `1. Ana klasörünüzde 'backups' klasörü oluşturun\n` +
+                               `2. İndirilen yedek dosyalarını oraya taşıyın\n` +
+                               `3. Bu klasörü .gitignore'a ekleyebilirsiniz\n\n` +
                                `Dosya: ${filename}\n\n` +
-                               `Bu Ã¶nerinin bir daha gÃ¶sterilmesini istiyor musunuz?`;
+                               `Bu önerinin bir daha gösterilmesini istiyor musunuz?`;
                 const showAgain = confirm(message);
                 if (!showAgain) {
                     localStorage.setItem('backup_folder_suggestion_shown', 'true');
@@ -153,15 +175,18 @@ class FileStorage {
             }, 2000);
         }
     }
-    // Backup klasÃ¶rÃ¼ varlÄ±ÄŸÄ±nÄ± kontrol et
+
+    // Backup klasörü varlığını kontrol et
     checkBackupFolder() {
-        // Bu fonksiyon tarayÄ±cÄ± kÄ±sÄ±tlamalarÄ± nedeniyle dosya sistemi eriÅŸimi yapamaz
-        // Sadece kullanÄ±cÄ±ya rehberlik saÄŸlar
+        // Bu fonksiyon tarayıcı kısıtlamaları nedeniyle dosya sistemi erişimi yapamaz
+        // Sadece kullanıcıya rehberlik sağlar
     }
-    // KullanÄ±cÄ± verilerini global deÄŸiÅŸkenlere uygula
+
+    // Kullanıcı verilerini global değişkenlere uygula
     applyUserData(userData) {
         if (!userData) return;
-        // Global deÄŸiÅŸkenleri gÃ¼ncelle
+
+        // Global değişkenleri güncelle
         if (userData.expenses) {
             expenses = userData.expenses;
             window.expenses = expenses;
@@ -178,14 +203,17 @@ class FileStorage {
             people = userData.people;
             window.people = people;
         }
-        // Tema ayarÄ±nÄ± uygula
+
+        // Tema ayarını uygula
         if (userData.settings && userData.settings.theme) {
             document.body.className = userData.settings.theme === 'dark' ? 'dark-theme' : '';
         }
-        // TÃ¼m gÃ¶rÃ¼nÃ¼mleri gÃ¼ncelle
+
+        // Tüm görünümleri güncelle
         this.updateAllViews();
     }
-    // BoÅŸ kullanÄ±cÄ± verisi oluÅŸtur
+
+    // Boş kullanıcı verisi oluştur
     async createEmptyUserData() {
         const emptyData = {
             username: this.currentUser,
@@ -202,13 +230,16 @@ class FileStorage {
                 theme: 'light'
             }
         };
+
         this.applyUserData(emptyData);
         await this.saveUserData();
     }
-    // Otomatik kaydetmeyi baÅŸlat
+
+    // Otomatik kaydetmeyi başlat
     startAutoSave() {
-        // Veri deÄŸiÅŸikliklerini dinle
+        // Veri değişikliklerini dinle
         this.watchDataChanges();
+        
         // Periyodik kontrol (her 30 saniye)
         if (this.autoSaveInterval) clearInterval(this.autoSaveInterval);
         this.autoSaveInterval = setInterval(() => {
@@ -217,9 +248,10 @@ class FileStorage {
             }
         }, 30000);
     }
-    // Veri deÄŸiÅŸikliklerini izle
+
+    // Veri değişikliklerini izle
     watchDataChanges() {
-        // Proxy kullanarak array deÄŸiÅŸikliklerini yakala
+        // Proxy kullanarak array değişikliklerini yakala
         const createWatchedArray = (arr, name) => {
             return new Proxy(arr, {
                 set: (target, property, value) => {
@@ -229,6 +261,7 @@ class FileStorage {
                 }
             });
         };
+
         // Global array'leri watch et
         if (typeof expenses !== 'undefined') {
             expenses = createWatchedArray(expenses, 'expenses');
@@ -243,18 +276,21 @@ class FileStorage {
             people = createWatchedArray(people, 'people');
         }
     }
+
     // Otomatik kaydetmeyi zamanla
     scheduleAutoSave(dataType) {
         this.pendingSave = true;
-        // UI'da kaydetme durumunu gÃ¶ster
-        this.showSaveStatus('DeÄŸiÅŸiklikler kaydediliyor...', 'pending');
-        // Debounce - sÃ¼rekli deÄŸiÅŸikliklerde kaydetmeyi geciktir
+        // UI'da kaydetme durumunu göster
+        this.showSaveStatus('Değişiklikler kaydediliyor...', 'pending');
+        
+        // Debounce - sürekli değişikliklerde kaydetmeyi geciktir
         clearTimeout(this.saveTimeout);
         this.saveTimeout = setTimeout(() => {
             this.saveUserData();
         }, this.autoSaveDelay);
     }
-    // Kaydetme durumu gÃ¶ster
+
+    // Kaydetme durumu göster
     showSaveStatus(message, type) {
         // Mevcut status div'i kontrol et
         let statusDiv = document.getElementById('save-status');
@@ -275,7 +311,8 @@ class FileStorage {
             `;
             document.body.appendChild(statusDiv);
         }
-        // Stil ve mesajÄ± ayarla
+
+        // Stil ve mesajı ayarla
         const colors = {
             success: '#27ae60',
             error: '#e74c3c',
@@ -284,21 +321,23 @@ class FileStorage {
         statusDiv.style.backgroundColor = colors[type] || colors.pending;
         statusDiv.textContent = message;
         statusDiv.style.opacity = '1';
-        // BaÅŸarÄ± ve hata mesajlarÄ±nÄ± otomatik gizle
+
+        // Başarı ve hata mesajlarını otomatik gizle
         if (type !== 'pending') {
             setTimeout(() => {
                 statusDiv.style.opacity = '0';
             }, 3000);
         }
     }
-    // TÃ¼m gÃ¶rÃ¼nÃ¼mleri gÃ¼ncelle
+
+    // Tüm görünümleri güncelle
     updateAllViews() {
         // Sayfa yenilenmesini bekle
         setTimeout(() => {
             if (typeof DataManager !== 'undefined' && DataManager.updateAllViews) {
                 DataManager.updateAllViews();
             }
-            // Manuel olarak mevcut fonksiyonlarÄ± Ã§aÄŸÄ±r
+            // Manuel olarak mevcut fonksiyonları çağır
             if (typeof updateExpenseTable === 'function') updateExpenseTable();
             if (typeof updateDashboard === 'function') updateDashboard();
             if (typeof updateAccounts === 'function') updateAccounts();
@@ -307,27 +346,32 @@ class FileStorage {
             if (typeof updateCardAndUserManagement === 'function') updateCardAndUserManagement();
         }, 100);
     }
-    // Dosyadan veri iÃ§e aktar
+
+    // Dosyadan veri içe aktar
     async importFromFile(file) {
         try {
             const text = await file.text();
             const userData = JSON.parse(text);
-            // Veri formatÄ±nÄ± kontrol et ve dÃ¶nÃ¼ÅŸtÃ¼r
+            
+            // Veri formatını kontrol et ve dönüştür
             const convertedData = this.convertImportFormat(userData);
+            
             // Verileri uygula
             this.applyUserData(convertedData);
             await this.saveUserData();
-            this.showSaveStatus('Veriler iÃ§e aktarÄ±ldÄ±', 'success');
+            
+            this.showSaveStatus('Veriler içe aktarıldı', 'success');
             return true;
         } catch (error) {
-            console.error('Dosya iÃ§e aktarma hatasÄ±:', error);
-            this.showSaveStatus('Ä°Ã§e aktarma hatasÄ±!', 'error');
+            console.error('Dosya içe aktarma hatası:', error);
+            this.showSaveStatus('İçe aktarma hatası!', 'error');
             return false;
         }
     }
-    // Import formatÄ±nÄ± dÃ¶nÃ¼ÅŸtÃ¼r
+
+    // Import formatını dönüştür
     convertImportFormat(data) {
-        // Eski TÃ¼rkÃ§e formatÄ±ndan yeni formata dÃ¶nÃ¼ÅŸtÃ¼r
+        // Eski Türkçe formatından yeni formata dönüştür
         if (data.harcamalar) {
             data.expenses = data.harcamalar.map(item => ({
                 id: item.id || Date.now() + Math.random(),
@@ -336,39 +380,47 @@ class FileStorage {
                 date: item.tarih || item.date || new Date().toISOString().slice(0, 10),
                 card: item.kart || item.card || 'Nakit',
                 user: item.kisi || item.user || 'Admin',
-                category: item.kategori || item.category || 'DiÄŸer'
+                category: item.kategori || item.category || 'Diğer'
             }));
             delete data.harcamalar;
         }
+
         if (data.duzenliOdemeler) {
             data.regularPayments = data.duzenliOdemeler;
             delete data.duzenliOdemeler;
         }
+
         if (data.kartlar) {
             data.creditCards = data.kartlar;
             delete data.kartlar;
         }
+
         if (data.kisiler) {
             data.people = data.kisiler;
             delete data.kisiler;
         }
+
         return data;
     }
-    // KullanÄ±cÄ±yÄ± Ã§Ä±kÄ±ÅŸ yap
+
+    // Kullanıcıyı çıkış yap
     logout() {
         // Otomatik kaydetmeyi durdur
         if (this.autoSaveInterval) {
             clearInterval(this.autoSaveInterval);
             this.autoSaveInterval = null;
         }
+
         // Son kez kaydet
         if (this.pendingSave) {
             this.saveUserData();
         }
+
         this.currentUser = null;
         this.userDataPath = null;
         this.pendingSave = false;
     }
+
     // Sistem durumunu kontrol et
     getStatus() {
         return {
@@ -379,14 +431,17 @@ class FileStorage {
         };
     }
 }
+
 // Global FileStorage instance
 const fileStorage = new FileStorage();
-// Sayfa kapatÄ±lmadan Ã¶nce kaydet
+
+// Sayfa kapatılmadan önce kaydet
 window.addEventListener('beforeunload', () => {
     if (fileStorage.pendingSave) {
         fileStorage.saveUserData();
     }
 });
+
 // Export for use in other modules
 window.FileStorage = FileStorage;
 window.fileStorage = fileStorage;

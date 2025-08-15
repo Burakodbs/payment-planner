@@ -191,12 +191,12 @@ function createCardDistributionChart() {
     const cardStats = getCardStatistics();
     const labels = Object.keys(cardStats);
     const data = Object.values(cardStats).map(stat => stat.total);
-    // BoÅŸ data kontrolÃ¼
+    // Boş data kontrolü
     if (labels.length === 0 || data.every(value => value === 0)) {
         ctx.font = '16px Arial';
         ctx.textAlign = 'center';
         ctx.fillStyle = '#666';
-        ctx.fillText('HenÃ¼z kart bazlÄ± veri yok', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx.fillText('Henüz kart bazlı veri yok', ctx.canvas.width / 2, ctx.canvas.height / 2);
         return;
     }
     const colors = [
@@ -238,7 +238,7 @@ function createCardDistributionChart() {
         }
     });
 }
-// KullanÄ±cÄ± daÄŸÄ±lÄ±m grafiÄŸi
+// Kullanıcı dağılım grafiği
 function createUserDistributionChart() {
     const ctx = document.getElementById('userDistributionChart').getContext('2d');
     const userStats = getUserStatistics();
@@ -284,20 +284,20 @@ function createUserDistributionChart() {
         }
     });
 }
-// HaftalÄ±k ortalama grafiÄŸi
+// Haftalık ortalama grafiği
 function createWeeklyAverageChart() {
     const ctx = document.getElementById('weeklyAverageChart').getContext('2d');
-    // HaftanÄ±n gÃ¼nleri bazÄ±nda analiz
+    // Haftanın günleri bazında analiz
     const weeklyData = {
         'Pazartesi': [],
-        'SalÄ±': [],
-        'Ã‡arÅŸamba': [],
-        'PerÅŸembe': [],
+        'Salı': [],
+        'Çarşamba': [],
+        'Perşembe': [],
         'Cuma': [],
         'Cumartesi': [],
         'Pazar': []
     };
-    const dayNames = ['Pazar', 'Pazartesi', 'SalÄ±', 'Ã‡arÅŸamba', 'PerÅŸembe', 'Cuma', 'Cumartesi'];
+    const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
     expenses.forEach(expense => {
         const date = new Date(expense.date);
         const dayName = dayNames[date.getDay()];
@@ -346,7 +346,7 @@ function createWeeklyAverageChart() {
         }
     });
 }
-// DetaylÄ± statisticsi gÃ¼ncelle
+// Detaylı statisticsi güncelle
 function updateDetailedStatistics() {
     // Expense analysis
     const expenseAnalysis = document.getElementById('expenseAnalysis');
@@ -358,13 +358,13 @@ function updateDetailedStatistics() {
             <strong>Ortalama:</strong> ${avgExpense.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} TL
         </div>
         <div style="margin-bottom: 8px;">
-            <strong>En YÃ¼ksek:</strong> ${maxExpense.toLocaleString('tr-TR')} TL
+            <strong>En Yüksek:</strong> ${maxExpense.toLocaleString('tr-TR')} TL
         </div>
         <div style="margin-bottom: 8px;">
-            <strong>En DÃ¼ÅŸÃ¼k:</strong> ${minExpense.toLocaleString('tr-TR')} TL
+            <strong>En Düşük:</strong> ${minExpense.toLocaleString('tr-TR')} TL
         </div>
         <div>
-            <strong>Toplam Ä°ÅŸlem:</strong> ${expenses.length} adet
+            <strong>Toplam İşlem:</strong> ${expenses.length} adet
         </div>
     `;
     // Rekor statisticsi
@@ -376,15 +376,15 @@ function updateDetailedStatistics() {
     const worstMonth = sortedMonths[sortedMonths.length - 1];
     recordStats.innerHTML = `
         <div style="margin-bottom: 8px;">
-            <strong>En YÃ¼ksek Ay:</strong><br>
+            <strong>En Yüksek Ay:</strong><br>
             ${formatMonth(bestMonth[0])} - ${bestMonth[1].total.toLocaleString('tr-TR')} TL
         </div>
         <div style="margin-bottom: 8px;">
-            <strong>En DÃ¼ÅŸÃ¼k Ay:</strong><br>
+            <strong>En Düşük Ay:</strong><br>
             ${formatMonth(worstMonth[0])} - ${worstMonth[1].total.toLocaleString('tr-TR')} TL
         </div>
         <div>
-            <strong>Aktif Ay SayÄ±sÄ±:</strong> ${Object.keys(monthlyData).length}
+            <strong>Aktif Ay Sayısı:</strong> ${Object.keys(monthlyData).length}
         </div>
     `;
     // Trend analizi
@@ -397,8 +397,8 @@ function updateDetailedStatistics() {
         const current = recentMonths[recentMonths.length - 1][1].total;
         const previous = recentMonths[recentMonths.length - 2][1].total;
         const change = ((current - previous) / previous * 100);
-        if (change > 10) trend = `ğŸ“ˆ ArtÄ±ÅŸ (+${change.toFixed(1)}%)`;
-        else if (change < -10) trend = `ğŸ“‰ AzalÄ±ÅŸ (${change.toFixed(1)}%)`;
+        if (change > 10) trend = `ğŸ“ˆ Artış (+${change.toFixed(1)}%)`;
+        else if (change < -10) trend = `ğŸ“‰ Azalış (${change.toFixed(1)}%)`;
         else trend = `ğŸ“Š Stabil (${change.toFixed(1)}%)`;
     }
     const installmentCount = expenses.filter(h => h.isTaksit).length;
@@ -409,20 +409,20 @@ function updateDetailedStatistics() {
             ${trend}
         </div>
         <div style="margin-bottom: 8px;">
-            <strong>Taksitli Ä°ÅŸlemler:</strong><br>
+            <strong>Taksitli İşlemler:</strong><br>
             ${installmentCount} adet (%${installmentPercentage})
         </div>
         <div>
-            <strong>Ortalama Ä°ÅŸlem/GÃ¼n:</strong><br>
+            <strong>Ortalama İşlem/Gün:</strong><br>
             ${(expenses.length / getDaysSinceFirstExpense()).toFixed(1)} adet
         </div>
     `;
 }
-// YardÄ±mcÄ± fonksiyonlar
+// Yardımcı fonksiyonlar
 function formatMonth(monthKey) {
     const [year, month] = monthKey.split('-');
-    const monthNames = ['Ocak', 'Åubat', 'Mart', 'Nisan', 'MayÄ±s', 'Haziran',
-        'Temmuz', 'AÄŸustos', 'EylÃ¼l', 'Ekim', 'KasÄ±m', 'AralÄ±k'];
+    const monthNames = ['Ocak', 'Åubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
 }
 function getDaysSinceFirstExpense() {
@@ -437,10 +437,10 @@ function showEmptyDataMessage() {
     const pageContent = document.querySelector('.page-content');
     if (pageContent) {
         pageContent.innerHTML = `
-            <h2>ğŸ“Š Ä°statistikler</h2>
+            <h2>ğŸ“Š İstatistikler</h2>
             <div class="summary-card" style="text-align: center; padding: 48px 24px;">
                 <h3>ğŸ“ˆ No Expense Data Yet</h3>
-                <p>Ä°statistikleri gÃ¶rÃ¼ntÃ¼leyebilmek iÃ§in Ã¶nce expense eklemeniz gerekiyor.</p>
+                <p>İstatistikleri görüntüleyebilmek için önce expense eklemeniz gerekiyor.</p>
                 <a href="add-expense.html" class="btn btn-primary" style="margin-top: 16px;">
                     â• Add Expense
                 </a>
@@ -448,11 +448,11 @@ function showEmptyDataMessage() {
         `;
     }
 }
-// KiÅŸiye Ã–zel Ä°statistikler
+// Kişiye Özel İstatistikler
 let personalTrendChart = null;
 let personalCardChart = null;
 let personalComparisonChart = null;
-// Sayfa yÃ¼klendiÄŸinde kiÅŸi listesini doldur
+// Sayfa yüklendiğinde kişi listesini doldur
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadPersonalStatsInit();
@@ -462,23 +462,23 @@ function loadPersonalStatsInit() {
     const personFilter = document.getElementById('personFilter');
     if (!personFilter) return;
     if (!people || people.length === 0) return;
-    // KiÅŸiler listesini doldur
-    personFilter.innerHTML = '<option value="">TÃ¼m KiÅŸiler</option>';
+    // Kişiler listesini doldur
+    personFilter.innerHTML = '<option value="">Tüm Kişiler</option>';
     people.forEach(person => {
         const option = document.createElement('option');
         option.value = person;
         option.textContent = person;
         personFilter.appendChild(option);
     });
-    // Ä°lk yÃ¼klemede tÃ¼m kiÅŸiler iÃ§in statistic gÃ¶ster
+    // İlk yüklemede tüm kişiler için statistic göster
     updatePersonalStats();
 }
 function updatePersonalStats() {
     const selectedPerson = document.getElementById('personFilter').value;
-    // SeÃ§ili kiÅŸiye gÃ¶re expensesÄ± filtrele
+    // Seçili kişiye göre expensesı filtrele
     let filteredExpenses = expenses;
     if (selectedPerson) {
-        // Hem person hem user alanÄ±nÄ± kontrol et
+        // Hem person hem user alanını kontrol et
         filteredExpenses = expenses.filter(h => 
             h.person === selectedPerson || h.user === selectedPerson
         );
@@ -487,9 +487,9 @@ function updatePersonalStats() {
         showNoPersonalDataMessage();
         return;
     }
-    // KiÅŸisel statistic cardsÄ±nÄ± gÃ¼ncelle
+    // Kişisel statistic cardsını güncelle
     updatePersonalStatsCards(filteredExpenses, selectedPerson);
-    // KiÅŸisel chartleri oluÅŸtur
+    // Kişisel chartleri oluştur
     createPersonalCharts(filteredExpenses, selectedPerson);
 }
 function updatePersonalStatsCards(filteredExpenses, person) {
@@ -529,7 +529,7 @@ function createPersonalCharts(filteredExpenses, person) {
 function createPersonalTrendChart(filteredExpenses) {
     const ctx = document.getElementById('personalTrendChart');
     if (!ctx) return;
-    // AylÄ±k dataleri hazÄ±rla
+    // Aylık dataleri hazırla
     const monthlyData = {};
     filteredExpenses.forEach(h => {
         const month = h.date.slice(0, 7);
@@ -606,7 +606,7 @@ function createPersonalCardChart(filteredExpenses) {
 function createPersonalComparisonChart(filteredExpenses, selectedPerson) {
     const ctx = document.getElementById('personalComparisonChart');
     if (!ctx) return;
-    // Son 6 ayÄ±n datalerini hazÄ±rla
+    // Son 6 ayın datalerini hazırla
     const months = [];
     const personalAmounts = [];
     const totalAmounts = [];
@@ -615,7 +615,7 @@ function createPersonalComparisonChart(filteredExpenses, selectedPerson) {
         date.setMonth(date.getMonth() - i);
         const monthKey = date.toISOString().slice(0, 7);
         months.push(formatMonth(monthKey));
-        // KiÅŸisel expense
+        // Kişisel expense
         const personalAmount = filteredExpenses
             .filter(h => h.date.startsWith(monthKey))
             .reduce((sum, h) => sum + h.amount, 0);
@@ -632,7 +632,7 @@ function createPersonalComparisonChart(filteredExpenses, selectedPerson) {
             labels: months,
             datasets: [
                 {
-                    label: selectedPerson || 'SeÃ§ili',
+                    label: selectedPerson || 'Seçili',
                     data: personalAmounts,
                     backgroundColor: 'rgba(99, 102, 241, 0.7)',
                     borderColor: '#6366f1',
@@ -673,8 +673,8 @@ function showNoPersonalDataMessage() {
     if (container) {
         container.innerHTML = `
             <div class="summary-card" style="text-align: center; padding: 48px 24px;">
-                <h3>ğŸ“Š Bu kiÅŸi iÃ§in data bulunamadÄ±</h3>
-                <p>SeÃ§ili kiÅŸi iÃ§in henÃ¼z expense datasi bulunmuyor.</p>
+                <h3>ğŸ“Š Bu kişi için data bulunamadı</h3>
+                <p>Seçili kişi için henüz expense datasi bulunmuyor.</p>
             </div>
         `;
     }
@@ -692,7 +692,7 @@ function generateColors(count) {
 function formatMonth(monthKey) {
     const [year, month] = monthKey.split('-');
     const monthNames = ['Oca', 'Åub', 'Mar', 'Nis', 'May', 'Haz',
-        'Tem', 'AÄŸu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+        'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
 }
 function formatDate(dateStr) {

@@ -1,15 +1,15 @@
 ﻿// Add Expense page specific JavaScript code
-// Sayfa tab'larÄ±nÄ± yÃ¶net
+// Sayfa tab'larını yönet
 function showPageTab(tabName) {
-    // TÃ¼m tab'larÄ± gizle
+    // Tüm tab'ları gizle
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-    // TÃ¼m tab butonlarÄ±nÄ±n active class'Ä±nÄ± kaldÄ±r
+    // Tüm tab butonlarının active class'ını kaldır
     document.querySelectorAll('.page-tab').forEach(btn => {
         btn.classList.remove('active');
     });
-    // SeÃ§ilen tab'Ä± gÃ¶ster
+    // Seçilen tab'ı göster
     const targetTab = document.getElementById(tabName + 'Tab');
     // Tab name mapping for compatibility
     let actualTabName = tabName;
@@ -20,7 +20,7 @@ function showPageTab(tabName) {
     if (actualTab) {
         actualTab.classList.add('active');
     }
-    // SeÃ§ilen tab butonunu aktif yap
+    // Seçilen tab butonunu aktif yap
     event.target.classList.add('active');
     // Tab specific operations
     if (tabName === 'regular' || tabName === 'duzenli') {
@@ -31,7 +31,7 @@ function showPageTab(tabName) {
 // Load regular payments
 // New system: use global regularPayments array and updateRegularPaymentsList function from utils.js.
 function loadRegularPayments() {
-    // Auth sistem hazÄ±r olana kadar bekle
+    // Auth sistem hazır olana kadar bekle
     let attempts = 0;
     const maxAttempts = 20;
     const waitAndLoad = () => {
@@ -47,7 +47,7 @@ function loadRegularPayments() {
         } else {
             const container = document.getElementById('regularPaymentsList');
             if (container) {
-                container.innerHTML = '<p style="color: var(--text-muted);">HenÃ¼z dÃ¼zenli Ã¶deme tanÄ±mlanmamÄ±ÅŸ</p>';
+                container.innerHTML = '<p style="color: var(--text-muted);">Henüz düzenli ödeme tanımlanmamış</p>';
             }
         }
     };
@@ -58,7 +58,7 @@ function populateRegularPaymentForm() {
     // Populate cards
     const cardSelect = document.getElementById('regularCard');
     if (cardSelect) {
-        cardSelect.innerHTML = '<option value="">Kart SeÃ§in</option>';
+        cardSelect.innerHTML = '<option value="">Kart Seçin</option>';
         if (window.creditCards && Array.isArray(window.creditCards)) {
             window.creditCards.forEach(card => {
                 cardSelect.innerHTML += `<option value="${card}">${card}</option>`;
@@ -68,7 +68,7 @@ function populateRegularPaymentForm() {
     // Populate users
     const userSelect = document.getElementById('regularUser');
     if (userSelect) {
-        userSelect.innerHTML = '<option value="">KullanÄ±cÄ± SeÃ§in</option>';
+        userSelect.innerHTML = '<option value="">Kullanıcı Seçin</option>';
         if (window.people && Array.isArray(window.people)) {
             window.people.forEach(person => {
                 userSelect.innerHTML += `<option value="${person}">${person}</option>`;
@@ -100,7 +100,7 @@ function handleDuzenliOdemeSubmit(event) {
     } else {
         console.error('RegularPayments.add not available');
         if (typeof showToast === 'function') {
-            showToast('Sistem henÃ¼z hazÄ±r deÄŸil, birkaÃ§ saniye bekleyin', 'error');
+            showToast('Sistem henüz hazır değil, birkaç saniye bekleyin', 'error');
         }
     }
 }
@@ -138,7 +138,7 @@ let stickyCardValue = '';
 let stickyDateValue = '';
 // Keyboard shortcuts handler
 function handleKeyboardShortcuts(event) {
-    // Input alanlarÄ±nda kÄ±sayollarÄ± devre dÄ±ÅŸÄ± bÄ±rak
+    // Input alanlarında kısayolları devre dışı bırak
     const activeElement = document.activeElement;
     const isInputField = activeElement && (
         activeElement.tagName === 'INPUT' ||

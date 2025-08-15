@@ -1,90 +1,72 @@
-// Main Application Variables - Managed by auth system
+﻿// Main Application Vari        if (currentTheme === 'dark') {
+            button.innerHTML = '☀️';
+            button.title = 'Açık temaya geç';
+        } else {
+            button.innerHTML = '🌙';
+            button.title = 'Koyu temaya geç';
+        } Managed by auth system
 let expenses = [];
 let regularPayments = [];
 let creditCards = [];
 let people = [];
-
 const currentMonth = new Date().toISOString().slice(0, 7);
 const currentDate = new Date().toISOString().slice(0, 10);
-
 // Figma-Inspired Theme System
 function initializeTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon();
 }
-
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     updateThemeIcon();
 }
-
 function updateThemeIcon() {
     const themeButtons = document.querySelectorAll('.theme-toggle');
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    
     themeButtons.forEach(button => {
         if (currentTheme === 'dark') {
-            button.innerHTML = '☀️';
+            button.innerHTML = 'â˜€ï¸';
             button.title = 'Açık temaya geç';
         } else {
-            button.innerHTML = '🌙';
+            button.innerHTML = 'ğŸŒ™';
             button.title = 'Koyu temaya geç';
         }
     });
 }
-
 // Tab Navigation
 function showTab(tabName) {
-    // Hide all tabs
-    const tabs = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => tab.style.display = 'none');
-    
-    // Remove active class from all tab buttons
-    const tabButtons = document.querySelectorAll('.tab-button');
-    tabButtons.forEach(btn => btn.classList.remove('active'));
-    
-    // Show selected tab
-    const selectedTab = document.getElementById(tabName);
-    if (selectedTab) {
-        selectedTab.style.display = 'block';
-    }
-    
-    // Add active class to clicked button
-    const activeButton = document.querySelector(`[onclick="showTab('${tabName}')"]`);
-    if (activeButton) {
-        activeButton.classList.add('active');
-    }
-}
-
-// Page-specific tab handling
-function showPageTab(tabName) {
-    // Hide all page tabs
-    const tabs = document.querySelectorAll('.page-tab');
-    tabs.forEach(tab => tab.style.display = 'none');
-    
-    // Remove active class from all tab buttons
-    const tabButtons = document.querySelectorAll('.page-tab-button');
-    tabButtons.forEach(btn => btn.classList.remove('active'));
-    
-    // Show selected tab
-    const selectedTab = document.getElementById(tabName + 'Tab');
-    if (selectedTab) {
-        selectedTab.style.display = 'block';
-    }
-    
-    // Add active class to clicked button
-    const activeButton = document.querySelector(`[onclick="showPageTab('${tabName}')"]`);
-    if (activeButton) {
-        activeButton.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.getElementById(tabName).classList.add('active');
+    event.target.classList.add('active');
+    if (tabName === 'liste') {
+        updateExpenseTable();
+    } else if (tabName === 'duzenli') {
+        updateRegularPaymentsList();
+    } else if (tabName === 'analitik') {
+        initializeAnalytics();
+    } else if (tabName === 'accounts') {
+        updateAccounts();
+    } else if (tabName === 'aylik') {
+        // Ay seçili değilse bugünkü ayı set et
+        const summaryTarih = document.getElementById('summaryDate');
+        if (summaryTarih && !summaryTarih.value) {
+            summaryTarih.value = currentMonth;
+        }
+        updateMonthlySummary();
+    } else if (tabName === 'dashboard') {
+        updateDashboard();
     }
 }
-
-// Initialize application when DOM is loaded
+// Uygulama Başlatma
 document.addEventListener('DOMContentLoaded', function () {
     // Tema sistemini hemen başlat
     initializeTheme();
@@ -93,17 +75,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function waitForAuthSystem() {
         if (typeof authSystem !== 'undefined' && authSystem && authSystem.currentUser) {
             // Kart ve kullanıcı seçeneklerini initialize et
-            if (typeof FormHandlers !== 'undefined') {
-                FormHandlers.updateCardOptions();
-                FormHandlers.updateUserOptions();
-            }
-            
+            FormHandlers.updateCardOptions();
+            FormHandlers.updateUserOptions();
             // Form başlangıç değerleri
             const summaryTarih = document.getElementById('summaryDate');
             const expenseTarih = document.getElementById('expenseDate');
             const regularBaslangic = document.getElementById('regularStart');
             const card = document.getElementById('card');
-            
             if (summaryTarih) summaryTarih.value = currentMonth;
             if (expenseTarih) expenseTarih.value = currentDate;
             if (regularBaslangic) regularBaslangic.value = currentMonth;
@@ -116,14 +94,4 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Auth sistemi kontrolünü başlat
     setTimeout(waitForAuthSystem, 100);
-});
-
-// Error handling
-window.addEventListener('error', function(e) {
-    console.error('Global error:', e.error);
-});
-
-// Handle unhandled promise rejections
-window.addEventListener('unhandledrejection', function(e) {
-    console.error('Unhandled promise rejection:', e.reason);
 });

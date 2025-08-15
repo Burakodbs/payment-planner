@@ -1,4 +1,4 @@
-﻿// Chart YÃ¶netimi
+﻿// Chart Yönetimi
 let chartInstances = {};
 // Dashboard Charts
 function updateDashboardCharts() {
@@ -32,7 +32,7 @@ function updateDashboardCharts() {
         data: {
             labels: months,
             datasets: [{
-                label: 'AylÄ±k Harcama',
+                label: 'Aylık Harcama',
                 data: monthlyTotals,
                 borderColor: 'rgb(99, 102, 241)',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -106,7 +106,7 @@ function createMonthlyTrendChart(data) {
                 return new Date(year, monthNum - 1).toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' });
             }),
             datasets: [{
-                label: 'AylÄ±k Harcama',
+                label: 'Aylık Harcama',
                 data: totals,
                 borderColor: 'rgb(99, 102, 241)',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -177,7 +177,7 @@ function createUserDistributionChart(data) {
         data: {
             labels: users,
             datasets: [{
-                label: 'Harcama TutarÄ±',
+                label: 'Harcama Tutarı',
                 data: amounts,
                 backgroundColor: [
                     '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -209,14 +209,14 @@ function createWeeklyActivityChart(data) {
     if (chartInstances.weeklyActivity) {
         chartInstances.weeklyActivity.destroy();
     }
-    const days = ['Pazartesi', 'SalÄ±', 'Ã‡arÅŸamba', 'PerÅŸembe', 'Cuma', 'Cumartesi', 'Pazar'];
+    const days = ['Pazartesi', 'Salı', 'Ã‡arşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const weeklyData = days.map(day => data.weeklyActivity[day] || 0);
     chartInstances.weeklyActivity = new Chart(ctx, {
         type: 'radar',
         data: {
             labels: days,
             datasets: [{
-                label: 'HaftalÄ±k Aktivite',
+                label: 'Haftalık Aktivite',
                 data: weeklyData,
                 borderColor: 'rgb(99, 102, 241)',
                 backgroundColor: 'rgba(99, 102, 241, 0.2)',

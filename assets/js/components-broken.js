@@ -1,4 +1,7 @@
-﻿// Essential UI Components - Simplified and Clean
+﻿// Essential UI Components -         { href: 'expense-listesi.html', icon: '📋', text: 'Harcama Listesi', id: 'expense-listesi' },
+        { href: 'accounts.html', icon: '💰', text: 'Hesaplar', id: 'accounts' },
+        { href: 'aylik-ozet.html', icon: '📅', text: 'Aylık Özet', id: 'monthly-summary' },
+        { href: 'data-yonetimi.html', icon: '⚙️', text: 'Veri Yönetimi', id: 'data-yonetimi' }lified and Clean
 // Header Component - Clean and minimal
 function renderHeader() {
     return `
@@ -58,7 +61,7 @@ function renderAuthContainer() {
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>ğŸ’³ Harcama Takip Sistemi</h1>
-                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
+                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
                     </div>
                     <div id="loginForm" class="auth-form">
                         <h2>Giriş Yap</h2>

@@ -53,7 +53,7 @@ class RegularPayments {
             });
         }
         const formTitle = document.getElementById('regularFormTitle');
-        if (formTitle) formTitle.textContent = 'Yeni DÃ¼zenli Ã–deme';
+        if (formTitle) formTitle.textContent = 'Yeni Düzenli Ödeme';
         const submitBtn = document.getElementById('regularSubmitBtn');
         if (submitBtn) {
             submitBtn.textContent = 'Ekle';
@@ -65,10 +65,10 @@ class RegularPayments {
         const description = document.getElementById('regularDescription')?.value?.trim();
         const amountVal = document.getElementById('regularAmount')?.value;
         const card = document.getElementById('regularCard')?.value;
-        const person = document.getElementById('regularUser')?.value; // HTML'de regularUser ama data'da person saklayalÄ±m
+        const person = document.getElementById('regularUser')?.value; // HTML'de regularUser ama data'da person saklayalım
         const start = document.getElementById('regularStart')?.value;
         if (!description || !amountVal || !card || !person || !start) {
-            NotificationService.error('LÃ¼tfen tÃ¼m zorunlu alanlarÄ± doldurun');
+            NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
         const regularPayment = {
@@ -85,7 +85,7 @@ class RegularPayments {
         DataManager.save();
         this.updateList();
         this.cancel();
-        NotificationService.success('DÃ¼zenli Ã¶deme eklendi');
+        NotificationService.success('Düzenli ödeme eklendi');
         DataManager.updateAllViews();
     }
     static updateList() {
@@ -95,7 +95,7 @@ class RegularPayments {
             return;
         }
         if (!regularPayments.length) {
-            container.innerHTML = '<p style="color: var(--text-muted);">HenÃ¼z dÃ¼zenli Ã¶deme tanÄ±mlanmamÄ±ÅŸ</p>';
+            container.innerHTML = '<p style="color: var(--text-muted);">Henüz düzenli ödeme tanımlanmamış</p>';
             return;
         }
         let html = '';
@@ -110,13 +110,13 @@ class RegularPayments {
                     <div>
                         <div style="font-weight:600; color:var(--text);">${payment.description}${statusText}</div>
                         <div style="font-size:12px; color:var(--text-secondary);">${payment.amount} TL - ${personName} - ${payment.card}</div>
-                        <div style="font-size:12px; color:var(--text-muted);">BaÅŸlangÄ±Ã§: ${payment.startDate}${endDate}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">Başlangıç: ${payment.startDate}${endDate}</div>
                     </div>
                     <div>
                         ${isActive ? 
-                            `<button class="btn btn-sm btn-outline" onclick="RegularPayments.edit(${payment.id})" style="margin-right:8px;">DÃ¼zenle</button>
+                            `<button class="btn btn-sm btn-outline" onclick="RegularPayments.edit(${payment.id})" style="margin-right:8px;">Düzenle</button>
                              <button class="btn btn-sm btn-danger" onclick="RegularPayments.delete(${payment.id})">Durdur</button>` :
-                            `<button class="btn btn-sm btn-success" onclick="RegularPayments.reactivate(${payment.id})" style="margin-right:8px;">Yeniden BaÅŸlat</button>
+                            `<button class="btn btn-sm btn-success" onclick="RegularPayments.reactivate(${payment.id})" style="margin-right:8px;">Yeniden Başlat</button>
                              <button class="btn btn-sm btn-danger" onclick="RegularPayments.permanentDelete(${payment.id})">Tamamen Sil</button>`
                         }
                     </div>
@@ -128,7 +128,7 @@ class RegularPayments {
     static edit(id) {
         const payment = regularPayments.find(o => o.id === id);
         if (!payment) {
-            NotificationService.error('DÃ¼zenli Ã¶deme bulunamadÄ±');
+            NotificationService.error('Düzenli ödeme bulunamadı');
             return;
         }
         this.editingId = id;
@@ -140,13 +140,13 @@ class RegularPayments {
         document.getElementById('regularUser').value = payment.person || payment.user || ''; // Backward compatibility
         document.getElementById('regularStart').value = payment.startDate;
         const formTitle = document.getElementById('regularFormTitle');
-        if (formTitle) formTitle.textContent = 'DÃ¼zenli Ã–demeyi DÃ¼zenle';
+        if (formTitle) formTitle.textContent = 'Düzenli Ödemeyi Düzenle';
         const submitBtn = document.getElementById('regularSubmitBtn');
         if (submitBtn) {
-            submitBtn.textContent = 'GÃ¼ncelle';
+            submitBtn.textContent = 'Güncelle';
             submitBtn.className = 'btn btn-primary';
         }
-        NotificationService.info('DÃ¼zenleme modu aktif');
+        NotificationService.info('Düzenleme modu aktif');
     }
     static update() {
         const description = document.getElementById('regularDescription')?.value?.trim();
@@ -155,7 +155,7 @@ class RegularPayments {
         const person = document.getElementById('regularUser')?.value; // HTML'de regularUser ama data'da person
         const start = document.getElementById('regularStart')?.value;
         if (!description || !amountVal || !card || !person || !start) {
-            NotificationService.error('LÃ¼tfen tÃ¼m zorunlu alanlarÄ± doldurun');
+            NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
         const idx = regularPayments.findIndex(o => o.id === this.editingId);
@@ -171,17 +171,17 @@ class RegularPayments {
             DataManager.save();
             this.updateList();
             this.cancel();
-            NotificationService.success('DÃ¼zenli Ã¶deme gÃ¼ncellendi');
+            NotificationService.success('Düzenli ödeme güncellendi');
             DataManager.updateAllViews();
         }
     }
     static delete(id) {
         const payment = regularPayments.find(o => o.id === id);
         if (!payment) {
-            NotificationService.error('DÃ¼zenli Ã¶deme bulunamadÄ±');
+            NotificationService.error('Düzenli ödeme bulunamadı');
             return;
         }
-        if (confirm(`"${payment.description}" dÃ¼zenli Ã¶demeyi durdurmak istediÄŸinizden emin misiniz?\n\nGeÃ§miÅŸteki Ã¶demeler korunacak, sadece gelecekteki otomatik kayÄ±tlar durdurulacak.`)) {
+        if (confirm(`"${payment.description}" düzenli ödemeyi durdurmak istediğinizden emin misiniz?\n\nGeçmişteki ödemeler korunacak, sadece gelecekteki otomatik kayıtlar durdurulacak.`)) {
             const today = new Date().toISOString().slice(0, 10);
             const idx = regularPayments.findIndex(o => o.id === id);
             if (idx !== -1) {
@@ -190,7 +190,7 @@ class RegularPayments {
             }
             DataManager.save();
             this.updateList();
-            NotificationService.success('DÃ¼zenli Ã¶deme durduruldu. GeÃ§miÅŸ kayÄ±tlar korundu.');
+            NotificationService.success('Düzenli ödeme durduruldu. Geçmiş kayıtlar korundu.');
             DataManager.updateAllViews();
         }
     }
@@ -201,19 +201,19 @@ class RegularPayments {
             delete regularPayments[idx].endDate;
             DataManager.save();
             this.updateList();
-            NotificationService.success('DÃ¼zenli Ã¶deme yeniden baÅŸlatÄ±ldÄ±');
+            NotificationService.success('Düzenli ödeme yeniden başlatıldı');
         }
     }
     static permanentDelete(id) {
         const payment = regularPayments.find(o => o.id === id);
         if (!payment) return;
-        if (confirm(`"${payment.description}" dÃ¼zenli Ã¶demeyi tamamen silmek istediÄŸinizden emin misiniz? Bu iÅŸlem geri alÄ±namaz!`)) {
+        if (confirm(`"${payment.description}" düzenli ödemeyi tamamen silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
             const idx = regularPayments.findIndex(o => o.id === id);
             if (idx !== -1) {
                 regularPayments.splice(idx, 1);
                 DataManager.save();
                 this.updateList();
-                NotificationService.success('DÃ¼zenli Ã¶deme tamamen silindi');
+                NotificationService.success('Düzenli ödeme tamamen silindi');
             }
         }
     }
@@ -241,7 +241,7 @@ function debugRegularPaymentsForMonth(month) {
         const monthlyRecurring = getRecurringPaymentsForMonth(month);
         return monthlyRecurring;
     } else {
-        console.error('âŒ getRecurringPaymentsForMonth fonksiyonu bulunamadÄ±!');
+        console.error('âŒ getRecurringPaymentsForMonth fonksiyonu bulunamadı!');
     }
 }
 // Make debug function globally available
@@ -287,7 +287,7 @@ function updateExpenseTable() {
     tbody.innerHTML = '';
     filteredExpenses.forEach((expense, index) => {
         const row = tbody.insertRow();
-        // Hem eski hem yeni taksit alanlarÄ±nÄ± destekle
+        // Hem eski hem yeni taksit alanlarını destekle
         const isInstallment = expense.isInstallment || expense.isTaksit;
         const installmentNumber = expense.installmentNumber || expense.taksitNo;
         const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
@@ -350,15 +350,15 @@ function updateResultCount(filteredExpenses) {
         resultCountElement.textContent = message;
     }
 }
-// Filtreleme ve SÄ±ralama
-// DÃ¼zenli Ã¶demeleri expense formatÄ±na dÃ¶nÃ¼ÅŸtÃ¼r
+// Filtreleme ve Sıralama
+// Düzenli ödemeleri expense formatına dönüştür
 function getDuzenliOdemelerAsHarcamalar() {
     const currentDate = new Date();
     const currentMonth = currentDate.toISOString().slice(0, 7); // YYYY-MM format
     const today = currentDate.toISOString().slice(0, 10);
-    // Sadece aktif dÃ¼zenli Ã¶demeleri dahil et
+    // Sadece aktif düzenli ödemeleri dahil et
     const aktiveDuzenliOdemeler = regularPayments.filter(odeme => {
-        // Aktif olmayan Ã¶demeleri hariÃ§ tut
+        // Aktif olmayan ödemeleri hariç tut
         if (odeme.aktif === false || odeme.active === false) {
             return false;
         }
@@ -367,32 +367,32 @@ function getDuzenliOdemelerAsHarcamalar() {
         if (endDate && endDate <= today) {
             return false;
         }
-        // BaÅŸlangÄ±Ã§ tarihi bugÃ¼nden sonra ise henÃ¼z baÅŸlamamÄ±ÅŸ, hariÃ§ tut
+        // Başlangıç tarihi bugünden sonra ise henüz başlamamış, hariç tut
         if (odeme.startDate && odeme.startDate > today) {
             return false;
         }
         return true;
     });
     return aktiveDuzenliOdemeler.map(odeme => {
-        const description = odeme.description || odeme.ad || 'DÃ¼zenli Ã–deme';
+        const description = odeme.description || odeme.ad || 'Düzenli Ödeme';
         const person = odeme.person || odeme.user || 'Unknown'; // Standardize to person
         return {
             id: `duzenli_${odeme.id}_${currentMonth}`,
-            date: `${currentMonth}-15`, // AyÄ±n ortasÄ±na koy
+            date: `${currentMonth}-15`, // Ayın ortasına koy
             card: odeme.card,
             person: person,
-            kategori: 'DÃ¼zenli Ã–deme',
-            description: `${description} (DÃ¼zenli Ã–deme)`,
+            kategori: 'Düzenli Ödeme',
+            description: `${description} (Düzenli Ödeme)`,
             amount: odeme.amount,
             taksitNo: null,
             toplamTaksit: null,
             isTaksit: false,
-            isDuzenli: true // DÃ¼zenli Ã¶deme olduÄŸunu belirten flag
+            isDuzenli: true // Düzenli ödeme olduğunu belirten flag
         };
     });
 }
 function applyAllFilters() {
-    // HarcamalarÄ± ve dÃ¼zenli Ã¶demeleri birleÅŸtir
+    // Harcamaları ve düzenli ödemeleri birleştir
     let filtered = [...expenses];
     // Check if filter elements exist (only on expense-listesi page)
     const filtreDateElement = document.getElementById('filtreTarih');
@@ -469,21 +469,21 @@ function applyAllFilters() {
             }
         });
     } catch (e) {
-        console.error('SÄ±ralama hatasÄ±:', e);
+        console.error('Sıralama hatası:', e);
     }
     return filtered;
 }
-// Harcama Ä°ÅŸlemleri
+// Harcama İşlemleri
 function deleteHarcama(id) {
     const expense = expenses.find(h => h.id === id);
     if (!expense) {
         showToast('Expense not found', 'error');
         return;
     }
-    let confirmMessage = 'Bu expenseyÄ± silmek istediÄŸinizden emin misiniz?';
-    // Otomatik oluÅŸturulan dÃ¼zenli Ã¶deme ise uyarÄ± ver
+    let confirmMessage = 'Bu expenseyı silmek istediğinizden emin misiniz?';
+    // Otomatik oluşturulan düzenli ödeme ise uyarı ver
     if (expense.isRegular) {
-        confirmMessage = `Bu otomatik oluÅŸturulan dÃ¼zenli Ã¶demeyi silmek istediÄŸinizden emin misiniz?\n\n"${expense.description}"\n\nNot: Gelecek ay tekrar otomatik olarak oluÅŸturulacaktÄ±r.`;
+        confirmMessage = `Bu otomatik oluşturulan düzenli ödemeyi silmek istediğinizden emin misiniz?\n\n"${expense.description}"\n\nNot: Gelecek ay tekrar otomatik olarak oluşturulacaktır.`;
     }
     if (confirm(confirmMessage)) {
         expenses = expenses.filter(h => h.id !== id);
@@ -491,7 +491,7 @@ function deleteHarcama(id) {
         updateExpenseTable();
         updateDashboard();
         if (expense.isRegular) {
-            showToast('DÃ¼zenli Ã¶deme silindi (gelecek ay yeniden oluÅŸturulacak)', 'info');
+            showToast('Düzenli ödeme silindi (gelecek ay yeniden oluşturulacak)', 'info');
         } else {
             showToast('Harcama silindi', 'success');
         }

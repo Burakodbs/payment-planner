@@ -31,12 +31,12 @@ class DataOperations {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        NotificationService.success('Veriler dÄ±ÅŸa aktarÄ±ldÄ±');
+        NotificationService.success('Veriler dışa aktarıldı');
     }
     static importData() {
         const fileInput = document.getElementById('fileInput');
         if (!fileInput || !fileInput.files || !fileInput.files.length) {
-            NotificationService.error('LÃ¼tfen bir dosya seÃ§in');
+            NotificationService.error('Lütfen bir dosya seçin');
             return;
         }
         const file = fileInput.files[0];
@@ -62,17 +62,17 @@ class DataOperations {
                     creditCards: Array.isArray(data.creditCards) ? data.creditCards.length : 0,
                     people: Array.isArray(data.people) ? data.people.length : 0
                 };
-                NotificationService.success(`Veriler iÃ§e aktarÄ±ldÄ±: ${importCount.expenses} expense, ${importCount.regularPayments} dÃ¼zenli Ã¶deme, ${importCount.creditCards} card, ${importCount.people} kiÅŸi`);
+                NotificationService.success(`Veriler içe aktarıldı: ${importCount.expenses} expense, ${importCount.regularPayments} düzenli ödeme, ${importCount.creditCards} card, ${importCount.people} kişi`);
                 fileInput.value = '';
             } catch (error) {
-                NotificationService.error('Dosya okuma hatasÄ±: ' + error.message);
+                NotificationService.error('Dosya okuma hatası: ' + error.message);
             }
         };
         reader.readAsText(file);
     }
     static clearAllData() {
-        if (confirm('TÃ¼m dataleri silmek istediÄŸinizden emin misiniz? Bu iÅŸlem geri alÄ±namaz!')) {
-            if (confirm('Bu iÅŸlem GERÄ° ALINAMAZ! Emin misiniz?')) {
+        if (confirm('Tüm dataleri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
+            if (confirm('Bu işlem GERİ ALINAMAZ! Emin misiniz?')) {
                 if (authSystem && authSystem.currentUser) {
                     expenses = [];
                     regularPayments = [];
@@ -88,7 +88,7 @@ class DataOperations {
         }
     }
     static clearExpenseData() {
-        if (confirm('Sadece expense datalerini silmek istediÄŸinizden emin misiniz?')) {
+        if (confirm('Sadece expense datalerini silmek istediğinizden emin misiniz?')) {
             expenses = [];
             DataManager.save();
             NotificationService.success('Expense data deleted');
@@ -106,7 +106,7 @@ class DataOperations {
             if (alreadyFlagged && regularPayments.length > 0) return;
             const isExpenseRegular = (h) => h && (
                 h.isRegular || h.isRegular || h.isRegularAutomatic ||
-                /(\(DÃ¼zenli\))/i.test(h.description || '') ||
+                /(\(Düzenli\))/i.test(h.description || '') ||
                 (typeof h.id === 'string' && h.id.startsWith('regular_'))
             );
             const candidateRecords = expenses.filter(isExpenseRegular);
@@ -123,10 +123,10 @@ class DataOperations {
             const groups = new Map();
             candidateRecords.forEach(h => {
                 if (h.regularOdemeId && existingDefinitionIds.has(h.regularOdemeId)) return;
-                const baseName = (h.description || 'DÃ¼zenli Ã–deme')
-                    .replace(/\(DÃ¼zenli.*?\)/i, '')
+                const baseName = (h.description || 'Düzenli Ödeme')
+                    .replace(/\(Düzenli.*?\)/i, '')
                     .replace(/\(Otomatik.*?\)/i, '')
-                    .trim() || 'DÃ¼zenli Ã–deme';
+                    .trim() || 'Düzenli Ödeme';
                 const key = [baseName, h.card || '', h.person || '', Number(h.amount) || 0].join('||');
                 const existing = groups.get(key);
                 if (existing) {
@@ -141,7 +141,7 @@ class DataOperations {
                         person: h.person,
                         amount: Number(h.amount) || 0,
                         startDate: h.date || new Date().toISOString().slice(0, 10),
-                        kategori: 'DÃ¼zenli Ã–deme',
+                        kategori: 'Düzenli Ödeme',
                         items: [h]
                     });
                 }
@@ -173,7 +173,7 @@ class DataOperations {
             });
             DataManager.save();
             localStorage.setItem(userKey, '1');
-            NotificationService.info(`${groups.size} dÃ¼zenli Ã¶deme tanÄ±mÄ± otomatik oluÅŸturuldu`);
+            NotificationService.info(`${groups.size} düzenli ödeme tanımı otomatik oluşturuldu`);
         } catch (e) {
             console.warn('Regular payment migration error:', e);
         }

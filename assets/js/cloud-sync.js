@@ -1,12 +1,12 @@
 ﻿// GitHub Gist Cloud Sync Extension
 class GistCloudSync {
     constructor() {
-        this.gistId = null; // Ä°lk kurulumda oluÅŸturulacak
+        this.gistId = null; // İlk kurulumda oluşturulacak
         this.githubToken = null; // GitHub Personal Access Token
         this.syncInterval = 5 * 60 * 1000; // 5 dakikada bir sync
         this.lastSyncTime = 0;
     }
-    // GitHub token'Ä± ayarla (bir kez yapÄ±lÄ±r)
+    // GitHub token'ı ayarla (bir kez yapılır)
     setGitHubToken(token) {
         this.githubToken = token;
         localStorage.setItem('github_token', token);
@@ -16,16 +16,16 @@ class GistCloudSync {
         this.gistId = gistId;
         localStorage.setItem('gist_id', gistId);
     }
-    // AyarlarÄ± yÃ¼kle
+    // Ayarları yükle
     loadSettings() {
         this.githubToken = localStorage.getItem('github_token');
         this.gistId = localStorage.getItem('gist_id');
         this.lastSyncTime = parseInt(localStorage.getItem('last_sync_time') || '0');
     }
-    // Verileri cloud'a gÃ¶nder
+    // Verileri cloud'a gönder
     async uploadToGist(userData) {
         if (!this.githubToken) {
-            console.warn('GitHub token ayarlanmamÄ±ÅŸ');
+            console.warn('GitHub token ayarlanmamış');
             return false;
         }
         const gistData = {
@@ -43,7 +43,7 @@ class GistCloudSync {
         try {
             let url = 'https://api.github.com/gists';
             let method = 'POST';
-            // EÄŸer gist ID varsa update et
+            // Eğer gist ID varsa update et
             if (this.gistId) {
                 url = `https://api.github.com/gists/${this.gistId}`;
                 method = 'PATCH';
@@ -58,26 +58,26 @@ class GistCloudSync {
             });
             if (response.ok) {
                 const result = await response.json();
-                // Ä°lk upload ise gist ID'yi kaydet
+                // İlk upload ise gist ID'yi kaydet
                 if (!this.gistId) {
                     this.setGistId(result.id);
                 }
                 this.lastSyncTime = Date.now();
                 localStorage.setItem('last_sync_time', this.lastSyncTime.toString());
-                this.showSyncStatus('Cloud\'a yÃ¼klendi', 'success');
+                this.showSyncStatus('Cloud\'a yüklendi', 'success');
                 return true;
             } else {
                 throw new Error(`GitHub API Error: ${response.status}`);
             }
         } catch (error) {
-            console.error('Cloud upload hatasÄ±:', error);
-            console.error('Token var mÄ±:', !!this.githubToken);
-            console.error('Request detaylarÄ±:', {
+            console.error('Cloud upload hatası:', error);
+            console.error('Token var mı:', !!this.githubToken);
+            console.error('Request detayları:', {
                 url: this.gistId ? `https://api.github.com/gists/${this.gistId}` : 'https://api.github.com/gists',
                 method: this.gistId ? 'PATCH' : 'POST',
                 hasToken: !!this.githubToken
             });
-            this.showSyncStatus('Upload hatasÄ±: ' + error.message, 'error');
+            this.showSyncStatus('Upload hatası: ' + error.message, 'error');
             return false;
         }
     }
@@ -106,14 +106,14 @@ class GistCloudSync {
                 throw new Error(`Gist download error: ${response.status}`);
             }
         } catch (error) {
-            console.error('Cloud download hatasÄ±:', error);
-            this.showSyncStatus('Download hatasÄ±', 'error');
+            console.error('Cloud download hatası:', error);
+            this.showSyncStatus('Download hatası', 'error');
             return null;
         }
     }
-    // Otomatik senkronizasyon baÅŸlat
+    // Otomatik senkronizasyon başlat
     startAutoSync() {
-        // Sayfa yÃ¼klendiÄŸinde cloud'dan kontrol et (sadece gist ID varsa)
+        // Sayfa yüklendiğinde cloud'dan kontrol et (sadece gist ID varsa)
         if (this.gistId) {
             this.checkForCloudUpdates();
         } else {
@@ -125,15 +125,15 @@ class GistCloudSync {
             }
         }, this.syncInterval);
     }
-    // Cloud gÃ¼ncellemelerini kontrol et
+    // Cloud güncellemelerini kontrol et
     async checkForCloudUpdates() {
         const cloudData = await this.downloadFromGist();
         if (cloudData && window.fileStorage) {
-            // Cloud'daki tarih ile local'i karÅŸÄ±laÅŸtÄ±r
+            // Cloud'daki tarih ile local'i karşılaştır
             const cloudDate = new Date(cloudData.lastUpdated).getTime();
             const localDate = this.lastSyncTime;
             if (cloudDate > localDate) {
-                const confirmSync = confirm('â˜ï¸ Cloud\'da daha gÃ¼ncel veriler bulundu. Ä°ndirmek istiyor musunuz?');
+                const confirmSync = confirm('â˜ï¸ Cloud\'da daha güncel veriler bulundu. İndirmek istiyor musunuz?');
                 if (confirmSync) {
                     window.fileStorage.applyUserData(cloudData);
                     await window.fileStorage.saveUserData();
@@ -144,7 +144,7 @@ class GistCloudSync {
     }
     // Manuel cloud sync
     async syncToCloud() {
-        // FileStorage'Ä±n hazÄ±r olmasÄ±nÄ± bekle
+        // FileStorage'ın hazır olmasını bekle
         let retries = 0;
         while ((!window.fileStorage || !window.fileStorage.currentUser) && retries < 10) {
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -176,7 +176,7 @@ class GistCloudSync {
         });
         return await this.uploadToGist(userData);
     }
-    // Sync durumu gÃ¶ster
+    // Sync durumu göster
     showSyncStatus(message, type) {
         // Mevcut save status div'i kullan
         if (window.fileStorage) {
@@ -184,30 +184,30 @@ class GistCloudSync {
         } else {
         }
     }
-    // Setup assistant - ilk kurulum iÃ§in
+    // Setup assistant - ilk kurulum için
     async setupWizard() {
         const setupMessage = `ğŸ”§ GITHUB GIST CLOUD SYNC KURULUMU
-Bu Ã¶zellik verilerinizi otomatik olarak GitHub Gist'e yedekler.
-BÃ¶ylece her cihazdan gÃ¼ncel verilerinize eriÅŸebilirsiniz.
-Kurulum adÄ±mlarÄ±:
-1. GitHub.com'da Personal Access Token oluÅŸturun
-2. Token'Ä± aÅŸaÄŸÄ±daki alana girin
-3. Ä°lk sync otomatik olarak yapÄ±lÄ±r
-GitHub Token oluÅŸturmak iÃ§in:
+Bu özellik verilerinizi otomatik olarak GitHub Gist'e yedekler.
+Böylece her cihazdan güncel verilerinize erişebilirsiniz.
+Kurulum adımları:
+1. GitHub.com'da Personal Access Token oluşturun
+2. Token'ı aşağıdaki alana girin
+3. İlk sync otomatik olarak yapılır
+GitHub Token oluşturmak için:
 github.com â†’ Settings â†’ Developer settings â†’ Personal access tokens â†’ Generate new token
-âœ… 'gist' permission'Ä±nÄ± seÃ§in
-Token'Ä±nÄ±zÄ± girin:`;
+âœ… 'gist' permission'ını seçin
+Token'ınızı girin:`;
         const token = prompt(setupMessage);
         if (token) {
             this.setGitHubToken(token);
-            // Ä°lk sync'i yap
+            // İlk sync'i yap
             const success = await this.syncToCloud();
             if (success) {
-                alert('âœ… Cloud sync kurulumu tamamlandÄ±!\nVerileriniz otomatik olarak senkronize edilecek.');
+                alert('âœ… Cloud sync kurulumu tamamlandı!\nVerileriniz otomatik olarak senkronize edilecek.');
                 this.startAutoSync();
                 return true;
             } else {
-                alert('âŒ Kurulum hatasÄ±. Token\'Ä± kontrol edin.');
+                alert('âŒ Kurulum hatası. Token\'ı kontrol edin.');
                 return false;
             }
         }
@@ -216,22 +216,22 @@ Token'Ä±nÄ±zÄ± girin:`;
 }
 // Global instance
 const gistSync = new GistCloudSync();
-// Sayfa yÃ¼klendiÄŸinde sadece settings yÃ¼kle
+// Sayfa yüklendiğinde sadece settings yükle
 document.addEventListener('DOMContentLoaded', function() {
     gistSync.loadSettings();
-    // Otomatik sync login sonrasÄ± auth.js'de baÅŸlatÄ±lacak
+    // Otomatik sync login sonrası auth.js'de başlatılacak
     if (gistSync.githubToken) {
     } else {
     }
 });
-// FileStorage ile entegre et (manuel Ã§aÄŸÄ±rÄ±m)
+// FileStorage ile entegre et (manuel çağırım)
 function initFileStorageIntegration() {
     if (window.fileStorage && !window.fileStorage._cloudSyncInitialized) {
         const originalSave = window.fileStorage.saveUserData;
         window.fileStorage.saveUserData = async function() {
             // Normal kaydet
             const result = await originalSave.call(this);
-            // Cloud'a da gÃ¶nder (5 saniye sonra)
+            // Cloud'a da gönder (5 saniye sonra)
             setTimeout(() => {
                 if (gistSync.githubToken) {
                     gistSync.syncToCloud();
@@ -244,8 +244,8 @@ function initFileStorageIntegration() {
     }
     return false;
 }
-// Global eriÅŸim iÃ§in
+// Global erişim için
 window.initFileStorageIntegration = initFileStorageIntegration;
-// Global eriÅŸim
+// Global erişim
 window.GistCloudSync = GistCloudSync;
 window.gistSync = gistSync;

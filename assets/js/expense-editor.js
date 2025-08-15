@@ -21,7 +21,7 @@ class ExpenseEditor {
         document.getElementById('editUser').value = expense.person;
         // Show modal
         document.getElementById('editExpenseModal').style.display = 'block';
-        NotificationService.info('DÃ¼zenleme modu aktif');
+        NotificationService.info('Düzenleme modu aktif');
     }
     static populateModalSelects() {
         // Card options
@@ -56,7 +56,7 @@ class ExpenseEditor {
     static handleSubmit(event) {
         event.preventDefault();
         if (!this.editingId) {
-            NotificationService.error('DÃ¼zenlenecek expense bulunamadÄ±');
+            NotificationService.error('Düzenlenecek expense bulunamadı');
             return;
         }
         const expenseIndex = expenses.findIndex(h => h.id === this.editingId);
@@ -73,7 +73,7 @@ class ExpenseEditor {
         const installmentNumber = document.getElementById('editInstallmentNumber').value;
         const totalInstallments = document.getElementById('editTotalInstallments').value;
         if (!date || !card || !user || !amount) {
-            NotificationService.error('LÃ¼tfen tÃ¼m zorunlu alanlarÄ± doldurun');
+            NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
         // Update expense
@@ -94,7 +94,7 @@ class ExpenseEditor {
         NotificationService.success('Expense updated');
     }
     static delete(id) {
-        if (confirm('Bu expenseyÄ± silmek istediÄŸinizden emin misiniz?')) {
+        if (confirm('Bu expenseyı silmek istediğinizden emin misiniz?')) {
             const expenseIndex = expenses.findIndex(h => h.id === id);
             if (expenseIndex !== -1) {
                 expenses.splice(expenseIndex, 1);
