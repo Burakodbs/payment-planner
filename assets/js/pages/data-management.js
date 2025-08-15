@@ -1,5 +1,80 @@
 // Data Management page specific JavaScript code
 
+// Cloud sync fonksiyonları
+function setupCloudSync() {
+    if (window.gistSync) {
+        window.gistSync.setupWizard();
+    } else {
+        showToast('❌ Cloud sync modülü yüklenemedi', 'error');
+    }
+}
+
+function syncToCloud() {
+    if (window.gistSync && window.gistSync.githubToken) {
+        window.gistSync.syncToCloud().then(success => {
+            if (success) {
+                showToast('☁️ Veriler cloud\'a yüklendi', 'success');
+            } else {
+                showToast('❌ Cloud upload hatası', 'error');
+            }
+        });
+    } else {
+        showToast('⚙️ Önce cloud sync\'i kurun', 'warning');
+    }
+}
+
+function syncFromCloud() {
+    if (window.gistSync && window.gistSync.gistId) {
+        window.gistSync.downloadFromGist().then(cloudData => {
+            if (cloudData) {
+                const confirmMessage = `☁️ CLOUD\'DAN VERİ İNDİRME\n\n` +
+                                     `Cloud\'da bulunan veriler:\n` +
+                                     `• ${cloudData.expenses?.length || 0} harcama\n` +
+                                     `• ${cloudData.regularPayments?.length || 0} düzenli ödeme\n` +
+                                     `• ${cloudData.creditCards?.length || 0} kredi kartı\n` +
+                                     `• ${cloudData.people?.length || 0} kişi\n\n` +
+                                     `Son güncelleme: ${new Date(cloudData.lastUpdated).toLocaleString()}\n\n` +
+                                     `⚠️ UYARI: Mevcut veriler silinecek!\n\n` +
+                                     `Cloud\'dan indirmek istiyor musunuz?`;
+
+                if (confirm(confirmMessage)) {
+                    window.fileStorage.applyUserData(cloudData);
+                    window.fileStorage.saveUserData();
+                    showToast('☁️ Cloud\'dan veriler indirildi', 'success');
+                    setTimeout(() => updateCardAndUserManagement(), 500);
+                }
+            } else {
+                showToast('❌ Cloud\'dan veri indirilemedi', 'error');
+            }
+        });
+    } else {
+        showToast('⚙️ Cloud sync kurulumu gerekli', 'warning');
+    }
+}
+
+function getCloudStatus() {
+    if (!window.gistSync) {
+        return 'Cloud sync modülü yüklenemedi';
+    }
+    
+    if (!window.gistSync.githubToken) {
+        return '⚙️ Kurulum gerekli - GitHub token yok';
+    }
+    
+    if (!window.gistSync.gistId) {
+        return '🔄 İlk sync bekleniyor';
+    }
+    
+    const lastSync = parseInt(localStorage.getItem('last_sync_time') || '0');
+    if (lastSync === 0) {
+        return '📤 Henüz sync yapılmadı';
+    }
+    
+    const timeDiff = Date.now() - lastSync;
+    const minutes = Math.floor(timeDiff / (1000 * 60));
+    
+    return `✅ ${minutes} dakika önce sync edildi`;
+}
 
 // Sayfa yüklendiğinde ortak component'leri initialize et
 document.addEventListener('DOMContentLoaded', function () {
@@ -7,6 +82,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initializePage === 'function') {
         initializePage('data-yonetimi');
     }
+    
+    // Cloud sync durumunu göster
+    setTimeout(() => {
+        const statusElement = document.getElementById('cloudSyncStatus');
+        if (statusElement) {
+            statusElement.textContent = getCloudStatus();
+        }
+    }, 1000);
 });
 
 function updateDataStats() {
