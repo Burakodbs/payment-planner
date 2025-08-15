@@ -141,21 +141,67 @@ class FileStorage {
         });
     }
 
-    // Yedek dosya oluştur ve indir
+    // Yedek dosya oluştur ve ana klasörün içindeki backups klasörüne kaydet
     createBackupFile(userData) {
         const filename = `${this.currentUser}-backup-${new Date().toISOString().slice(0, 10)}.json`;
         const dataStr = JSON.stringify(userData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         
-        // Dosyayı downloads klasörüne kaydet (otomatik indirme)
+        // Ana klasör içindeki backups klasörüne kaydet
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
         link.download = filename;
         link.style.display = 'none';
+        
+        // Tarayıcıdan dosya sistemi erişimi için manuel indirme
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
+        
+        // Kullanıcıya backup klasörü oluşturması için bilgi ver
+        console.log(`📁 Yedek dosyası indirildi: ${filename}`);
+        console.log(`💡 İpucu: Ana klasörünüzde 'backups' klasörü oluşturup yedek dosyalarınızı oraya taşıyabilirsiniz.`);
+        
+        // Backup klasörü kontrolü ve oluşturma önerisi
+        this.suggestBackupFolder(filename);
+    }
+
+    // Backup klasörü önerisi
+    suggestBackupFolder(filename) {
+        // LocalStorage'da backup folder önerisi gösterildi mi kontrol et
+        const backupSuggestionShown = localStorage.getItem('backup_folder_suggestion_shown');
+        
+        if (!backupSuggestionShown) {
+            setTimeout(() => {
+                const message = `📁 YEDEK KLASÖRÜ ÖNERİSİ\n\n` +
+                               `Yedek dosyalarınızı daha düzenli tutmak için:\n\n` +
+                               `1. Ana klasörünüzde 'backups' klasörü oluşturun\n` +
+                               `2. İndirilen yedek dosyalarını oraya taşıyın\n` +
+                               `3. Bu klasörü .gitignore'a ekleyebilirsiniz\n\n` +
+                               `Dosya: ${filename}\n\n` +
+                               `Bu önerinin bir daha gösterilmesini istiyor musunuz?`;
+                
+                const showAgain = confirm(message);
+                if (!showAgain) {
+                    localStorage.setItem('backup_folder_suggestion_shown', 'true');
+                }
+            }, 2000);
+        }
+    }
+
+    // Backup klasörü varlığını kontrol et
+    checkBackupFolder() {
+        // Bu fonksiyon tarayıcı kısıtlamaları nedeniyle dosya sistemi erişimi yapamaz
+        // Sadece kullanıcıya rehberlik sağlar
+        console.log('💡 Backup Klasörü Yapısı:');
+        console.log('📁 payment-planner/');
+        console.log('  ├── 📁 backups/');
+        console.log('  │   ├── admin-backup-2025-08-15.json');
+        console.log('  │   ├── admin-backup-2025-08-14.json');
+        console.log('  │   └── ...');
+        console.log('  ├── 📄 index.html');
+        console.log('  └── 📁 assets/');
     }
 
     // Kullanıcı verilerini global değişkenlere uygula

@@ -287,7 +287,13 @@ function updateExpenseTable() {
 
     filteredExpenses.forEach((expense, index) => {
         const row = tbody.insertRow();
-        const taksitBilgi = expense.isTaksit ? `${expense.taksitNo}/${expense.toplamTaksit}` : '-';
+        
+        // Hem eski hem yeni taksit alanlarını destekle
+        const isInstallment = expense.isInstallment || expense.isTaksit;
+        const installmentNumber = expense.installmentNumber || expense.taksitNo;
+        const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
+        
+        const taksitBilgi = isInstallment ? `${installmentNumber}/${totalInstallments}` : '-';
 
         let rowStyle = '';
         let taksitEtiket = '';

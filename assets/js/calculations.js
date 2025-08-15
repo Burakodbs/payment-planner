@@ -20,8 +20,13 @@ function calculateDebts() {
     });
 
     expenses.forEach(expense => {
-        if (expense.isTaksit) {
-            const kalanTaksit = expense.toplamTaksit - expense.taksitNo;
+        // Yeni İngilizce alanları ve eski Türkçe alanları destekle
+        const isInstallment = expense.isInstallment || expense.isTaksit;
+        const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
+        const installmentNumber = expense.installmentNumber || expense.taksitNo;
+        
+        if (isInstallment && totalInstallments && installmentNumber) {
+            const kalanTaksit = totalInstallments - installmentNumber;
             futurePayments[expense.person] += expense.amount * kalanTaksit;
         }
     });
@@ -33,9 +38,14 @@ function getMonthlyFutureTaksits() {
     const monthlyTaksits = {};
 
     expenses.forEach(expense => {
-        if (expense.isTaksit && expense.toplamTaksit && expense.taksitNo) {
+        // Yeni İngilizce alanları ve eski Türkçe alanları destekle
+        const isInstallment = expense.isInstallment || expense.isTaksit;
+        const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
+        const installmentNumber = expense.installmentNumber || expense.taksitNo;
+        
+        if (isInstallment && totalInstallments && installmentNumber) {
             const [expenseYear, expenseMonth, expenseDay] = expense.date.split('-').map(Number);
-            const kalanTaksit = expense.toplamTaksit - expense.taksitNo;
+            const kalanTaksit = totalInstallments - installmentNumber;
 
             for (let i = 1; i <= kalanTaksit; i++) {
                 let taksitYear = expenseYear;
@@ -59,8 +69,8 @@ function getMonthlyFutureTaksits() {
                 monthlyTaksits[monthKey][expense.person].push({
                     description: expense.description || 'Taksit',
                     amount: expense.amount,
-                    taksitNo: expense.taksitNo + i,
-                    toplamTaksit: expense.toplamTaksit,
+                    taksitNo: installmentNumber + i,
+                    toplamTaksit: totalInstallments,
                     card: expense.card,
                     orijinalTarih: expense.date
                 });
@@ -76,12 +86,17 @@ function getFutureTaksits(selectedMonth) {
     const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
 
     expenses.forEach(expense => {
-        if (expense.isTaksit && expense.toplamTaksit && expense.taksitNo) {
+        // Yeni İngilizce alanları ve eski Türkçe alanları destekle
+        const isInstallment = expense.isInstallment || expense.isTaksit;
+        const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
+        const installmentNumber = expense.installmentNumber || expense.taksitNo;
+        
+        if (isInstallment && totalInstallments && installmentNumber) {
             const [expenseYear, expenseMonth, expenseDay] = expense.date.split('-').map(Number);
 
-            const kalanTaksit = expense.toplamTaksit - expense.taksitNo;
+            const kalanTaksit = totalInstallments - installmentNumber;
 
-            // console.log(`Harcama: ${expense.description}, Taksit: ${expense.taksitNo}/${expense.toplamTaksit}, Kalan: ${kalanTaksit}`);
+            // console.log(`Harcama: ${expense.description}, Taksit: ${installmentNumber}/${totalInstallments}, Kalan: ${kalanTaksit}`);
 
             for (let i = 1; i <= kalanTaksit; i++) {
                 let taksitYear = expenseYear;
@@ -95,10 +110,11 @@ function getFutureTaksits(selectedMonth) {
                 // console.log(`Taksit ${i}: ${taksitYear}-${taksitMonth}, Aranan: ${selectedYear}-${selectedMonthNum}`);
 
                 if (taksitYear === selectedYear && taksitMonth === selectedMonthNum) {
-                    // console.log(`Eşleşti! Taksit ekleniyor: ${expense.taksitNo + i}/${expense.toplamTaksit}`);
+                    // console.log(`Eşleşti! Taksit ekleniyor: ${installmentNumber + i}/${totalInstallments}`);
                     futureTaksits.push({
                         ...expense,
-                        taksitNo: expense.taksitNo + i,
+                        taksitNo: installmentNumber + i,
+                        installmentNumber: installmentNumber + i,
                         date: `${taksitYear}-${taksitMonth.toString().padStart(2, '0')}-${expenseDay.toString().padStart(2, '0')}`,
                         isFuture: true
                     });

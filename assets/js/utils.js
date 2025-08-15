@@ -96,15 +96,21 @@ function updateDashboardUpcomingInstallments() {
         return;
     }
 
-    const html = upcomingInstallments.slice(0, 5).map(installment => `
+    const html = upcomingInstallments.slice(0, 5).map(installment => {
+        // Hem eski hem yeni taksit alanlarını destekle
+        const installmentNumber = installment.installmentNumber || installment.taksitNo;
+        const totalInstallments = installment.totalInstallments || installment.toplamTaksit;
+        
+        return `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
             <div>
                 <div style="font-weight: 600; color: var(--text-primary);">${installment.description || 'Taksit'}</div>
-                <div style="font-size: 12px; color: var(--text-secondary);">${installment.taksitNo}/${installment.toplamTaksit} - ${installment.person} - ${installment.card}</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">${installmentNumber}/${totalInstallments} - ${installment.person} - ${installment.card}</div>
             </div>
             <div style="font-weight: 600; color: var(--warning);">${(parseFloat(installment.amount) || 0).toFixed(2)} TL</div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 
     container.innerHTML = html;
 }
