@@ -135,9 +135,38 @@ function runManualMigration() {
 // ==========================================
 
 /**
- * Export all data to JSON file
+ * Export all data to JSON file - Integrated with FileStorage
  */
 function exportData() {
+    try {
+        console.log('🔄 Starting data export with FileStorage integration...');
+        
+        // Use FileStorage if available
+        if (window.fileStorage && window.fileStorage.currentUser) {
+            // FileStorage already handles backup file creation automatically
+            // Force a manual save and backup
+            window.fileStorage.saveUserData().then(() => {
+                showToast('✅ Yedek başarıyla oluşturuldu ve indirildi!', 'success');
+            }).catch((error) => {
+                console.error('FileStorage export error:', error);
+                fallbackExport();
+            });
+            return;
+        }
+        
+        // Fallback to original export method
+        fallbackExport();
+        
+    } catch (error) {
+        console.error('❌ Export error:', error);
+        showToast('❌ Yedek oluşturulurken hata oluştu: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Fallback export method (original localStorage-based)
+ */
+function fallbackExport() {
     try {
         console.log('🔄 Starting data export...');
         
@@ -200,11 +229,11 @@ function exportData() {
 }
 
 /**
- * Import data from JSON file
+ * Import data from JSON file - Integrated with FileStorage
  */
 function importData() {
     try {
-        console.log('🔄 Starting data import process...');
+        console.log('🔄 Starting data import process with FileStorage integration...');
         
         // Create file input
         const fileInput = document.createElement('input');
@@ -212,7 +241,7 @@ function importData() {
         fileInput.accept = '.json';
         fileInput.style.display = 'none';
         
-        fileInput.addEventListener('change', function(event) {
+        fileInput.addEventListener('change', async function(event) {
             const file = event.target.files[0];
             if (!file) {
                 showToast('⚠️ Dosya seçilmedi', 'warning');
@@ -224,22 +253,44 @@ function importData() {
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    processImportedData(importedData, file.name);
-                } catch (parseError) {
-                    console.error('❌ JSON parse error:', parseError);
-                    showToast('❌ Geçersiz JSON dosyası: ' + parseError.message, 'error');
+            try {
+                // Use FileStorage if available
+                if (window.fileStorage && window.fileStorage.currentUser) {
+                    const success = await window.fileStorage.importFromFile(file);
+                    if (success) {
+                        showToast('✅ Veriler başarıyla içe aktarıldı!', 'success');
+                        // Update all views
+                        setTimeout(() => {
+                            updateCardAndUserManagement();
+                            if (typeof DataManager !== 'undefined' && DataManager.updateAllViews) {
+                                DataManager.updateAllViews();
+                            }
+                        }, 500);
+                    }
+                } else {
+                    // Fallback to original import method
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            processImportedData(importedData, file.name);
+                        } catch (parseError) {
+                            console.error('❌ JSON parse error:', parseError);
+                            showToast('❌ Geçersiz JSON dosyası: ' + parseError.message, 'error');
+                        }
+                    };
+                    
+                    reader.onerror = function() {
+                        showToast('❌ Dosya okuma hatası', 'error');
+                    };
+                    
+                    reader.readAsText(file);
                 }
-            };
-            
-            reader.onerror = function() {
-                showToast('❌ Dosya okuma hatası', 'error');
-            };
-            
-            reader.readAsText(file);
+                
+            } catch (error) {
+                console.error('❌ Import error:', error);
+                showToast('❌ İçe aktarma hatası: ' + error.message, 'error');
+            }
         });
         
         // Trigger file selection
@@ -489,11 +540,11 @@ function restoreDataFromBackup(backupData, filename) {
 }
 
 /**
- * Emergency restore function - restore from hardcoded backup data
+ * Emergency restore function - restore from hardcoded backup data - Integrated with FileStorage
  */
 function emergencyRestore() {
     try {
-        console.log('🚨 Starting emergency data restore...');
+        console.log('🚨 Starting emergency data restore with FileStorage integration...');
         
         // Hardcoded backup data from the latest known backup
         const emergencyBackupData = {
@@ -523,7 +574,35 @@ function emergencyRestore() {
                               `Acil kurtarma işlemini başlatmak istiyor musunuz?`;
 
         if (confirm(confirmMessage)) {
-            restoreDataFromBackup(emergencyBackupData, 'Emergency Backup');
+            // Use FileStorage if available
+            if (window.fileStorage && window.fileStorage.currentUser) {
+                // Convert to proper format for FileStorage
+                const userData = {
+                    username: window.fileStorage.currentUser,
+                    lastUpdated: new Date().toISOString(),
+                    expenses: emergencyBackupData.expenses,
+                    regularPayments: emergencyBackupData.regularPayments,
+                    creditCards: emergencyBackupData.creditCards,
+                    people: emergencyBackupData.people,
+                    settings: {
+                        theme: 'light'
+                    }
+                };
+                
+                window.fileStorage.applyUserData(userData);
+                window.fileStorage.saveUserData().then(() => {
+                    showToast('🚑 Acil veri kurtarma başarıyla tamamlandı!', 'success');
+                    setTimeout(() => updateCardAndUserManagement(), 500);
+                }).catch((error) => {
+                    console.error('FileStorage emergency restore error:', error);
+                    // Fallback to original method
+                    restoreDataFromBackup(emergencyBackupData, 'Emergency Backup');
+                });
+            } else {
+                // Fallback to original method
+                restoreDataFromBackup(emergencyBackupData, 'Emergency Backup');
+            }
+            
             showToast('🚑 Acil veri kurtarma işlemi başlatıldı!', 'success');
         } else {
             showToast('🚨 Acil kurtarma iptal edildi', 'info');

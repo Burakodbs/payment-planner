@@ -380,7 +380,7 @@ class AuthSystem {
     }
 
     // Kullanıcı girişi
-    login(username, password) {
+    async login(username, password) {
         if (!username || !password) {
             throw new Error('Kullanıcı adı ve şifre gereklidir');
         }
@@ -420,7 +420,13 @@ class AuthSystem {
         localStorage.setItem('session_id', sessionId);
         localStorage.setItem('app_sessions', JSON.stringify(this.sessions));
         
-        this.loadUserData();
+        // File storage sistemini başlat
+        if (window.fileStorage) {
+            await window.fileStorage.initUser(username);
+        } else {
+            // Fallback: localStorage'dan yükle
+            this.loadUserData();
+        }
         return true;
     }
 
@@ -431,7 +437,13 @@ class AuthSystem {
 
     // Çıkış
     logout() {
-        this.saveUserData();
+        // File storage'dan çıkış yap
+        if (window.fileStorage) {
+            window.fileStorage.logout();
+        } else {
+            // Fallback: localStorage'a kaydet
+            this.saveUserData();
+        }
         
         // Session'ı temizle
         const sessionId = localStorage.getItem('session_id');
@@ -503,6 +515,14 @@ class AuthSystem {
     saveUserData() {
         if (!this.currentUser || !this.users[this.currentUser]) return;
 
+        // File storage varsa onu kullan
+        if (window.fileStorage && window.fileStorage.currentUser) {
+            // File storage kendi kaydetme sistemini kullanacak
+            window.fileStorage.scheduleAutoSave('user_action');
+            return;
+        }
+
+        // Fallback: localStorage'a kaydet
         this.users[this.currentUser].data = {
             expenses: expenses || [],
             regularPayments: regularPayments || [],
@@ -933,14 +953,14 @@ class AuthSystem {
 }
 
 // Auth UI Handler Functions - Merged from auth-ui.js
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
 
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
 
     try {
-        authSystem.login(username, password);
+        await authSystem.login(username, password);
         
         if (authSystem.users[username].role === 'admin') {
             authSystem.showAdminPanel();
