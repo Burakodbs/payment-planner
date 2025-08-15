@@ -1,101 +1,14 @@
-// Data Management page specific JavaScript code
-
-// Cloud sync fonksiyonları
-function setupCloudSync() {
-    if (window.gistSync) {
-        window.gistSync.setupWizard();
-    } else {
-        showToast('❌ Cloud sync modülü yüklenemedi', 'error');
-    }
-}
-
-function syncToCloud() {
-    if (window.gistSync && window.gistSync.githubToken) {
-        window.gistSync.syncToCloud().then(success => {
-            if (success) {
-                showToast('☁️ Veriler cloud\'a yüklendi', 'success');
-            } else {
-                showToast('❌ Cloud upload hatası', 'error');
-            }
-        });
-    } else {
-        showToast('⚙️ Önce cloud sync\'i kurun', 'warning');
-    }
-}
-
-function syncFromCloud() {
-    if (window.gistSync && window.gistSync.gistId) {
-        window.gistSync.downloadFromGist().then(cloudData => {
-            if (cloudData) {
-                const confirmMessage = `☁️ CLOUD\'DAN VERİ İNDİRME\n\n` +
-                                     `Cloud\'da bulunan veriler:\n` +
-                                     `• ${cloudData.expenses?.length || 0} harcama\n` +
-                                     `• ${cloudData.regularPayments?.length || 0} düzenli ödeme\n` +
-                                     `• ${cloudData.creditCards?.length || 0} kredi kartı\n` +
-                                     `• ${cloudData.people?.length || 0} kişi\n\n` +
-                                     `Son güncelleme: ${new Date(cloudData.lastUpdated).toLocaleString()}\n\n` +
-                                     `⚠️ UYARI: Mevcut veriler silinecek!\n\n` +
-                                     `Cloud\'dan indirmek istiyor musunuz?`;
-
-                if (confirm(confirmMessage)) {
-                    window.fileStorage.applyUserData(cloudData);
-                    window.fileStorage.saveUserData();
-                    showToast('☁️ Cloud\'dan veriler indirildi', 'success');
-                    setTimeout(() => updateCardAndUserManagement(), 500);
-                }
-            } else {
-                showToast('❌ Cloud\'dan veri indirilemedi', 'error');
-            }
-        });
-    } else {
-        showToast('⚙️ Cloud sync kurulumu gerekli', 'warning');
-    }
-}
-
-function getCloudStatus() {
-    if (!window.gistSync) {
-        return 'Cloud sync modülü yüklenemedi';
-    }
-    
-    if (!window.gistSync.githubToken) {
-        return '⚙️ Kurulum gerekli - GitHub token yok';
-    }
-    
-    if (!window.gistSync.gistId) {
-        return '🔄 İlk sync bekleniyor';
-    }
-    
-    const lastSync = parseInt(localStorage.getItem('last_sync_time') || '0');
-    if (lastSync === 0) {
-        return '📤 Henüz sync yapılmadı';
-    }
-    
-    const timeDiff = Date.now() - lastSync;
-    const minutes = Math.floor(timeDiff / (1000 * 60));
-    
-    return `✅ ${minutes} dakika önce sync edildi`;
-}
-
-// Sayfa yüklendiğinde ortak component'leri initialize et
+﻿// Data Management page specific JavaScript code
+// Sayfa yÃ¼klendiÄŸinde ortak component'leri initialize et
 document.addEventListener('DOMContentLoaded', function () {
     // Ortak component'leri initialize et
     if (typeof initializePage === 'function') {
         initializePage('data-yonetimi');
     }
-    
-    // Cloud sync durumunu göster
-    setTimeout(() => {
-        const statusElement = document.getElementById('cloudSyncStatus');
-        if (statusElement) {
-            statusElement.textContent = getCloudStatus();
-        }
-    }, 1000);
 });
-
 function updateDataStats() {
-    // İstatistikler cardı kaldırıldı, fonksiyon geriye uyumluluk için boş bırakıldı
+    // Ä°statistikler cardÄ± kaldÄ±rÄ±ldÄ±, fonksiyon geriye uyumluluk iÃ§in boÅŸ bÄ±rakÄ±ldÄ±
 }
-
 function updateCardAndUserManagement() {
     // Card management
     const cardList = document.getElementById('cardManagementList');
@@ -104,37 +17,33 @@ function updateCardAndUserManagement() {
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
                 <span>${card}</span>
                 <div style="display: flex; gap: 4px;">
-                    <button class="btn btn-sm btn-outline" onclick="editCard('${card}')">Düzenle</button>
+                    <button class="btn btn-sm btn-outline" onclick="editCard('${card}')">DÃ¼zenle</button>
                     <button class="btn btn-sm btn-danger" onclick="removeCard('${card}')">Sil</button>
                 </div>
             </div>
         `).join('');
     }
-
-    // Kullanıcı yönetimi
+    // KullanÄ±cÄ± yÃ¶netimi
     const userList = document.getElementById('userManagementList');
     if (userList) {
         userList.innerHTML = people.map(person => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
                 <span>${person}</span>
                 <div style="display: flex; gap: 4px;">
-                    <button class="btn btn-sm btn-outline" onclick="editUser('${person}')">Düzenle</button>
+                    <button class="btn btn-sm btn-outline" onclick="editUser('${person}')">DÃ¼zenle</button>
                     <button class="btn btn-sm btn-danger" onclick="removeUser('${person}')">Sil</button>
                 </div>
             </div>
         `).join('');
     }
-
-    // Düzenli ödeme form seçeneklerini güncelle
+    // DÃ¼zenli Ã¶deme form seÃ§eneklerini gÃ¼ncelle
     const regularCardSelect = document.getElementById('regularCard');
     const regularUserSelect = document.getElementById('regularUser');
-
     if (regularCardSelect) {
-        // Mevcut seçenekleri clear(ilk option hariç)
+        // Mevcut seÃ§enekleri clear(ilk option hariÃ§)
         const options = regularCardSelect.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
-
-        // Yeni seçenekleri ekle
+        // Yeni seÃ§enekleri ekle
         creditCards.forEach(card => {
             const option = document.createElement('option');
             option.value = card;
@@ -142,13 +51,11 @@ function updateCardAndUserManagement() {
             regularCardSelect.appendChild(option);
         });
     }
-
     if (regularUserSelect) {
-        // Mevcut seçenekleri clear(ilk option hariç)
+        // Mevcut seÃ§enekleri clear(ilk option hariÃ§)
         const options = regularUserSelect.querySelectorAll('option:not([value=""])');
         options.forEach(option => option.remove());
-
-        // Yeni seçenekleri ekle
+        // Yeni seÃ§enekleri ekle
         people.forEach(person => {
             const option = document.createElement('option');
             option.value = person;
@@ -157,7 +64,6 @@ function updateCardAndUserManagement() {
         });
     }
 }
-
 function addNewCard() {
     const input = document.getElementById('newCardInput');
     const cardName = input.value.trim();
@@ -170,7 +76,6 @@ function addNewCard() {
         showToast('Card successfully added', 'success');
     }
 }
-
 function addNewUser() {
     const input = document.getElementById('newUserInput');
     const userName = input.value.trim();
@@ -180,12 +85,11 @@ function addNewUser() {
         updateUserOptions();
         updateCardAndUserManagement();
         input.value = '';
-        showToast('Kullanıcı başarıyla eklendi', 'success');
+        showToast('KullanÄ±cÄ± baÅŸarÄ±yla eklendi', 'success');
     }
 }
-
 function removeCard(cardName) {
-    if (confirm(`"${cardName}" cardını silmek istediğinizden emin misiniz?`)) {
+    if (confirm(`"${cardName}" cardÄ±nÄ± silmek istediÄŸinizden emin misiniz?`)) {
         creditCards = creditCards.filter(k => k !== cardName);
         authSystem.saveUserData();
         updateCardOptions();
@@ -193,66 +97,55 @@ function removeCard(cardName) {
         showToast('Card deleted', 'success');
     }
 }
-
 function removeUser(userName) {
-    if (confirm(`"${userName}" kullanıcısını silmek istediğinizden emin misiniz?`)) {
+    if (confirm(`"${userName}" kullanÄ±cÄ±sÄ±nÄ± silmek istediÄŸinizden emin misiniz?`)) {
         people = people.filter(k => k !== userName);
         authSystem.saveUserData();
         updateUserOptions();
         updateCardAndUserManagement();
-        showToast('Kullanıcı silindi', 'success');
+        showToast('KullanÄ±cÄ± silindi', 'success');
     }
 }
-
 // Manual migration function for data management page
 function runManualMigration() {
     if (typeof migrateRegularPaymentData === 'function') {
         migrateRegularPaymentData();
     } else {
-        showToast('Migration fonksiyonu bulunamadı', 'error');
+        showToast('Migration fonksiyonu bulunamadÄ±', 'error');
     }
 }
-
 // ==========================================
 // BACKUP & RESTORE FUNCTIONS
 // ==========================================
-
 /**
  * Export all data to JSON file - Integrated with FileStorage
  */
 function exportData() {
     try {
-        console.log('🔄 Starting data export with FileStorage integration...');
-        
         // Use FileStorage if available
         if (window.fileStorage && window.fileStorage.currentUser) {
             // FileStorage already handles backup file creation automatically
             // Force a manual save and backup
             window.fileStorage.saveUserData().then(() => {
-                showToast('✅ Yedek başarıyla oluşturuldu ve indirildi!', 'success');
+                showToast('âœ… Yedek baÅŸarÄ±yla oluÅŸturuldu ve indirildi!', 'success');
             }).catch((error) => {
                 console.error('FileStorage export error:', error);
                 fallbackExport();
             });
             return;
         }
-        
         // Fallback to original export method
         fallbackExport();
-        
     } catch (error) {
-        console.error('❌ Export error:', error);
-        showToast('❌ Yedek oluşturulurken hata oluştu: ' + error.message, 'error');
+        console.error('âŒ Export error:', error);
+        showToast('âŒ Yedek oluÅŸturulurken hata oluÅŸtu: ' + error.message, 'error');
     }
 }
-
 /**
  * Fallback export method (original localStorage-based)
  */
 function fallbackExport() {
     try {
-        console.log('🔄 Starting data export...');
-        
         // Collect all data
         const exportData = {
             expenses: expenses || [],
@@ -263,85 +156,68 @@ function fallbackExport() {
             version: '3.1.0',
             appName: 'Payment Planner'
         };
-
         // Create backup filename with current date
         const currentDate = new Date().toISOString().slice(0, 10);
         const filename = `payment-planner-backup-${currentDate}.json`;
-
         // Convert to JSON string
         const jsonString = JSON.stringify(exportData, null, 2);
-        
         // Create blob and download
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        
         // Create download link
         const downloadLink = document.createElement('a');
         downloadLink.href = url;
         downloadLink.download = filename;
         downloadLink.style.display = 'none';
-        
         // Trigger download
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
-        
         // Clean up
         URL.revokeObjectURL(url);
-
         // Show success message
         const totalRecords = (exportData.expenses.length + 
                             exportData.regularPayments.length + 
                             exportData.creditCards.length + 
                             exportData.people.length);
-
-        showToast(`✅ Yedek başarıyla oluşturuldu!\n📊 ${totalRecords} toplam kayıt\n📁 ${filename}`, 'success');
-        
-        console.log(`✅ Data exported successfully:`, {
+        showToast(`âœ… Yedek baÅŸarÄ±yla oluÅŸturuldu!\nğŸ“Š ${totalRecords} toplam kayÄ±t\nğŸ“ ${filename}`, 'success');
             expenses: exportData.expenses.length,
             regularPayments: exportData.regularPayments.length,
             creditCards: exportData.creditCards.length,
             people: exportData.people.length,
             filename: filename
         });
-
     } catch (error) {
-        console.error('❌ Export error:', error);
-        showToast('❌ Yedek oluşturulurken hata oluştu: ' + error.message, 'error');
+        console.error('âŒ Export error:', error);
+        showToast('âŒ Yedek oluÅŸturulurken hata oluÅŸtu: ' + error.message, 'error');
     }
 }
-
 /**
  * Import data from JSON file - Integrated with FileStorage
  */
 function importData() {
     try {
-        console.log('🔄 Starting data import process with FileStorage integration...');
-        
         // Create file input
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = '.json';
         fileInput.style.display = 'none';
-        
         fileInput.addEventListener('change', async function(event) {
             const file = event.target.files[0];
             if (!file) {
-                showToast('⚠️ Dosya seçilmedi', 'warning');
+                showToast('âš ï¸ Dosya seÃ§ilmedi', 'warning');
                 return;
             }
-
             if (!file.name.toLowerCase().endsWith('.json')) {
-                showToast('❌ Lütfen geçerli bir JSON dosyası seçin', 'error');
+                showToast('âŒ LÃ¼tfen geÃ§erli bir JSON dosyasÄ± seÃ§in', 'error');
                 return;
             }
-
             try {
                 // Use FileStorage if available
                 if (window.fileStorage && window.fileStorage.currentUser) {
                     const success = await window.fileStorage.importFromFile(file);
                     if (success) {
-                        showToast('✅ Veriler başarıyla içe aktarıldı!', 'success');
+                        showToast('âœ… Veriler baÅŸarÄ±yla iÃ§e aktarÄ±ldÄ±!', 'success');
                         // Update all views
                         setTimeout(() => {
                             updateCardAndUserManagement();
@@ -358,96 +234,77 @@ function importData() {
                             const importedData = JSON.parse(e.target.result);
                             processImportedData(importedData, file.name);
                         } catch (parseError) {
-                            console.error('❌ JSON parse error:', parseError);
-                            showToast('❌ Geçersiz JSON dosyası: ' + parseError.message, 'error');
+                            console.error('âŒ JSON parse error:', parseError);
+                            showToast('âŒ GeÃ§ersiz JSON dosyasÄ±: ' + parseError.message, 'error');
                         }
                     };
-                    
                     reader.onerror = function() {
-                        showToast('❌ Dosya okuma hatası', 'error');
+                        showToast('âŒ Dosya okuma hatasÄ±', 'error');
                     };
-                    
                     reader.readAsText(file);
                 }
-                
             } catch (error) {
-                console.error('❌ Import error:', error);
-                showToast('❌ İçe aktarma hatası: ' + error.message, 'error');
+                console.error('âŒ Import error:', error);
+                showToast('âŒ Ä°Ã§e aktarma hatasÄ±: ' + error.message, 'error');
             }
         });
-        
         // Trigger file selection
         document.body.appendChild(fileInput);
         fileInput.click();
         document.body.removeChild(fileInput);
-
     } catch (error) {
-        console.error('❌ Import initialization error:', error);
-        showToast('❌ İçe aktarma başlatılırken hata oluştu: ' + error.message, 'error');
+        console.error('âŒ Import initialization error:', error);
+        showToast('âŒ Ä°Ã§e aktarma baÅŸlatÄ±lÄ±rken hata oluÅŸtu: ' + error.message, 'error');
     }
 }
-
 /**
  * Process and validate imported data
  */
 function processImportedData(importedData, filename) {
     try {
-        console.log('🔄 Processing imported data from:', filename);
-        console.log('📊 Raw imported data:', importedData);
-
         // Validate data structure
         if (!importedData || typeof importedData !== 'object') {
-            throw new Error('Geçersiz veri formatı');
+            throw new Error('GeÃ§ersiz veri formatÄ±');
         }
-
         // Convert old Turkish field names to new English format if needed
         const convertedData = convertImportedDataFormat(importedData);
-        
         // Validate converted data
         const validationResult = validateImportedData(convertedData);
         if (!validationResult.isValid) {
-            throw new Error('Veri doğrulama hatası: ' + validationResult.error);
+            throw new Error('Veri doÄŸrulama hatasÄ±: ' + validationResult.error);
         }
-
         // Show confirmation dialog
         const totalRecords = (convertedData.expenses?.length || 0) + 
                            (convertedData.regularPayments?.length || 0) + 
                            (convertedData.creditCards?.length || 0) + 
                            (convertedData.people?.length || 0);
-
-        const confirmMessage = `📁 Dosya: ${filename}\n\n📊 İçe Aktarılacak Veriler:\n` +
-                              `• ${convertedData.expenses?.length || 0} harcama\n` +
-                              `• ${convertedData.regularPayments?.length || 0} düzenli ödeme\n` +
-                              `• ${convertedData.creditCards?.length || 0} kredi kartı\n` +
-                              `• ${convertedData.people?.length || 0} kişi\n\n` +
-                              `⚠️ UYARI: Bu işlem mevcut tüm verilerinizin yerine geçer!\n\n` +
-                              `Devam etmek istediğinizden emin misiniz?`;
-
+        const confirmMessage = `ğŸ“ Dosya: ${filename}\n\nğŸ“Š Ä°Ã§e AktarÄ±lacak Veriler:\n` +
+                              `â€¢ ${convertedData.expenses?.length || 0} harcama\n` +
+                              `â€¢ ${convertedData.regularPayments?.length || 0} dÃ¼zenli Ã¶deme\n` +
+                              `â€¢ ${convertedData.creditCards?.length || 0} kredi kartÄ±\n` +
+                              `â€¢ ${convertedData.people?.length || 0} kiÅŸi\n\n` +
+                              `âš ï¸ UYARI: Bu iÅŸlem mevcut tÃ¼m verilerinizin yerine geÃ§er!\n\n` +
+                              `Devam etmek istediÄŸinizden emin misiniz?`;
         if (confirm(confirmMessage)) {
             restoreDataFromBackup(convertedData, filename);
         } else {
-            showToast('📋 İçe aktarma iptal edildi', 'info');
+            showToast('ğŸ“‹ Ä°Ã§e aktarma iptal edildi', 'info');
         }
-
     } catch (error) {
-        console.error('❌ Data processing error:', error);
-        showToast('❌ Veri işleme hatası: ' + error.message, 'error');
+        console.error('âŒ Data processing error:', error);
+        showToast('âŒ Veri iÅŸleme hatasÄ±: ' + error.message, 'error');
     }
 }
-
 /**
  * Convert imported data format (handle both old Turkish and new English formats)
  */
 function convertImportedDataFormat(importedData) {
-    console.log('🔄 Converting data format...');
-    
     const converted = {
         expenses: [],
         regularPayments: [],
         creditCards: [],
         people: []
     };
-
     // Handle expenses (harcamalar -> expenses)
     const expensesData = importedData.expenses || importedData.harcamalar || [];
     converted.expenses = expensesData.map(item => {
@@ -456,13 +313,12 @@ function convertImportedDataFormat(importedData) {
                       parseFloat(item.amount) : 
                       (item.tutar !== null && item.tutar !== undefined) ? 
                       parseFloat(item.tutar) : 0;
-
         return {
             id: item.id,
             date: item.date || item.tarih,
             card: item.card || item.kart,
             person: item.person || item.kullanici,
-            category: item.category || item.kategori || 'Diğer',
+            category: item.category || item.kategori || 'DiÄŸer',
             description: item.description || item.aciklama || '',
             amount: amount,
             installmentNumber: item.installmentNumber || item.taksitNo,
@@ -472,7 +328,6 @@ function convertImportedDataFormat(importedData) {
             isRegular: item.isRegular || false
         };
     });
-
     // Handle regular payments (duzenliOdemeler -> regularPayments)
     const regularPaymentsData = importedData.regularPayments || importedData.duzenliOdemeler || [];
     converted.regularPayments = regularPaymentsData.map(item => ({
@@ -485,23 +340,17 @@ function convertImportedDataFormat(importedData) {
         category: item.category || item.kategori || 'Regular Payment',
         active: item.active !== false && item.aktif !== false // Default to true
     }));
-
     // Handle credit cards (kredikartlari -> creditCards)
     converted.creditCards = importedData.creditCards || importedData.kredikartlari || [];
-
     // Handle people (kisiler -> people)
     converted.people = importedData.people || importedData.kisiler || [];
-
-    console.log('✅ Data conversion completed:', {
         expenses: converted.expenses.length,
         regularPayments: converted.regularPayments.length,
         creditCards: converted.creditCards.length,
         people: converted.people.length
     });
-
     return converted;
 }
-
 /**
  * Validate imported data
  */
@@ -511,19 +360,15 @@ function validateImportedData(data) {
         if (!data.expenses || !Array.isArray(data.expenses)) {
             return { isValid: false, error: 'Expenses data is missing or invalid' };
         }
-
         if (!data.regularPayments || !Array.isArray(data.regularPayments)) {
             return { isValid: false, error: 'Regular payments data is missing or invalid' };
         }
-
         if (!data.creditCards || !Array.isArray(data.creditCards)) {
             return { isValid: false, error: 'Credit cards data is missing or invalid' };
         }
-
         if (!data.people || !Array.isArray(data.people)) {
             return { isValid: false, error: 'People data is missing or invalid' };
         }
-
         // Validate expenses data structure
         for (let i = 0; i < Math.min(data.expenses.length, 3); i++) {
             const expense = data.expenses[i];
@@ -531,21 +376,16 @@ function validateImportedData(data) {
                 return { isValid: false, error: `Invalid expense structure at index ${i}` };
             }
         }
-
         return { isValid: true };
-
     } catch (error) {
         return { isValid: false, error: error.message };
     }
 }
-
 /**
  * Restore data from backup
  */
 function restoreDataFromBackup(backupData, filename) {
     try {
-        console.log('🔄 Starting data restoration...');
-
         // Create backup of current data before restoring
         const currentDataBackup = {
             expenses: [...(expenses || [])],
@@ -553,19 +393,16 @@ function restoreDataFromBackup(backupData, filename) {
             creditCards: [...(creditCards || [])],
             people: [...(people || [])]
         };
-
         // Update global variables
         window.expenses = backupData.expenses;
         window.regularPayments = backupData.regularPayments;
         window.creditCards = backupData.creditCards;
         window.people = backupData.people;
-
         // Save to localStorage
         localStorage.setItem('expenses', JSON.stringify(backupData.expenses));
         localStorage.setItem('regularPayments', JSON.stringify(backupData.regularPayments));
         localStorage.setItem('creditCards', JSON.stringify(backupData.creditCards));
         localStorage.setItem('people', JSON.stringify(backupData.people));
-
         // Save to auth system if available
         if (typeof authSystem !== 'undefined' && authSystem.currentUser) {
             authSystem.currentUserData = {
@@ -576,44 +413,33 @@ function restoreDataFromBackup(backupData, filename) {
                 people: backupData.people
             };
             authSystem.saveUserData();
-            console.log('✅ Data saved to user account');
         }
-
         // Update all UI components
         if (typeof DataManager !== 'undefined' && DataManager.updateAllViews) {
             DataManager.updateAllViews();
         }
-
         updateCardAndUserManagement();
-
         const totalRecords = backupData.expenses.length + 
                            backupData.regularPayments.length + 
                            backupData.creditCards.length + 
                            backupData.people.length;
-
-        showToast(`✅ Veriler başarıyla geri yüklendi!\n📊 ${totalRecords} kayıt içe aktarıldı\n📁 ${filename}`, 'success');
-
-        console.log('✅ Data restoration completed successfully:', {
+        showToast(`âœ… Veriler baÅŸarÄ±yla geri yÃ¼klendi!\nğŸ“Š ${totalRecords} kayÄ±t iÃ§e aktarÄ±ldÄ±\nğŸ“ ${filename}`, 'success');
             expenses: backupData.expenses.length,
             regularPayments: backupData.regularPayments.length,
             creditCards: backupData.creditCards.length,
             people: backupData.people.length
         });
-
         // Reload page after a short delay to refresh all views
         setTimeout(() => {
-            if (confirm('Sayfayı yeniden yüklemek tüm görünümleri güncelleyecek. Devam edilsin mi?')) {
+            if (confirm('SayfayÄ± yeniden yÃ¼klemek tÃ¼m gÃ¶rÃ¼nÃ¼mleri gÃ¼ncelleyecek. Devam edilsin mi?')) {
                 window.location.reload();
             }
         }, 2000);
-
     } catch (error) {
-        console.error('❌ Data restoration error:', error);
-        showToast('❌ Veri geri yükleme hatası: ' + error.message, 'error');
-        
+        console.error('âŒ Data restoration error:', error);
+        showToast('âŒ Veri geri yÃ¼kleme hatasÄ±: ' + error.message, 'error');
         // Try to restore from backup if available
         if (currentDataBackup) {
-            console.log('🔄 Attempting to restore previous data...');
             window.expenses = currentDataBackup.expenses;
             window.regularPayments = currentDataBackup.regularPayments;
             window.creditCards = currentDataBackup.creditCards;
@@ -621,41 +447,36 @@ function restoreDataFromBackup(backupData, filename) {
         }
     }
 }
-
 /**
  * Emergency restore function - restore from hardcoded backup data - Integrated with FileStorage
  */
 function emergencyRestore() {
     try {
-        console.log('🚨 Starting emergency data restore with FileStorage integration...');
-        
         // Hardcoded backup data from the latest known backup
         const emergencyBackupData = {
             "expenses": [
-                {"id":"duzenli_1754317509229_2025-08","date":"2025-08-05","card":"Vakıf","person":"Burak","category":"Düzenli Ödeme","description":"anne telefon (Düzenli)","amount":208,"installmentNumber":null,"totalInstallments":null,"isInstallment":false,"regularPaymentId":1754317509229,"isRegular":true},
-                {"id":1754317386965,"date":"2025-08-04","card":"Ziraat","person":"Burak","category":"Diğer","description":"turknet berkay","amount":1000,"installmentNumber":1,"totalInstallments":6,"isInstallment":true},
-                {"id":1754340317305,"date":"2025-08-04","card":"Vakıf","person":"Burak","category":"Diğer","description":"","amount":75,"installmentNumber":null,"totalInstallments":null,"isInstallment":null},
-                {"id":"duzenli_1754435023174_2025-08","date":"2025-08-03","card":"Vakıf","person":"Burak","category":"Düzenli Ödeme","description":"ihh (Düzenli)","amount":800,"installmentNumber":null,"totalInstallments":null,"isInstallment":false,"regularPaymentId":1754435023174,"isRegular":true}
+                {"id":"duzenli_1754317509229_2025-08","date":"2025-08-05","card":"VakÄ±f","person":"Burak","category":"DÃ¼zenli Ã–deme","description":"anne telefon (DÃ¼zenli)","amount":208,"installmentNumber":null,"totalInstallments":null,"isInstallment":false,"regularPaymentId":1754317509229,"isRegular":true},
+                {"id":1754317386965,"date":"2025-08-04","card":"Ziraat","person":"Burak","category":"DiÄŸer","description":"turknet berkay","amount":1000,"installmentNumber":1,"totalInstallments":6,"isInstallment":true},
+                {"id":1754340317305,"date":"2025-08-04","card":"VakÄ±f","person":"Burak","category":"DiÄŸer","description":"","amount":75,"installmentNumber":null,"totalInstallments":null,"isInstallment":null},
+                {"id":"duzenli_1754435023174_2025-08","date":"2025-08-03","card":"VakÄ±f","person":"Burak","category":"DÃ¼zenli Ã–deme","description":"ihh (DÃ¼zenli)","amount":800,"installmentNumber":null,"totalInstallments":null,"isInstallment":false,"regularPaymentId":1754435023174,"isRegular":true}
             ],
             "regularPayments": [
-                {"id":1754317509229,"description":"anne telefon","card":"Vakıf","person":"Burak","amount":208,"startDate":"2025-08-05","category":"Regular Payment","active":true},
-                {"id":1754317556140,"description":"anane telefon","card":"Vakıf","person":"Burak","amount":308.5,"startDate":"2025-08-18","category":"Regular Payment","active":true},
-                {"id":1754317577574,"description":"burak telefon","card":"Vakıf","person":"Burak","amount":306,"startDate":"2025-08-12","category":"Regular Payment","active":true},
-                {"id":1754435023174,"description":"ihh","amount":800,"card":"Vakıf","person":"Burak","startDate":"2025-08-03","category":"Regular Payment","active":true}
+                {"id":1754317509229,"description":"anne telefon","card":"VakÄ±f","person":"Burak","amount":208,"startDate":"2025-08-05","category":"Regular Payment","active":true},
+                {"id":1754317556140,"description":"anane telefon","card":"VakÄ±f","person":"Burak","amount":308.5,"startDate":"2025-08-18","category":"Regular Payment","active":true},
+                {"id":1754317577574,"description":"burak telefon","card":"VakÄ±f","person":"Burak","amount":306,"startDate":"2025-08-12","category":"Regular Payment","active":true},
+                {"id":1754435023174,"description":"ihh","amount":800,"card":"VakÄ±f","person":"Burak","startDate":"2025-08-03","category":"Regular Payment","active":true}
             ],
-            "creditCards": ["Axess", "World", "Enpara", "Vakıf", "Ziraat"],
+            "creditCards": ["Axess", "World", "Enpara", "VakÄ±f", "Ziraat"],
             "people": ["Burak", "Semih Abi", "Sinan Abi", "Annem", "Talha"]
         };
-
-        const confirmMessage = `🚨 ACİL VERİ KURTARMA\n\n` +
-                              `Bu işlem son bilinen yedek verileri geri yükler:\n` +
-                              `• ${emergencyBackupData.expenses.length} harcama\n` +
-                              `• ${emergencyBackupData.regularPayments.length} düzenli ödeme\n` +
-                              `• ${emergencyBackupData.creditCards.length} kredi kartı\n` +
-                              `• ${emergencyBackupData.people.length} kişi\n\n` +
-                              `⚠️ UYARI: Mevcut tüm veriler silinecek!\n\n` +
-                              `Acil kurtarma işlemini başlatmak istiyor musunuz?`;
-
+        const confirmMessage = `ğŸš¨ ACÄ°L VERÄ° KURTARMA\n\n` +
+                              `Bu iÅŸlem son bilinen yedek verileri geri yÃ¼kler:\n` +
+                              `â€¢ ${emergencyBackupData.expenses.length} harcama\n` +
+                              `â€¢ ${emergencyBackupData.regularPayments.length} dÃ¼zenli Ã¶deme\n` +
+                              `â€¢ ${emergencyBackupData.creditCards.length} kredi kartÄ±\n` +
+                              `â€¢ ${emergencyBackupData.people.length} kiÅŸi\n\n` +
+                              `âš ï¸ UYARI: Mevcut tÃ¼m veriler silinecek!\n\n` +
+                              `Acil kurtarma iÅŸlemini baÅŸlatmak istiyor musunuz?`;
         if (confirm(confirmMessage)) {
             // Use FileStorage if available
             if (window.fileStorage && window.fileStorage.currentUser) {
@@ -671,10 +492,9 @@ function emergencyRestore() {
                         theme: 'light'
                     }
                 };
-                
                 window.fileStorage.applyUserData(userData);
                 window.fileStorage.saveUserData().then(() => {
-                    showToast('🚑 Acil veri kurtarma başarıyla tamamlandı!', 'success');
+                    showToast('ğŸš‘ Acil veri kurtarma baÅŸarÄ±yla tamamlandÄ±!', 'success');
                     setTimeout(() => updateCardAndUserManagement(), 500);
                 }).catch((error) => {
                     console.error('FileStorage emergency restore error:', error);
@@ -685,14 +505,12 @@ function emergencyRestore() {
                 // Fallback to original method
                 restoreDataFromBackup(emergencyBackupData, 'Emergency Backup');
             }
-            
-            showToast('🚑 Acil veri kurtarma işlemi başlatıldı!', 'success');
+            showToast('ğŸš‘ Acil veri kurtarma iÅŸlemi baÅŸlatÄ±ldÄ±!', 'success');
         } else {
-            showToast('🚨 Acil kurtarma iptal edildi', 'info');
+            showToast('ğŸš¨ Acil kurtarma iptal edildi', 'info');
         }
-
     } catch (error) {
-        console.error('❌ Emergency restore error:', error);
-        showToast('❌ Acil kurtarma hatası: ' + error.message, 'error');
+        console.error('âŒ Emergency restore error:', error);
+        showToast('âŒ Acil kurtarma hatasÄ±: ' + error.message, 'error');
     }
 }

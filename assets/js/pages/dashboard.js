@@ -1,14 +1,11 @@
-// Dashboard sayfasına özel JavaScript kodları
-
-// console.log('Dashboard sayfası yüklendi');
-
-// Dashboard sayfasına özel fonksiyonlar ve event listener'lar
+﻿// Dashboard sayfasÄ±na Ã¶zel JavaScript kodlarÄ±
+// 
+// Dashboard sayfasÄ±na Ã¶zel fonksiyonlar ve event listener'lar
 document.addEventListener('DOMContentLoaded', function () {
     // Ortak component'leri initialize et
     if (typeof initializePage === 'function') {
         initializePage('dashboard');
     }
-
-    // Dashboard için özel initialization
-    // console.log('Dashboard initialized');
+    // Dashboard iÃ§in Ã¶zel initialization
+    // 
 });

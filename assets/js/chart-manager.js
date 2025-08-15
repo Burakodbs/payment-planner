@@ -1,37 +1,28 @@
-// Chart Yönetimi
+﻿// Chart YÃ¶netimi
 let chartInstances = {};
-
 // Dashboard Charts
 function updateDashboardCharts() {
     const chartInstances = window.chartInstances || {};
-
     // Canvas elementlerini kontrol et
     const trendCanvas = document.getElementById('dashboardTrendChart');
     const userCanvas = document.getElementById('dashboardUserChart');
-
     if (!trendCanvas || !userCanvas) {
-        // console.log('Dashboard chart canvas elements not found');
         return;
     }
-
     const currentDate = new Date();
     const months = [];
     const monthlyTotals = [];
-
     for (let i = 5; i >= 0; i--) {
         const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const monthStr = `${year}-${month}`;
         const monthName = date.toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' });
-
         const monthExpenses = expenses.filter(h => h.date && h.date.startsWith(monthStr));
         const monthTotal = monthExpenses.reduce((sum, h) => sum + (parseFloat(h.amount) || 0), 0);
-
         months.push(monthName);
         monthlyTotals.push(monthTotal);
     }
-
     const trendCtx = trendCanvas.getContext('2d');
     if (chartInstances.dashboardTrend) {
         chartInstances.dashboardTrend.destroy();
@@ -41,7 +32,7 @@ function updateDashboardCharts() {
         data: {
             labels: months,
             datasets: [{
-                label: 'Aylık Harcama',
+                label: 'AylÄ±k Harcama',
                 data: monthlyTotals,
                 borderColor: 'rgb(99, 102, 241)',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -65,17 +56,14 @@ function updateDashboardCharts() {
             }
         }
     });
-
     const currentMonth = new Date().toISOString().slice(0, 7);
     const thisMonthExpenses = expenses.filter(h => h.date && h.date.startsWith(currentMonth));
-
     const userTotals = {};
     thisMonthExpenses.forEach(h => {
         if (h.person) {
             userTotals[h.person] = (userTotals[h.person] || 0) + (parseFloat(h.amount) || 0);
         }
     });
-
     const userCtx = userCanvas.getContext('2d');
     if (chartInstances.dashboardUser) {
         chartInstances.dashboardUser.destroy();
@@ -100,21 +88,16 @@ function updateDashboardCharts() {
             }
         }
     });
-
     window.chartInstances = chartInstances;
 }
-
 // Analytics Charts
 function createMonthlyTrendChart(data) {
     const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
-
     if (chartInstances.monthlyTrend) {
         chartInstances.monthlyTrend.destroy();
     }
-
     const months = Object.keys(data.monthlyTrend).sort();
     const totals = months.map(month => data.monthlyTrend[month]);
-
     chartInstances.monthlyTrend = new Chart(ctx, {
         type: 'line',
         data: {
@@ -123,7 +106,7 @@ function createMonthlyTrendChart(data) {
                 return new Date(year, monthNum - 1).toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' });
             }),
             datasets: [{
-                label: 'Aylık Harcama',
+                label: 'AylÄ±k Harcama',
                 data: totals,
                 borderColor: 'rgb(99, 102, 241)',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -147,17 +130,13 @@ function createMonthlyTrendChart(data) {
         }
     });
 }
-
 function createCardDistributionChart(data) {
     const ctx = document.getElementById('cardDistributionChart').getContext('2d');
-
     if (chartInstances.cardDistribution) {
         chartInstances.cardDistribution.destroy();
     }
-
     const cards = Object.keys(data.cardDistribution);
     const amounts = Object.values(data.cardDistribution);
-
     chartInstances.cardDistribution = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -186,23 +165,19 @@ function createCardDistributionChart(data) {
         }
     });
 }
-
 function createUserDistributionChart(data) {
     const ctx = document.getElementById('userDistributionChart').getContext('2d');
-
     if (chartInstances.userDistribution) {
         chartInstances.userDistribution.destroy();
     }
-
     const users = Object.keys(data.userDistribution);
     const amounts = Object.values(data.userDistribution);
-
     chartInstances.userDistribution = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: users,
             datasets: [{
-                label: 'Harcama Tutarı',
+                label: 'Harcama TutarÄ±',
                 data: amounts,
                 backgroundColor: [
                     '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -229,23 +204,19 @@ function createUserDistributionChart(data) {
         }
     });
 }
-
 function createWeeklyActivityChart(data) {
     const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
-
     if (chartInstances.weeklyActivity) {
         chartInstances.weeklyActivity.destroy();
     }
-
-    const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+    const days = ['Pazartesi', 'SalÄ±', 'Ã‡arÅŸamba', 'PerÅŸembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const weeklyData = days.map(day => data.weeklyActivity[day] || 0);
-
     chartInstances.weeklyActivity = new Chart(ctx, {
         type: 'radar',
         data: {
             labels: days,
             datasets: [{
-                label: 'Haftalık Aktivite',
+                label: 'HaftalÄ±k Aktivite',
                 data: weeklyData,
                 borderColor: 'rgb(99, 102, 241)',
                 backgroundColor: 'rgba(99, 102, 241, 0.2)',
@@ -272,16 +243,12 @@ function createWeeklyActivityChart(data) {
         }
     });
 }
-
 function createComparisonChart(month1, month2, data1, data2) {
     const ctx = document.getElementById('comparisonChart').getContext('2d');
-
     if (chartInstances.comparison) {
         chartInstances.comparison.destroy();
     }
-
     const allUsers = [...new Set([...Object.keys(data1), ...Object.keys(data2)])];
-
     chartInstances.comparison = new Chart(ctx, {
         type: 'bar',
         data: {

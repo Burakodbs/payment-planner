@@ -1,19 +1,15 @@
-// Aylık Özet sayfasına özel JavaScript kodları
-
-// console.log('Aylık özet sayfası yüklendi');
-
-// Sayfa yüklendiğinde mevcut ayı varsayılan olarak ayarla
+﻿// AylÄ±k Ã–zet sayfasÄ±na Ã¶zel JavaScript kodlarÄ±
+// 
+// Sayfa yÃ¼klendiÄŸinde mevcut ayÄ± varsayÄ±lan olarak ayarla
 document.addEventListener('DOMContentLoaded', function () {
     // Ortak component'leri initialize et
     if (typeof initializePage === 'function') {
         initializePage('monthly-summary');
     }
-
     const summaryDate = document.getElementById('summaryDate');
     if (summaryDate) {
         summaryDate.value = new Date().toISOString().slice(0, 7);
-
-        // Kısa bir gecikme sonra özeti güncelle
+        // KÄ±sa bir gecikme sonra Ã¶zeti gÃ¼ncelle
         setTimeout(() => {
             if (typeof updateMonthlySummary === 'function') {
                 updateMonthlySummary();

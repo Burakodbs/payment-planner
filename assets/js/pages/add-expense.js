@@ -1,77 +1,86 @@
-// Add Expense page specific JavaScript code
-
-// console.log('Add expense page loaded');
-
-// Sayfa tab'larını yönet
+﻿// Add Expense page specific JavaScript code
+// Sayfa tab'larÄ±nÄ± yÃ¶net
 function showPageTab(tabName) {
-    // Tüm tab'ları gizle
+    // TÃ¼m tab'larÄ± gizle
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-
-    // Tüm tab butonlarının active class'ını kaldır
+    // TÃ¼m tab butonlarÄ±nÄ±n active class'Ä±nÄ± kaldÄ±r
     document.querySelectorAll('.page-tab').forEach(btn => {
         btn.classList.remove('active');
     });
-
-    // Seçilen tab'ı göster
+    // SeÃ§ilen tab'Ä± gÃ¶ster
     const targetTab = document.getElementById(tabName + 'Tab');
-    if (targetTab) {
-        targetTab.classList.add('active');
+    // Tab name mapping for compatibility
+    let actualTabName = tabName;
+    if (tabName === 'duzenli') {
+        actualTabName = 'regular';
     }
-
-    // Seçilen tab butonunu aktif yap
+    const actualTab = document.getElementById(actualTabName + 'Tab');
+    if (actualTab) {
+        actualTab.classList.add('active');
+    }
+    // SeÃ§ilen tab butonunu aktif yap
     event.target.classList.add('active');
-
     // Tab specific operations
-    if (tabName === 'regular') {
+    if (tabName === 'regular' || tabName === 'duzenli') {
         loadRegularPayments();
         populateRegularPaymentForm();
     }
 }
-
 // Load regular payments
 // New system: use global regularPayments array and updateRegularPaymentsList function from utils.js.
 function loadRegularPayments() {
-    if (typeof updateRegularPaymentsList === 'function') {
-        updateRegularPaymentsList();
-    } else {
-        // Fallback – old localStorage (temporary)
-        const legacy = JSON.parse(localStorage.getItem('regularPayments') || '[]');
-        const container = document.getElementById('regularPaymentsList');
-        if (!container) return;
-        if (legacy.length === 0) {
-            container.innerHTML = '<p class="text-muted">No regular payments defined yet.</p>';
-            return;
+    // Auth sistem hazÄ±r olana kadar bekle
+    let attempts = 0;
+    const maxAttempts = 20;
+    const waitAndLoad = () => {
+        attempts++;
+        // Check both window.regularPayments and global regularPayments
+        if ((window.regularPayments && Array.isArray(window.regularPayments)) || 
+            (typeof regularPayments !== 'undefined' && Array.isArray(regularPayments))) {
+            if (typeof updateRegularPaymentsList === 'function') {
+                updateRegularPaymentsList();
+            }
+        } else if (attempts < maxAttempts) {
+            setTimeout(waitAndLoad, 500);
+        } else {
+            const container = document.getElementById('regularPaymentsList');
+            if (container) {
+                container.innerHTML = '<p style="color: var(--text-muted);">HenÃ¼z dÃ¼zenli Ã¶deme tanÄ±mlanmamÄ±ÅŸ</p>';
+            }
         }
-        container.innerHTML = legacy.map(o => `<div class="regular-item"><div class="regular-info"><h4>${o.description}</h4><p>${o.amount} TL - ${o.card} - ${o.person}</p><small>Start Date: ${(o.startDate||o.start||'').toString()}</small></div></div>`).join('');
-    }
+    };
+    waitAndLoad();
 }
-
 // Populate regular payment form
 function populateRegularPaymentForm() {
     // Populate cards
     const cardSelect = document.getElementById('regularCard');
-    cardSelect.innerHTML = '<option value="">Select Card</option>';
-    if (typeof cards !== 'undefined' && cards) {
-        cards.forEach(card => {
-            cardSelect.innerHTML += `<option value="${card}">${card}</option>`;
-        });
+    if (cardSelect) {
+        cardSelect.innerHTML = '<option value="">Kart SeÃ§in</option>';
+        if (window.creditCards && Array.isArray(window.creditCards)) {
+            window.creditCards.forEach(card => {
+                cardSelect.innerHTML += `<option value="${card}">${card}</option>`;
+            });
+        }
     }
-
     // Populate users
     const userSelect = document.getElementById('regularUser');
-    userSelect.innerHTML = '<option value="">Select User</option>';
-    if (typeof people !== 'undefined' && people) {
-        people.forEach(person => {
-            userSelect.innerHTML += `<option value="${person}">${person}</option>`;
-        });
+    if (userSelect) {
+        userSelect.innerHTML = '<option value="">KullanÄ±cÄ± SeÃ§in</option>';
+        if (window.people && Array.isArray(window.people)) {
+            window.people.forEach(person => {
+                userSelect.innerHTML += `<option value="${person}">${person}</option>`;
+            });
+        }
     }
-
     // Today's date
-    document.getElementById('regularStart').value = new Date().toISOString().split('T')[0];
+    const startDateInput = document.getElementById('regularStart');
+    if (startDateInput) {
+        startDateInput.value = new Date().toISOString().split('T')[0];
+    }
 }
-
 // Add regular payment
 function handleRegularPaymentSubmit(event) {
     event.preventDefault();
@@ -82,7 +91,19 @@ function handleRegularPaymentSubmit(event) {
         showToast('System not loaded (addRegularPayment not found)', 'error');
     }
 }
-
+// Add regular payment with Turkish function name (HTML compatibility)
+function handleDuzenliOdemeSubmit(event) {
+    event.preventDefault();
+    // Use RegularPayments class directly
+    if (typeof RegularPayments !== 'undefined' && RegularPayments.add) {
+        RegularPayments.add();
+    } else {
+        console.error('RegularPayments.add not available');
+        if (typeof showToast === 'function') {
+            showToast('Sistem henÃ¼z hazÄ±r deÄŸil, birkaÃ§ saniye bekleyin', 'error');
+        }
+    }
+}
 // Remove regular payment
 function removeRegularPayment(index) {
     // In the new system, deletion by id is preferred instead of index.
@@ -93,45 +114,37 @@ function removeRegularPayment(index) {
         deleteRegularPayment(target.id);
     }
 }
-
 // Update shortcut info - for both people and cards
 function updateShortcutInfo() {
     const shortcutElement = document.getElementById('shortcutInfo');
     if (!shortcutElement) {
         return;
     }
-
     let shortcutText = 'Shortcuts: ';
-
     // User shortcuts
     if (people && people.length > 0) {
         const userShortcuts = people.slice(0, 5).map((person, index) => `Ctrl+${index + 1}=${person}`).join(', ');
         shortcutText += `Users: ${userShortcuts}`;
     }
-
     // Card shortcuts (Shift + 1-9)
     if (creditCards && creditCards.length > 0) {
         const cardShortcuts = creditCards.slice(0, 9).map((card, index) => `Shift+${index + 1}=${card}`).join(', ');
         shortcutText += (people && people.length > 0) ? ` | Cards: ${cardShortcuts}` : `Cards: ${cardShortcuts}`;
     }
-
     shortcutElement.textContent = shortcutText;
 }
-
 // Sticky form values
 let stickyCardValue = '';
 let stickyDateValue = '';
-
 // Keyboard shortcuts handler
 function handleKeyboardShortcuts(event) {
-    // Input alanlarında kısayolları devre dışı bırak
+    // Input alanlarÄ±nda kÄ±sayollarÄ± devre dÄ±ÅŸÄ± bÄ±rak
     const activeElement = document.activeElement;
     const isInputField = activeElement && (
         activeElement.tagName === 'INPUT' ||
         activeElement.tagName === 'TEXTAREA' ||
         activeElement.tagName === 'SELECT'
     );
-
     // User shortcuts (Ctrl + 1-5)
     if (event.ctrlKey && event.key >= '1' && event.key <= '5' && !event.shiftKey && !event.altKey) {
         const userIndex = parseInt(event.key) - 1;
@@ -143,9 +156,8 @@ function handleKeyboardShortcuts(event) {
             }
         }
     }
-
-    // Card shortcuts (Shift + 1-9) - only when not in input fields
-    if (event.shiftKey && event.code >= 'Digit1' && event.code <= 'Digit9' && !event.ctrlKey && !event.altKey && !isInputField) {
+    // Card shortcuts (Ctrl + Shift + 1-9) - only when not in input fields
+    if (event.ctrlKey && event.shiftKey && event.code >= 'Digit1' && event.code <= 'Digit9' && !event.altKey && !isInputField) {
         const cardIndex = parseInt(event.code.replace('Digit', '')) - 1;
         if (creditCards && creditCards[cardIndex]) {
             const cardSelect = document.getElementById('card');
@@ -156,7 +168,6 @@ function handleKeyboardShortcuts(event) {
             }
         }
     }
-
     // Submit form with Enter key (only in form elements)
     if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.altKey) {
         const activeElement = document.activeElement;
@@ -169,7 +180,6 @@ function handleKeyboardShortcuts(event) {
         }
     }
 }
-
 // Apply sticky values
 function applyStickyValues() {
     // Apply card value if sticky
@@ -179,7 +189,6 @@ function applyStickyValues() {
             cardSelect.value = stickyCardValue;
         }
     }
-
     // Apply date value if sticky
     if (stickyDateValue) {
         const dateInput = document.getElementById('expenseDate');
@@ -188,12 +197,10 @@ function applyStickyValues() {
         }
     }
 }
-
 // Preserve sticky values after form reset
 function preserveStickyValues() {
     const cardSelect = document.getElementById('card');
     const dateInput = document.getElementById('expenseDate');
-
     // Save current values as sticky
     if (cardSelect && cardSelect.value) {
         stickyCardValue = cardSelect.value;
@@ -202,22 +209,18 @@ function preserveStickyValues() {
         stickyDateValue = dateInput.value;
     }
 }
-
 // Initialize after auth system loads and update shortcut info
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize common components
     if (typeof initializePage === 'function') {
         initializePage('add-expense');
     }
-
     // Add keyboard shortcuts listener
     document.addEventListener('keydown', handleKeyboardShortcuts);
-
     // Add form change listeners
     setTimeout(() => {
         const cardSelect = document.getElementById('card');
         const dateInput = document.getElementById('expenseDate');
-
         if (cardSelect) {
             cardSelect.addEventListener('change', function () {
                 if (this.value) {
@@ -225,7 +228,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         }
-
         if (dateInput) {
             dateInput.addEventListener('change', function () {
                 if (this.value) {
@@ -233,14 +235,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         }
-
         // Initial sticky values application
         applyStickyValues();
     }, 200);
-
     // Update shortcut info with short delay
     setTimeout(updateShortcutInfo, 500);
-
     // Update after auth system loads data
     if (typeof authSystem !== 'undefined') {
         const originalTrigger = authSystem.triggerPageUpdates;
