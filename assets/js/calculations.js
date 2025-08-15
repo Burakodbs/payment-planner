@@ -60,6 +60,39 @@ function getMonthlyFutureTaksits() {
     return monthlyTaksits;
 }
 
+function getFutureTaksits(selectedMonth) {
+    const futureTaksits = [];
+    const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
+    expenses.forEach(expense => {
+        // Yeni İngilizce alanları ve eski Türkçe alanları destekle
+        const isInstallment = expense.isInstallment || expense.isTaksit;
+        const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
+        const installmentNumber = expense.installmentNumber || expense.taksitNo;
+        if (isInstallment && totalInstallments && installmentNumber) {
+            const [expenseYear, expenseMonth, expenseDay] = expense.date.split('-').map(Number);
+            const kalanTaksit = totalInstallments - installmentNumber;
+            for (let i = 1; i <= kalanTaksit; i++) {
+                let taksitYear = expenseYear;
+                let taksitMonth = expenseMonth + i;
+                while (taksitMonth > 12) {
+                    taksitMonth -= 12;
+                    taksitYear += 1;
+                }
+                if (taksitYear === selectedYear && taksitMonth === selectedMonthNum) {
+                    futureTaksits.push({
+                        ...expense,
+                        taksitNo: installmentNumber + i,
+                        installmentNumber: installmentNumber + i,
+                        date: `${taksitYear}-${taksitMonth.toString().padStart(2, '0')}-${expenseDay.toString().padStart(2, '0')}`,
+                        isFuture: true
+                    });
+                }
+            }
+        }
+    });
+    return futureTaksits;
+}
+
 function getMonthlyRegularPayments() {
     const monthlyRegular = {};
     regularPayments.forEach(payment => {
@@ -71,6 +104,68 @@ function getMonthlyRegularPayments() {
         }
     });
     return monthlyRegular;
+}
+
+function getRecurringPaymentsForMonth(selectedMonth) {
+    const recurringPayments = [];
+    const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
+    regularPayments.forEach((odeme, index) => {
+        // Active field compatibility: support both 'active' and 'aktif' 
+        const isActive = odeme.active !== false && odeme.aktif !== false;
+        if (!isActive || !odeme.startDate) {
+            return;
+        }
+        const start = new Date(odeme.startDate);
+        const startYear = start.getFullYear();
+        const startMonth = start.getMonth() + 1;
+        // Eğer seçilen ay başlangıç tarihinden önceyse, düzenli ödeme henüz başlamamış
+        if (selectedYear < startYear || (selectedYear === startYear && selectedMonthNum < startMonth)) {
+            return;
+        }
+        // Eğer bitiş tarihi varsa ve seçilen ay bitiş tarihinden sonraysa, düzenli ödeme bitmiş
+        const endDate = odeme.endDate || odeme.bitisTarihi || odeme.birisTarihi;
+        if (endDate) {
+            const bitis = new Date(endDate);
+            const bitisYear = bitis.getFullYear();
+            const bitisMonth = bitis.getMonth() + 1;
+            if (selectedYear > bitisYear || (selectedYear === bitisYear && selectedMonthNum > bitisMonth)) {
+                return;
+            }
+        }
+        // Support both old and new field names for compatibility
+        const description = odeme.description || odeme.ad || 'Düzenli Ödeme';
+        const person = odeme.person || odeme.user || 'Unknown'; // Standardize to person
+        // Bu aya ait düzenli ödemeyi expense formatına dönüştür
+        const recurringExpense = {
+            id: `recurring-${odeme.id}-${selectedMonth}`,
+            date: `${selectedYear}-${selectedMonthNum.toString().padStart(2, '0')}-${start.getDate().toString().padStart(2, '0')}`,
+            card: odeme.card,
+            person: person,
+            kategori: odeme.kategori || odeme.category || 'Düzenli Ödeme',
+            description: `${description} (Düzenli)`,
+            amount: parseFloat(odeme.amount) || 0,
+            isRegular: true,
+            regularOdemeId: odeme.id
+        };
+        // Eğer bu ödeme bu ay için zaten expenses listesinde yoksa ekle
+        const existingExpense = expenses.find(h => {
+            // Önce regularOdemeId kontrolü
+            if (h.regularOdemeId === odeme.id && h.date && h.date.startsWith(selectedMonth)) {
+                return true;
+            }
+            // Alternatif kontrol: Aynı açıklama, tutar ve ay
+            if (h.description && h.description.includes(description) && 
+                h.date && h.date.startsWith(selectedMonth) &&
+                Math.abs(parseFloat(h.amount) - parseFloat(odeme.amount)) < 0.01) {
+                return true;
+            }
+            return false;
+        });
+        if (!existingExpense) {
+            recurringPayments.push(recurringExpense);
+        }
+    });
+    return recurringPayments;
 }
 
 function calculateTotalBudget() {
@@ -151,8 +246,22 @@ function updateMonthlySummary(selectedMonth) {
         const now = new Date();
         selectedMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
     }
-    const monthlySummaryContent = document.getElementById('monthly-summary-content');
+    const monthlySummaryContent = document.getElementById('monthlySummaryContent');
     if (!monthlySummaryContent) return;
+    
+    // Check if data is available
+    const expensesArray = (typeof expenses !== 'undefined' && expenses) ? expenses : [];
+    const regularArray = (typeof regularPayments !== 'undefined' && regularPayments) ? regularPayments : [];
+    
+    if (expensesArray.length === 0 && regularArray.length === 0) {
+        monthlySummaryContent.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <h3>Henüz veri yok</h3>
+                <p>Bu ay için harcama verisi bulunamadı. Harcama ekleyerek başlayın.</p>
+            </div>
+        `;
+        return;
+    }
     
     const { monthlyExpenses, monthlyRegular } = getMonthlyExpenses(selectedMonth);
     

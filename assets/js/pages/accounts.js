@@ -6,10 +6,30 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initializePage === 'function') {
         initializePage('accounts');
     }
-    // Update accounts table
-    setTimeout(() => {
-        if (typeof updateAccounts === 'function') {
-            updateAccounts();
+    
+    // Wait for data to be loaded before updating accounts
+    function waitForDataAndUpdate() {
+        // Check if data is available
+        if (typeof authSystem !== 'undefined' && authSystem && authSystem.currentUser) {
+            // If user is logged in, check if data is loaded
+            if (expenses && people && expenses.length > 0) {
+                if (typeof updateAccounts === 'function') {
+                    updateAccounts();
+                }
+                return;
+            }
+        } else if (expenses && people) {
+            // If no auth system, use global data
+            if (typeof updateAccounts === 'function') {
+                updateAccounts();
+            }
+            return;
         }
-    }, 500);
+        
+        // If data not ready, wait a bit and try again
+        setTimeout(waitForDataAndUpdate, 500);
+    }
+    
+    // Start waiting for data
+    setTimeout(waitForDataAndUpdate, 100);
 });

@@ -177,9 +177,73 @@ function formatDate(dateString) {
         return dateString;
     }
 }
+
+// Update accounts table
+function updateAccounts() {
+    const accountsTable = document.getElementById('accountsTable');
+    if (!accountsTable) return;
+    
+    const tbody = accountsTable.querySelector('tbody');
+    if (!tbody) return;
+    
+    // Clear existing content
+    tbody.innerHTML = '';
+    
+    // Check if we have people data
+    const peopleArray = (typeof people !== 'undefined' && people) ? people : [];
+    const expensesArray = (typeof expenses !== 'undefined' && expenses) ? expenses : [];
+    
+    if (peopleArray.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    Henüz kişi verisi yok. Önce kişi ekleyin.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const { accounts, futurePayments } = calculateDebts();
+    
+    // Create rows for each person
+    peopleArray.forEach(person => {
+        const currentExpenses = accounts[person] || 0;
+        const futureInstallments = futurePayments[person] || 0;
+        const totalDebt = currentExpenses + futureInstallments;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${person}</strong></td>
+            <td class="${currentExpenses >= 0 ? 'debt-positive' : 'debt-negative'}">
+                ${formatCurrency(currentExpenses)}
+            </td>
+            <td class="${futureInstallments >= 0 ? 'debt-positive' : 'debt-negative'}">
+                ${formatCurrency(futureInstallments)}
+            </td>
+            <td class="${totalDebt >= 0 ? 'debt-positive' : 'debt-negative'}">
+                <strong>${formatCurrency(totalDebt)}</strong>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    // If no rows were added (no people with data), show appropriate message
+    if (tbody.children.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    Henüz harcama verisi yok. Harcama ekleyin.
+                </td>
+            </tr>
+        `;
+    }
+}
+
 // Make utilities globally available
 window.formatCurrency = formatCurrency;
 window.formatDate = formatDate;
+window.updateAccounts = updateAccounts;
 // Service Worker Registration - Essential for PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
