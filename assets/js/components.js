@@ -20,13 +20,12 @@ function renderHeader() {
 function renderNavigation(activePage = '') {
     const navItems = [
         { href: 'index.html', icon: '🏠', text: 'Ana Sayfa', id: 'dashboard' },
-        { href: 'harcama-ekle.html', icon: '➕', text: 'Harcama Ekle', id: 'harcama-ekle' },
-        { href: 'duzenli-odeme.html', icon: '🔄', text: 'Düzenli Ödeme', id: 'duzenli-odeme' },
-        { href: 'istatistikler.html', icon: '📊', text: 'İstatistikler', id: 'istatistikler' },
-        { href: 'expense-listesi.html', icon: '📋', text: 'Harcama Listesi', id: 'expense-listesi' },
-        { href: 'accounts.html', icon: '💰', text: 'Hesaplar', id: 'accounts' },
-        { href: 'aylik-ozet.html', icon: '📅', text: 'Aylık Özet', id: 'monthly-summary' },
-        { href: 'data-yonetimi.html', icon: '⚙️', text: 'Veri Yönetimi', id: 'data-yonetimi' }
+        { href: 'add-expense.html', icon: '➕', text: 'Harcama Ekle', id: 'add-expense' },
+        { href: 'expense-list.html', icon: '�', text: 'Harcama Listesi', id: 'expense-list' },
+        { href: 'accounts.html', icon: '�', text: 'Hesaplar', id: 'accounts' },
+        { href: 'monthly-summary.html', icon: '�', text: 'Aylık Özet', id: 'monthly-summary' },
+        { href: 'statistics.html', icon: '�', text: 'İstatistikler', id: 'statistics' },
+        { href: 'data-management.html', icon: '⚙️', text: 'Veri Yönetimi', id: 'data-management' }
     ];
     const navHTML = navItems.map(item => {
         const isActive = item.id === activePage || 
@@ -82,13 +81,12 @@ function initializePage(pageId) {
     // Update page title if needed
     const pageTitles = {
         'dashboard': 'Ana Sayfa',
-        'harcama-ekle': 'Harcama Ekle',
-        'duzenli-odeme': 'Düzenli Ödeme',
-        'istatistikler': 'İstatistikler',
-        'expense-listesi': 'Harcama Listesi',
+        'add-expense': 'Harcama Ekle',
+        'expense-list': 'Harcama Listesi',
         'accounts': 'Hesaplar',
         'monthly-summary': 'Aylık Özet',
-        'data-yonetimi': 'Veri Yönetimi'
+        'statistics': 'İstatistikler',
+        'data-management': 'Veri Yönetimi'
     };
     
     if (pageTitles[pageId]) {

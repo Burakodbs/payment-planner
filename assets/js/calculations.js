@@ -135,6 +135,18 @@ function getRecurringPaymentsForMonth(selectedMonth) {
         // Support both old and new field names for compatibility
         const description = odeme.description || odeme.ad || 'Düzenli Ödeme';
         const person = odeme.person || odeme.user || 'Unknown'; // Standardize to person
+        const amount = parseFloat(odeme.amount) || 0;
+        
+        // Skip if amount is 0 or invalid
+        if (amount <= 0) {
+            console.warn('Skipping recurring payment with invalid amount:', {
+                id: odeme.id,
+                description: description,
+                amount: odeme.amount,
+                parsedAmount: amount
+            });
+            return;
+        }
         // Bu aya ait düzenli ödemeyi expense formatına dönüştür
         const recurringExpense = {
             id: `recurring-${odeme.id}-${selectedMonth}`,
@@ -143,7 +155,7 @@ function getRecurringPaymentsForMonth(selectedMonth) {
             person: person,
             kategori: odeme.kategori || odeme.category || 'Düzenli Ödeme',
             description: `${description} (Düzenli)`,
-            amount: parseFloat(odeme.amount) || 0,
+            amount: amount,
             isRegular: true,
             regularOdemeId: odeme.id
         };

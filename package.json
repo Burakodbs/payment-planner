@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "python -m http.server 8000",
     "serve": "python -m http.server 8000",
+    "build": "node build-templates.js",
+    "build:watch": "node build-templates.js && python -m http.server 8000",
     "lint": "echo 'Lint kontrolü için ESLint kurulması gerekiyor'",
     "format": "echo 'Format kontrolü için Prettier kurulması gerekiyor'",
-    "build": "echo 'Bu proje statik dosyalardan oluşur, build gerekmez'",
     "preview": "python -m http.server 8000"
   },
   "keywords": [

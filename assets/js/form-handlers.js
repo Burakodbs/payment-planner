@@ -2,32 +2,64 @@
 class FormHandlers {
     static handleExpenseSubmit(event) {
         event.preventDefault();
+        
+        // Prevent double submission
+        const submitButton = event.target.querySelector('button[type="submit"]');
+        if (submitButton) {
+            if (submitButton.disabled) {
+                return;
+            }
+            submitButton.disabled = true;
+            setTimeout(() => {
+                submitButton.disabled = false;
+            }, 1000);
+        }
+        
         const formData = new FormData(event.target);
+        
+        // Validate amount before processing
+        const amountStr = formData.get('amount');
+        const amount = parseFloat(amountStr);
+        
+        if (!amountStr || amountStr.trim() === '' || isNaN(amount) || amount <= 0) {
+            NotificationService.error('Lütfen geçerli bir tutar girin');
+            // Focus on amount input
+            const amountInput = document.getElementById('amount');
+            if (amountInput) {
+                amountInput.focus();
+                amountInput.select();
+            }
+            return;
+        }
+        
         const expense = {
             id: Date.now(),
             date: formData.get('date'),
             card: formData.get('card'),
             person: formData.get('user'),
-            kategori: formData.get('kategori'),
+            category: formData.get('kategori'),
             description: formData.get('description'),
-            amount: parseFloat(formData.get('amount')),
+            amount: amount, // Use the validated parsed amount
+            installmentNumber: formData.get('taksitNo') ? parseInt(formData.get('taksitNo')) : null,
+            totalInstallments: formData.get('toplamTaksit') ? parseInt(formData.get('toplamTaksit')) : null,
+            isInstallment: formData.get('taksitNo') && formData.get('toplamTaksit'),
+            // Backward compatibility fields
+            kategori: formData.get('kategori'),
             taksitNo: formData.get('taksitNo') ? parseInt(formData.get('taksitNo')) : null,
             toplamTaksit: formData.get('toplamTaksit') ? parseInt(formData.get('toplamTaksit')) : null,
             isTaksit: formData.get('taksitNo') && formData.get('toplamTaksit')
         };
+        
         expenses.push(expense);
         DataManager.save();
+        
         // Sticky values
         FormHandlers.preserveStickyValues();
         event.target.reset();
         FormHandlers.applyStickyValues();
-        // Focus on amount input
-        const amountInput = document.getElementById('amount');
-        if (amountInput) {
-            amountInput.focus();
-            amountInput.select();
-        }
+        
         DataManager.updateAllViews();
+        
         NotificationService.success('Expense successfully added!');
     }
     static preserveStickyValues() {
@@ -57,6 +89,11 @@ class FormHandlers {
         const dateField = document.getElementById('expenseDate');
         if (dateField) {
             dateField.value = new Date().toISOString().slice(0, 10);
+        }
+        // Clear amount field to prevent accidental 0 submissions
+        const amountField = document.getElementById('amount');
+        if (amountField) {
+            amountField.value = '';
         }
     }
     static updateCardOptions() {

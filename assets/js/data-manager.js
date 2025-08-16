@@ -67,20 +67,29 @@ class RegularPayments {
         const card = document.getElementById('regularCard')?.value;
         const person = document.getElementById('regularUser')?.value; // HTML'de regularUser ama data'da person saklayalım
         const start = document.getElementById('regularStart')?.value;
+        
         if (!description || !amountVal || !card || !person || !start) {
             NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
+        
+        const parsedAmount = parseFloat(amountVal);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+            NotificationService.error('Lütfen geçerli bir tutar girin');
+            return;
+        }
+        
         const regularPayment = {
             id: Date.now(),
             description,
-            amount: parseFloat(amountVal),
+            amount: parsedAmount,
             card,
             person, // Standardize to 'person' for consistency
             startDate: start,
             category: 'Regular Payment',
             active: true
         };
+        
         regularPayments.push(regularPayment);
         DataManager.save();
         this.updateList();
@@ -248,10 +257,59 @@ function debugRegularPaymentsForMonth(month) {
 window.debugRegularPaymentsForMonth = debugRegularPaymentsForMonth;
 // Debug function to check data loading status
 function debugDataStatus() {
-    // Simplified logging - only for debugging when needed
+    console.log('=== DATA DEBUG INFO ===');
+    console.log('Regular payments:', regularPayments);
+    console.log('Current expenses count:', expenses.length);
+    
+    // Check for problematic regular payments
+    const problematicPayments = regularPayments.filter(payment => {
+        const amount = parseFloat(payment.amount);
+        return isNaN(amount) || amount <= 0;
+    });
+    
+    if (problematicPayments.length > 0) {
+        console.warn('Problematic regular payments found:', problematicPayments);
+    }
+    
+    // Check recent expenses for 0 amounts
+    const recentZeroAmountExpenses = expenses.filter(expense => {
+        return (parseFloat(expense.amount) || 0) === 0;
+    });
+    
+    if (recentZeroAmountExpenses.length > 0) {
+        console.warn('Zero amount expenses found:', recentZeroAmountExpenses);
+    }
+}
+
+// Function to clean zero amount expenses
+function cleanZeroAmountExpenses() {
+    const beforeCount = expenses.length;
+    const zeroExpenses = expenses.filter(expense => {
+        const amount = parseFloat(expense.amount);
+        return isNaN(amount) || amount <= 0;
+    });
+    
+    console.log('Zero amount expenses to be removed:', zeroExpenses);
+    
+    expenses = expenses.filter(expense => {
+        const amount = parseFloat(expense.amount);
+        return !isNaN(amount) && amount > 0;
+    });
+    
+    DataManager.save();
+    const removedCount = beforeCount - expenses.length;
+    console.log(`${removedCount} adet 0 TL'lik harcama temizlendi`);
+    
+    // Update views if on expense list page
+    if (typeof updateExpenseTable === 'function') {
+        updateExpenseTable();
+    }
+    
+    return removedCount;
 }
 // Make debug function globally available
 window.debugDataStatus = debugDataStatus;
+window.cleanZeroAmountExpenses = cleanZeroAmountExpenses;
 // Data migration: Convert user field to person for consistency
 function migrateUserToPersonFields() {
     let migrationCount = 0;
@@ -312,7 +370,7 @@ function updateExpenseTable() {
                 <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id || 'undefined'})">Delete</button>
             `;
         }
-        const amountValue = expense.amount ? Number(expense.amount).toFixed(2) : '0.00';
+        const amountValue = expense.amount !== undefined && expense.amount !== null ? Number(expense.amount).toFixed(2) : '0.00';
         row.innerHTML = `
             <td style="${rowStyle}">${new Date(expense.date).toLocaleDateString('tr-TR')}</td>
             <td style="${rowStyle}">${expense.card || '-'}</td>
@@ -394,16 +452,19 @@ function getDuzenliOdemelerAsHarcamalar() {
 function applyAllFilters() {
     // Harcamaları ve düzenli ödemeleri birleştir
     let filtered = [...expenses];
+    
     // Check if filter elements exist (only on expense-listesi page)
     const filtreDateElement = document.getElementById('filtreTarih');
     if (!filtreDateElement) {
         return filtered;
     }
     const selectedMonth = filtreDateElement.value;
+    
     if (selectedMonth) {
         const monthFiltered = filtered.filter(expense => expense.date.startsWith(selectedMonth));
         const futureTaksits = getFutureTaksits(selectedMonth);
         const recurringPayments = getRecurringPaymentsForMonth(selectedMonth);
+        
         filtered = [...monthFiltered, ...futureTaksits, ...recurringPayments];
     } else {
         filtered = [...expenses];

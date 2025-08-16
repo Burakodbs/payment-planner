@@ -62,9 +62,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
     setTimeout(waitForData, 500);
+    
     // Edit form event listener
     const editForm = document.getElementById('editExpenseForm');
     if (editForm) {
         editForm.addEventListener('submit', handleEditExpenseSubmit);
+    }
+    
+    // Initialize page with correct ID
+    if (typeof initializePage === 'function') {
+        initializePage('expense-list');
     }
 });

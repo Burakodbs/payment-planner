@@ -238,8 +238,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // Initial sticky values application
         applyStickyValues();
     }, 200);
+    
     // Update shortcut info with short delay
     setTimeout(updateShortcutInfo, 500);
+    
     // Update after auth system loads data
     if (typeof authSystem !== 'undefined') {
         const originalTrigger = authSystem.triggerPageUpdates;
@@ -247,5 +249,12 @@ document.addEventListener('DOMContentLoaded', function () {
             originalTrigger.call(this);
             setTimeout(updateShortcutInfo, 100);
         };
+    }
+});
+
+// Initialize page with correct ID
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof initializePage === 'function') {
+        initializePage('add-expense');
     }
 });
