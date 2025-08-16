@@ -35,12 +35,19 @@
     /* Status Colors */
     --success: #28a745;
     --success-bg: #d4edda;
+    --success-subtle: #f0f9f4;
     --warning: #ffc107;
     --warning-bg: #fff3cd;
+    --warning-subtle: #fefbf0;
     --danger: #dc3545;
     --danger-bg: #f8d7da;
+    --danger-subtle: #fef2f2;
     --info: #17a2b8;
     --info-bg: #d1ecf1;
+    --info-subtle: #f0f9ff;
+
+    /* Primary variations */
+    --primary-subtle: rgba(0, 0, 0, 0.05);
 
     /* Interactive States - Modern */
     --hover: #fafafa;
@@ -76,6 +83,7 @@
     --radius: 4px;
     --radius-md: 6px;
     --radius-lg: 8px;
+    --radius-full: 9999px;
 
     /* Figma-Style Transitions */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);

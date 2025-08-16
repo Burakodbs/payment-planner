@@ -178,7 +178,7 @@ function formatDate(dateString) {
     }
 }
 
-// Update accounts table
+// Update accounts table with modern design
 function updateAccounts() {
     const accountsTable = document.getElementById('accountsTable');
     if (!accountsTable) return;
@@ -196,15 +196,24 @@ function updateAccounts() {
     if (peopleArray.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                    Henüz kişi verisi yok. Önce kişi ekleyin.
+                <td colspan="5" class="empty-row">
+                    <div class="empty-state-small">
+                        <div class="empty-icon">👥</div>
+                        <div>Henüz kullanıcı yok</div>
+                        <small>Önce veri yönetimi sayfasından kullanıcı ekleyin</small>
+                    </div>
                 </td>
             </tr>
         `;
+        updateAccountsSummary(0, 0, 0, 0);
         return;
     }
     
     const { accounts, futurePayments } = calculateDebts();
+    
+    let totalExpenses = 0;
+    let totalFuture = 0;
+    let activeUsers = 0;
     
     // Create rows for each person
     peopleArray.forEach(person => {
@@ -212,38 +221,122 @@ function updateAccounts() {
         const futureInstallments = futurePayments[person] || 0;
         const totalDebt = currentExpenses + futureInstallments;
         
+        totalExpenses += currentExpenses;
+        totalFuture += futureInstallments;
+        if (totalDebt > 0) activeUsers++;
+        
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><strong>${person}</strong></td>
-            <td class="${currentExpenses >= 0 ? 'debt-positive' : 'debt-negative'}">
+            <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">👤</span>
+                    <strong>${person}</strong>
+                </div>
+            </td>
+            <td class="${currentExpenses >= 0 ? 'debt-positive' : currentExpenses < 0 ? 'debt-negative' : 'debt-neutral'}">
                 ${formatCurrency(currentExpenses)}
             </td>
-            <td class="${futureInstallments >= 0 ? 'debt-positive' : 'debt-negative'}">
+            <td class="${futureInstallments >= 0 ? 'debt-positive' : futureInstallments < 0 ? 'debt-negative' : 'debt-neutral'}">
                 ${formatCurrency(futureInstallments)}
             </td>
-            <td class="${totalDebt >= 0 ? 'debt-positive' : 'debt-negative'}">
+            <td class="${totalDebt >= 0 ? 'debt-positive' : totalDebt < 0 ? 'debt-negative' : 'debt-neutral'}">
                 <strong>${formatCurrency(totalDebt)}</strong>
+            </td>
+            <td>
+                <button class="detail-btn" onclick="showPersonDetails('${person}')">
+                    📊 Detay
+                </button>
             </td>
         `;
         tbody.appendChild(row);
     });
     
+    // Update summary cards
+    updateAccountsSummary(totalExpenses, totalFuture, totalExpenses + totalFuture, activeUsers);
+    
     // If no rows were added (no people with data), show appropriate message
     if (tbody.children.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                    Henüz harcama verisi yok. Harcama ekleyin.
+                <td colspan="5" class="empty-row">
+                    <div class="empty-state-small">
+                        <div class="empty-icon">💳</div>
+                        <div>Henüz harcama verisi yok</div>
+                        <small>Harcama ekledikten sonra hesaplar burada görünecek</small>
+                    </div>
                 </td>
             </tr>
         `;
     }
 }
 
+// Update summary cards
+function updateAccountsSummary(totalExpenses, totalFuture, netAmount, activeUsers) {
+    const totalExpensesEl = document.getElementById('totalExpensesAmount');
+    const totalFutureEl = document.getElementById('totalFutureAmount');
+    const accountBalanceEl = document.getElementById('accountBalance');
+    const activeUsersEl = document.getElementById('activeUsersCount');
+    
+    if (totalExpensesEl) totalExpensesEl.textContent = formatCurrency(totalExpenses);
+    if (totalFutureEl) totalFutureEl.textContent = formatCurrency(totalFuture);
+    if (accountBalanceEl) accountBalanceEl.textContent = formatCurrency(netAmount);
+    if (activeUsersEl) activeUsersEl.textContent = activeUsers.toString();
+}
+
+// Show person expense details
+function showPersonDetails(personName) {
+    // Filter expenses for this person
+    const personExpenses = expenses.filter(exp => exp.person === personName);
+    
+    if (personExpenses.length === 0) {
+        alert(`${personName} için henüz harcama kaydı bulunamadı.`);
+        return;
+    }
+    
+    // Create a simple modal or redirect to expense list with filter
+    const message = `${personName} - Son 5 Harcama:\n\n` + 
+        personExpenses
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 5)
+            .map(exp => `• ${exp.description}: ${formatCurrency(exp.amount)} (${exp.date})`)
+            .join('\n') + 
+        `\n\nToplam ${personExpenses.length} harcama kaydı var.`;
+    
+    alert(message);
+}
+
+// Export accounts data
+function exportAccountsData() {
+    const { accounts, futurePayments } = calculateDebts();
+    const peopleArray = (typeof people !== 'undefined' && people) ? people : [];
+    
+    let csvContent = "Kullanıcı,Mevcut Harcama,Gelecek Taksitler,Toplam\n";
+    
+    peopleArray.forEach(person => {
+        const current = accounts[person] || 0;
+        const future = futurePayments[person] || 0;
+        const total = current + future;
+        
+        csvContent += `${person},${current},${future},${total}\n`;
+    });
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `hesaplar_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
 // Make utilities globally available
 window.formatCurrency = formatCurrency;
 window.formatDate = formatDate;
 window.updateAccounts = updateAccounts;
+window.updateAccountsSummary = updateAccountsSummary;
+window.showPersonDetails = showPersonDetails;
+window.exportAccountsData = exportAccountsData;
 // Service Worker Registration - Essential for PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {

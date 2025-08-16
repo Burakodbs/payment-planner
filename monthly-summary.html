@@ -167,10 +167,6 @@
                             <span>👤</span>
                             <span id="currentUserInfo">Kullanıcı</span>
                         </div>
-                        <button class="theme-toggle" onclick="toggleTheme()"
-                            title="Tema Değiştir">
-                            🌙
-                        </button>
                     </div>
                 </div>
                 <div class="tabs">
@@ -190,21 +186,22 @@
                 <div class="content">
                     <!-- Aylık Özet Content -->
                     <div class="page-content">
-                        <h2>Aylık Özet</h2>
-
-                        <div class="month-selector">
-                            <div class="form-group">
-                                <label for="summaryDate">Hangi Ay?</label>
-                                <input type="month" id="summaryDate">
+                        <div class="page-header">
+                            <div class="page-header-content">
+                                <h2>📊 Aylık Özet</h2>
+                                <p>Seçilen aya ait harcama özetinizi görüntüleyin</p>
+                            </div>
+                            <div class="month-selector-compact">
+                                <label for="summaryDate">📅 Ay:</label>
+                                <input type="month" id="summaryDate" class="month-input-compact">
                             </div>
                         </div>
 
                         <div id="monthlySummaryContent">
-                            <div
-                                style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📅</div>
                                 <h3>Ay seçin ve özet görüntülensin</h3>
-                                <p>Yukarıdaki tarih seçiciden hangi ayı görmek
-                                    istediğinizi seçin.</p>
+                                <p>Yukarıdaki tarih seçiciden hangi ayı görmek istediğinizi seçin.</p>
                             </div>
                         </div>
                     </div>

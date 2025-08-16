@@ -173,6 +173,7 @@ function getRecurringPaymentsForMonth(selectedMonth) {
             }
             return false;
         });
+        
         if (!existingExpense) {
             recurringPayments.push(recurringExpense);
         }
@@ -236,8 +237,44 @@ function getMonthlyExpenses(selectedMonth) {
         const now = new Date();
         selectedMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
     }
-    const monthlyExpenses = expenses.filter(expense => isInCurrentMonth(expense, selectedMonth));
-    const monthlyRegular = regularPayments.filter(payment => payment.isActive !== false);
+    
+    // Sadece o aya ait harcamaları filtrele
+    const monthlyExpenses = expenses.filter(expense => {
+        return isInCurrentMonth(expense, selectedMonth);
+    });
+    
+    // Aktif düzenli ödemeleri al
+    const monthlyRegular = regularPayments.filter(payment => {
+        const isActive = payment.active !== false && payment.aktif !== false && payment.isActive !== false;
+        if (!isActive) return false;
+        
+        // Başlangıç tarihi kontrolü
+        if (payment.startDate) {
+            const startDate = new Date(payment.startDate);
+            const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
+            const startYear = startDate.getFullYear();
+            const startMonth = startDate.getMonth() + 1;
+            
+            // Seçilen ay başlangıçtan önce mi?
+            if (selectedYear < startYear || (selectedYear === startYear && selectedMonthNum < startMonth)) {
+                return false;
+            }
+            
+            // Bitiş tarihi kontrolü
+            const endDate = payment.endDate || payment.bitisTarihi;
+            if (endDate) {
+                const bitis = new Date(endDate);
+                const bitisYear = bitis.getFullYear();
+                const bitisMonth = bitis.getMonth() + 1;
+                if (selectedYear > bitisYear || (selectedYear === bitisYear && selectedMonthNum > bitisMonth)) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    });
+    
     return { monthlyExpenses, monthlyRegular };
 }
 
@@ -275,21 +312,39 @@ function updateMonthlySummary(selectedMonth) {
         return;
     }
     
-    const { monthlyExpenses, monthlyRegular } = getMonthlyExpenses(selectedMonth);
-    
-    // Tüm aylık harcamaları birleştir (harcamalar + düzenli ödemeler)
-    const allMonthlyExpenses = [...monthlyExpenses];
-    
-    // Düzenli ödemeleri de ekle
-    monthlyRegular.forEach(payment => {
-        allMonthlyExpenses.push({
-            ...payment,
-            date: selectedMonth + '-01',
-            category: payment.category || 'Düzenli Ödeme',
-            description: payment.description || payment.name,
-            isDuzenli: true
-        });
+    // Seçilen aya ait harcamaları al (sadece o aya ait taksitler dahil)
+    const monthlyExpenses = expensesArray.filter(expense => {
+        const expenseDate = new Date(expense.date);
+        const expenseMonth = `${expenseDate.getFullYear()}-${(expenseDate.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        // Taksitli harcamalar için özel kontrol
+        const isInstallment = expense.isInstallment || expense.isTaksit;
+        const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
+        const installmentNumber = expense.installmentNumber || expense.taksitNo;
+        
+        if (isInstallment && totalInstallments && installmentNumber) {
+            // Bu harcamanın hangi aylarda taksiti var kontrol et
+            const startDate = new Date(expense.date);
+            for (let i = 0; i < totalInstallments; i++) {
+                const taksitDate = new Date(startDate);
+                taksitDate.setMonth(startDate.getMonth() + i);
+                const taksitMonth = `${taksitDate.getFullYear()}-${(taksitDate.getMonth() + 1).toString().padStart(2, '0')}`;
+                if (taksitMonth === selectedMonth) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            // Normal harcama - sadece harcama tarihine bak
+            return expenseMonth === selectedMonth;
+        }
     });
+    
+    // Seçilen aya ait düzenli ödemeleri al
+    const recurringExpenses = getRecurringPaymentsForMonth(selectedMonth);
+    
+    // Tüm aylık harcamaları birleştir
+    const allMonthlyExpenses = [...monthlyExpenses, ...recurringExpenses];
     
     // Kullanıcı bazında toplamlar
     const userToplamlar = {};
@@ -321,47 +376,84 @@ function updateMonthlySummary(selectedMonth) {
     const toplamTutar = allMonthlyExpenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
     
     const html = `
-        <div style="display: grid; gap: 20px;">
-            <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
-                <h3 style="color: var(--text); margin: 0 0 16px 0;">${monthName} ${year} Özeti</h3>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--primary-subtle); border-radius: var(--radius);">
-                    <span style="color: var(--primary); font-weight: 600;">Toplam Harcama:</span>
-                    <span style="color: var(--primary); font-weight: 700; font-size: 18px;">${toplamTutar.toFixed(2)} TL</span>
+        <div class="monthly-summary-container">
+            <!-- Üst Özet Kartı -->
+            <div class="summary-header-card">
+                <div class="summary-title">
+                    <h3>📊 ${monthName} ${year} Özeti</h3>
+                </div>
+                <div class="total-amount-display">
+                    <span class="total-label">Toplam Harcama</span>
+                    <span class="total-value">${toplamTutar.toFixed(2)} TL</span>
                 </div>
             </div>
             
-            <div style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                
-            <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
-                <h4 style="color: var(--text); margin: 0 0 16px 0;">👥 Kullanıcı Bazında</h4>
-                ${Object.entries(userToplamlar)
+            <!-- İstatistik Kartları -->
+            <div class="stats-grid">
+                <!-- Kullanıcı Bazında Stats -->
+                <div class="stats-card">
+                    <div class="stats-header">
+                        <h4>👥 Kullanıcı Bazında</h4>
+                        <span class="stats-count">${Object.keys(userToplamlar).length} kullanıcı</span>
+                    </div>
+                    <div class="stats-list">
+                        ${Object.entries(userToplamlar)
             .sort((a, b) => b[1] - a[1])
             .map(([user, tutar]) => `
-                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">
-                            <span style="color: var(--text);">${user}</span>
-                            <span style="color: var(--primary); font-weight: 600;">${tutar.toFixed(2)} TL</span>
-                        </div>
-                    `).join('')}
-            </div>
-            
-            <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
-                <h4 style="color: var(--text); margin: 0 0 16px 0;">💳 Kart Bazında</h4>
-                ${Object.entries(cardToplamlar)
+                            <div class="stats-item">
+                                <div class="stats-item-info">
+                                    <span class="stats-item-name">${user}</span>
+                                    <div class="stats-item-bar">
+                                        <div class="stats-item-fill" style="width: ${(tutar / toplamTutar * 100).toFixed(1)}%"></div>
+                                    </div>
+                                </div>
+                                <span class="stats-item-value">${tutar.toFixed(2)} TL</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <!-- Kart Bazında Stats -->
+                <div class="stats-card">
+                    <div class="stats-header">
+                        <h4>💳 Kart Bazında</h4>
+                        <span class="stats-count">${Object.keys(cardToplamlar).length} kart</span>
+                    </div>
+                    <div class="stats-list">
+                        ${Object.entries(cardToplamlar)
             .sort((a, b) => b[1] - a[1])
             .map(([card, tutar]) => `
-                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">
-                            <span style="color: var(--text);">${card}</span>
-                            <span style="color: var(--primary); font-weight: 600;">${tutar.toFixed(2)} TL</span>
-                        </div>
-                    `).join('')}
+                            <div class="stats-item">
+                                <div class="stats-item-info">
+                                    <span class="stats-item-name">${card}</span>
+                                    <div class="stats-item-bar">
+                                        <div class="stats-item-fill" style="width: ${(tutar / toplamTutar * 100).toFixed(1)}%"></div>
+                                    </div>
+                                </div>
+                                <span class="stats-item-value">${tutar.toFixed(2)} TL</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
             </div>
             
-        </div>
-        
-        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
-            <h4 style="color: var(--text); margin: 0 0 16px 0;">📋 Detaylı Harcama Listesi</h4>
-            <div style="display: grid; gap: 8px;">
-                ${allMonthlyExpenses
+            <!-- Harcama Listesi -->
+            <div class="expenses-list-card">
+                <div class="expenses-header">
+                    <h4>📋 Detaylı Harcama Listesi</h4>
+                    <span class="expenses-count">${allMonthlyExpenses.length} harcama</span>
+                </div>
+                
+                <div class="expenses-table">
+                    <div class="expenses-table-header">
+                        <div class="expense-col-description">Açıklama</div>
+                        <div class="expense-col-person">Kullanıcı</div>
+                        <div class="expense-col-card">Kart</div>
+                        <div class="expense-col-amount">Tutar</div>
+                    </div>
+                    
+                    <div class="expenses-table-body">
+                        ${allMonthlyExpenses
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .map(exp => {
                 const isInstallment = exp.isInstallment || exp.isTaksit;
@@ -369,25 +461,64 @@ function updateMonthlySummary(selectedMonth) {
                 const installmentNumber = exp.installmentNumber || exp.taksitNo;
                 
                 let taksitBilgi = '';
+                let currentInstallmentNumber = installmentNumber;
+                
+                // Taksitli harcamalar için hangi taksit numarasında olduğumuzu hesapla
                 if (isInstallment && totalInstallments && installmentNumber) {
-                    taksitBilgi = `(${installmentNumber}/${totalInstallments})`;
-                } else if (exp.isDuzenli) {
-                    taksitBilgi = '(Düzenli Ödeme)';
+                    const startDate = new Date(exp.date);
+                    const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
+                    
+                    // Kaç ay geçmiş hesapla
+                    let monthsPassed = 0;
+                    for (let i = 0; i < totalInstallments; i++) {
+                        const taksitDate = new Date(startDate);
+                        taksitDate.setMonth(startDate.getMonth() + i);
+                        const taksitMonth = `${taksitDate.getFullYear()}-${(taksitDate.getMonth() + 1).toString().padStart(2, '0')}`;
+                        if (taksitMonth === selectedMonth) {
+                            currentInstallmentNumber = installmentNumber + i;
+                            break;
+                        }
+                    }
+                    
+                    taksitBilgi = `${currentInstallmentNumber}/${totalInstallments} Taksit`;
+                } else if (exp.isRegular || exp.isDuzenli) {
+                    taksitBilgi = 'Düzenli Ödeme';
+                }
+                
+                // Harcama tipine göre ikon belirle
+                let typeIcon = '💳';
+                if (exp.isRegular || exp.isDuzenli) {
+                    typeIcon = '🔄';
+                } else if (isInstallment) {
+                    typeIcon = '📅';
                 }
                 
                 return `
-                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 12px; padding: 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); align-items: center;">
-                                <div>
-                                    <div style="font-weight: 500; color: var(--text);">${exp.description || exp.name || 'Harcama'}</div>
-                                    <div style="font-size: 12px; color: var(--text-muted);">${exp.category || 'Genel'}</div>
-                                    ${taksitBilgi ? `<span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">${taksitBilgi}</span>` : ''}
+                            <div class="expense-row">
+                                <div class="expense-col-description">
+                                    <div class="expense-main-info">
+                                        <span class="expense-icon">${typeIcon}</span>
+                                        <div class="expense-details">
+                                            <span class="expense-name">${exp.description || exp.name || 'Harcama'}</span>
+                                            <span class="expense-category">${exp.category || exp.kategori || 'Genel'}</span>
+                                        </div>
+                                    </div>
+                                    ${taksitBilgi ? `<span class="expense-badge">${taksitBilgi}</span>` : ''}
                                 </div>
-                                <div style="font-size: 12px; color: var(--text-secondary);">${exp.person}</div>  
-                                <div style="font-size: 12px; color: var(--text-secondary);">${exp.card}</div>
-                                <div style="color: var(--primary); font-weight: 600;">${(parseFloat(exp.amount) || 0).toFixed(2)} TL</div>
+                                <div class="expense-col-person">
+                                    <span class="expense-person">${exp.person}</span>
+                                </div>  
+                                <div class="expense-col-card">
+                                    <span class="expense-card">${exp.card || 'Diğer'}</span>
+                                </div>
+                                <div class="expense-col-amount">
+                                    <span class="expense-amount">${(parseFloat(exp.amount) || 0).toFixed(2)} TL</span>
+                                </div>
                             </div>
                         `;
             }).join('')}
+                    </div>
+                </div>
             </div>
         </div>
     `;

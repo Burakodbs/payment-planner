@@ -7,37 +7,6 @@ let people = [];
 const currentMonth = new Date().toISOString().slice(0, 7);
 const currentDate = new Date().toISOString().slice(0, 10);
 
-// Figma-Inspired Theme System
-function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon();
-}
-
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon();
-}
-
-function updateThemeIcon() {
-    const themeButtons = document.querySelectorAll('.theme-toggle');
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    
-    themeButtons.forEach(button => {
-        if (currentTheme === 'dark') {
-            button.innerHTML = '☀️';
-            button.title = 'Açık temaya geç';
-        } else {
-            button.innerHTML = '🌙';
-            button.title = 'Koyu temaya geç';
-        }
-    });
-}
-
 // Tab Navigation
 function showTab(tabName) {
     // Hide all tabs
@@ -86,9 +55,6 @@ function showPageTab(tabName) {
 
 // Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
-    // Tema sistemini hemen başlat
-    initializeTheme();
-    
     // Auth sistemi başlatılana kadar bekle
     function waitForAuthSystem() {
         if (typeof authSystem !== 'undefined' && authSystem && authSystem.currentUser) {
