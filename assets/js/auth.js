@@ -387,38 +387,77 @@ class AuthSystem {
     loadUserData() {
         if (!this.currentUser || !this.users[this.currentUser]) return;
         const userData = this.users[this.currentUser].data;
-        // Global değişkenleri güncelle - güvenli şekilde
-        if (typeof expenses !== 'undefined') {
-            expenses = userData.expenses || [];
-        } else {
-            // Global değişken henüz tanımlı değilse window'da tanımla
-            window.expenses = userData.expenses || [];
+        
+        console.log('🔄 loadUserData called for user:', this.currentUser, {
+            expenses: userData.expenses?.length || 0,
+            regularPayments: userData.regularPayments?.length || 0,
+            creditCards: userData.creditCards?.length || 0,
+            people: userData.people?.length || 0
+        });
+        
+        console.log('🔍 Global variables before update:', {
+            expensesDefined: typeof expenses !== 'undefined',
+            expensesLength: typeof expenses !== 'undefined' ? expenses?.length : 'undefined',
+            windowExpenses: window.expenses?.length || 'undefined'
+        });
+        
+        // Ensure global variables exist first
+        if (typeof window.expenses === 'undefined') window.expenses = [];
+        if (typeof window.regularPayments === 'undefined') window.regularPayments = [];
+        if (typeof window.creditCards === 'undefined') window.creditCards = [];
+        if (typeof window.people === 'undefined') window.people = [];
+        
+        // Force update window arrays
+        window.expenses.length = 0;
+        window.expenses.push(...(userData.expenses || []));
+        
+        window.regularPayments.length = 0;
+        window.regularPayments.push(...(userData.regularPayments || []));
+        
+        window.creditCards.length = 0;
+        window.creditCards.push(...(userData.creditCards || []));
+        
+        window.people.length = 0;
+        window.people.push(...(userData.people || []));
+        
+        // Update global variable references completely
+        try {
+            // Replace global variables entirely with window references
+            if (typeof expenses !== 'undefined') {
+                window.expenses = userData.expenses || [];
+                // Force global variable to reference window object
+                expenses = window.expenses;
+            }
+            
+            if (typeof regularPayments !== 'undefined') {
+                window.regularPayments = userData.regularPayments || [];
+                regularPayments = window.regularPayments;
+            }
+            
+            if (typeof creditCards !== 'undefined') {
+                window.creditCards = userData.creditCards || [];
+                creditCards = window.creditCards;
+            }
+            
+            if (typeof people !== 'undefined') {
+                window.people = userData.people || [];
+                people = window.people;
+            }
+        } catch (error) {
+            console.error('❌ Error updating global variables:', error);
         }
-        if (typeof regularPayments !== 'undefined') {
-            regularPayments = userData.regularPayments || [];
-        } else {
-            window.regularPayments = userData.regularPayments || [];
-        }
-        if (typeof creditCards !== 'undefined') {
-            creditCards = userData.creditCards || [];
-        } else {
-            window.creditCards = userData.creditCards || [];
-        }
-        if (typeof people !== 'undefined') {
-            people = userData.people || [];
-        } else {
-            window.people = userData.people || [];
-        }
-        // currentUserData property'sini de güncelle (uyumluluk için)
+        
+        // currentUserData property'sini de güncelle (uyumlulık için)
         this.currentUserData = userData;
-        if (this.debug) {
-            console.log('User data loaded:', {
-                expenses: userData.expenses?.length || 0,
-                regularPayments: userData.regularPayments?.length || 0,
-                creditCards: userData.creditCards?.length || 0,
-                people: userData.people?.length || 0
-            });
-        }
+        
+        console.log('✅ User data loaded, global variables updated:', {
+            expenses: window.expenses?.length || 0,
+            regularPayments: window.regularPayments?.length || 0,
+            creditCards: window.creditCards?.length || 0,
+            people: window.people?.length || 0,
+            globalExpenses: typeof expenses !== 'undefined' ? expenses?.length : 'undefined'
+        });
+        
         // Simple light theme - no theme loading needed
         // Theme management disabled - using simple default theme
         // Mevcut expensesdan card ve kullanıcı çıkar (eksikse)
@@ -652,6 +691,11 @@ class AuthSystem {
         }
         // Harcama tablosu güncellemeleri
         if (typeof updateExpenseTable === 'function') {
+            console.log('📋 Calling updateExpenseTable from triggerPageUpdates...');
+            console.log('📊 Current data state:', {
+                expenses: expenses?.length || 0,
+                currentUserData: this.currentUserData?.expenses?.length || 0
+            });
             updateExpenseTable();
         }
         // Hesaplar güncellemeleri

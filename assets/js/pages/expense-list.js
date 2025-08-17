@@ -6,14 +6,69 @@ function setCurrentMonthFilter() {
         const currentDate = new Date();
         const currentMonth = currentDate.toISOString().slice(0, 7); // YYYY-MM format
         filterDate.value = currentMonth;
+        
+        console.log('📅 Current month filter set to:', currentMonth);
+        
         // Filtreyi ayarladıktan sonra tabloyu güncelle
         setTimeout(() => {
+            console.log('⏰ Calling updateExpenseTable from setCurrentMonthFilter...');
             if (typeof updateExpenseTable === 'function') {
                 updateExpenseTable();
             }
         }, 300);
     }
 }
+// Debug function to check data state
+function debugExpenseTable() {
+    console.log('🔍 DEBUG: Expense Table State');
+    console.log('🔍 Auth System:', {
+        exists: typeof authSystem !== 'undefined',
+        currentUser: authSystem?.currentUser,
+        isLoggedIn: authSystem?.isLoggedIn,
+        currentUserData: !!authSystem?.currentUserData,
+        userData: authSystem?.currentUserData
+    });
+    
+    console.log('🔍 Global Variables:', {
+        expenses: {
+            defined: typeof expenses !== 'undefined',
+            length: expenses?.length || 0,
+            sample: expenses?.slice(0, 3)
+        },
+        windowExpenses: {
+            exists: !!window.expenses,
+            length: window.expenses?.length || 0
+        }
+    });
+    
+    console.log('🔍 DOM Elements:', {
+        table: !!document.querySelector('#expenseTable tbody'),
+        filters: {
+            date: document.getElementById('filtreTarih')?.value,
+            user: document.getElementById('filterUser')?.value,
+            card: document.getElementById('filterCard')?.value
+        }
+    });
+    
+    // Force refresh auth data and table
+    if (authSystem && authSystem.currentUserData) {
+        console.log('🔄 Forcing data refresh...');
+        window.expenses = authSystem.currentUserData.expenses || [];
+        expenses = window.expenses;
+        
+        console.log('📊 After refresh:', {
+            expenses: expenses?.length || 0,
+            windowExpenses: window.expenses?.length || 0
+        });
+        
+        if (typeof updateExpenseTable === 'function') {
+            updateExpenseTable();
+        }
+    }
+    
+    alert('Debug bilgileri konsola yazdırıldı! F12 ile Developer Tools\'u açın.');
+}
+
 // Clear all filters function
 function clearAllFilters() {
     document.getElementById('filtreTarih').value = '';

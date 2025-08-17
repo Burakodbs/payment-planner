@@ -5,12 +5,14 @@ class DataManager {
             authSystem.saveUserData();
         }
     }
+    
     static getCards() {
         if (authSystem && authSystem.currentUserData) {
             return authSystem.currentUserData.creditCards || [];
         }
         return creditCards || [];
     }
+    
     static getUsers() {
         if (authSystem && authSystem.currentUserData) {
             return authSystem.currentUserData.people || [];
@@ -340,9 +342,54 @@ function updateExpenseTable() {
     if (!tbody) {
         return;
     }
+    
+    console.log('🔄 updateExpenseTable called:', {
+        expensesLength: expenses?.length || 0,
+        windowExpensesLength: window.expenses?.length || 0,
+        authSystemExists: typeof authSystem !== 'undefined',
+        currentUser: authSystem?.currentUser,
+        hasCurrentUserData: !!authSystem?.currentUserData,
+        authDataLength: authSystem?.currentUserData?.expenses?.length || 0
+    });
+    
+    // Always prefer window.expenses over global expenses variable
+    let workingExpenses = window.expenses || expenses || [];
+    
+    // If we have auth system data and window.expenses is empty, sync it
+    if (authSystem && authSystem.currentUserData && authSystem.currentUserData.expenses && workingExpenses.length === 0) {
+        console.log('🔄 Syncing from auth system to window.expenses...');
+        window.expenses = [...authSystem.currentUserData.expenses];
+        workingExpenses = window.expenses;
+        
+        // Also update global variable if it exists
+        if (typeof expenses !== 'undefined' && Array.isArray(expenses)) {
+            expenses.length = 0;
+            expenses.push(...authSystem.currentUserData.expenses);
+        }
+    }
+    
+    console.log('� Working with expenses array:', {
+        length: workingExpenses.length,
+        source: workingExpenses === window.expenses ? 'window.expenses' : 'global expenses'
+    });
+    
     const filteredExpenses = applyAllFilters();
     updateResultCount(filteredExpenses);
     tbody.innerHTML = '';
+    
+    console.log('📋 Filtered expenses:', filteredExpenses?.length || 0);
+    
+    if (!filteredExpenses || filteredExpenses.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    🔍 ${expenses?.length > 0 ? 'Filtrelere uygun harcama bulunamadı' : 'Henüz harcama kaydı yok'}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
     filteredExpenses.forEach((expense, index) => {
         const row = tbody.insertRow();
         // Hem eski hem yeni taksit alanlarını destekle
@@ -383,6 +430,8 @@ function updateExpenseTable() {
             </td>
         `;
     });
+    
+    console.log('✅ Table updated with', filteredExpenses.length, 'rows');
 }
 function updateResultCount(filteredExpenses) {
     const totalExpenses = expenses.length;
@@ -450,15 +499,29 @@ function getDuzenliOdemelerAsHarcamalar() {
     });
 }
 function applyAllFilters() {
-    // Harcamaları ve düzenli ödemeleri birleştir
-    let filtered = [...expenses];
+    // Always use window.expenses as the source of truth
+    let allExpenses = window.expenses || [];
+    
+    // If window.expenses is empty but auth system has data, sync it
+    if (allExpenses.length === 0 && authSystem && authSystem.currentUserData && authSystem.currentUserData.expenses) {
+        window.expenses = [...authSystem.currentUserData.expenses];
+        allExpenses = window.expenses;
+    }
+    
+    console.log('🔍 applyAllFilters called with expenses:', allExpenses.length);
+    
+    // Start with all expenses
+    let filtered = [...allExpenses];
     
     // Check if filter elements exist (only on expense-listesi page)
     const filtreDateElement = document.getElementById('filtreTarih');
     if (!filtreDateElement) {
+        console.log('📝 No filter elements found, returning all expenses');
         return filtered;
     }
     const selectedMonth = filtreDateElement.value;
+    
+    console.log('📅 Selected month filter:', selectedMonth);
     
     if (selectedMonth) {
         const monthFiltered = filtered.filter(expense => expense.date.startsWith(selectedMonth));
@@ -466,21 +529,33 @@ function applyAllFilters() {
         const recurringPayments = getRecurringPaymentsForMonth(selectedMonth);
         
         filtered = [...monthFiltered, ...futureTaksits, ...recurringPayments];
+        console.log('📊 Month filtered results:', {
+            monthFiltered: monthFiltered.length,
+            futureTaksits: futureTaksits.length,
+            recurringPayments: recurringPayments.length,
+            total: filtered.length
+        });
     } else {
-        filtered = [...expenses];
+        filtered = [...(expenses || [])];
+        console.log('📊 No month filter, showing all expenses:', filtered.length);
     }
+    
     const filterUserElement = document.getElementById('filterUser');
     const selectedUser = filterUserElement ? filterUserElement.value : '';
     if (selectedUser) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(expense => expense.person === selectedUser);
+        console.log(`👤 User filter applied: ${beforeCount} → ${filtered.length} (${selectedUser})`);
     }
+    
     const filterCardElement = document.getElementById('filterCard');
     const selectedCard = filterCardElement ? filterCardElement.value : '';
     if (selectedCard) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(expense => expense.card === selectedCard);
+        console.log(`💳 Card filter applied: ${beforeCount} → ${filtered.length} (${selectedCard})`);
     }
+    
     const minAmountElement = document.getElementById('minAmount');
     const maxAmountElement = document.getElementById('maxAmount');
     const minAmountValue = minAmountElement ? minAmountElement.value : '';
@@ -490,7 +565,9 @@ function applyAllFilters() {
     if (minAmountValue || maxAmountValue) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(expense => expense.amount >= minAmount && expense.amount <= maxAmount);
+        console.log(`💰 Amount filter applied: ${beforeCount} → ${filtered.length} (${minAmount}-${maxAmount})`);
     }
+    
     const sortCriteriaElement = document.getElementById('sortCriteria');
     const sortCriteria = sortCriteriaElement ? sortCriteriaElement.value : 'date-desc';
     const [field, direction] = sortCriteria.split('-');

@@ -1,8 +1,22 @@
 // Main Application Variables - Managed by auth system
-let expenses = [];
-let regularPayments = [];
-let creditCards = [];
-let people = [];
+// Initialize window properties first
+window.expenses = window.expenses || [];
+window.regularPayments = window.regularPayments || [];
+window.creditCards = window.creditCards || [];
+window.people = window.people || [];
+
+// Global variables always reference window properties
+let expenses = window.expenses;
+let regularPayments = window.regularPayments;
+let creditCards = window.creditCards;
+let people = window.people;
+
+console.log('🔄 Global variables initialized:', {
+    expenses: expenses.length,
+    regularPayments: regularPayments.length,
+    creditCards: creditCards.length,
+    people: people.length
+});
 
 const currentMonth = new Date().toISOString().slice(0, 7);
 const currentDate = new Date().toISOString().slice(0, 10);

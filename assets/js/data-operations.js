@@ -7,31 +7,42 @@ class DataOperations {
                 authSystem.ensureCardUserExtraction(); 
             } catch (_) {}
         }
+        
         const data = {
-            version: 2,
-            user: (authSystem && authSystem.currentUser) || null,
+            expenses: expenses || [],
+            regularPayments: regularPayments || [],
+            creditCards: creditCards || [],
+            people: people || [],
             exportDate: new Date().toISOString(),
-            counts: {
-                expenses: expenses.length,
-                regularPayments: regularPayments.length,
-                creditCards: creditCards.length,
-                people: people.length
-            },
-            expenses: expenses,
-            regularPayments: regularPayments,
-            creditCards: creditCards,
-            people: people
+            version: '3.1.0',
+            appName: 'Payment Planner'
         };
+        
+        const currentDate = new Date().toISOString().slice(0, 10);
+        const filename = `payment-planner-backup-${currentDate}.json`;
+        
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `kredi-cardi-dataleri-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        NotificationService.success('Veriler dışa aktarıldı');
+        
+        const totalRecords = data.expenses.length + data.regularPayments.length + data.creditCards.length + data.people.length;
+        NotificationService.success(`✅ Yedek oluşturuldu!\n📂 ${filename}\n📊 ${totalRecords} toplam kayıt`);
+        
+        console.log('✅ Export completed:', {
+            filename,
+            counts: {
+                expenses: data.expenses.length,
+                regularPayments: data.regularPayments.length,
+                creditCards: data.creditCards.length,
+                people: data.people.length
+            }
+        });
     }
     static importData() {
         const fileInput = document.getElementById('fileInput');
@@ -44,27 +55,52 @@ class DataOperations {
         reader.onload = function (e) {
             try {
                 const data = JSON.parse(e.target.result);
-                // Load raw data
-                if (Array.isArray(data.expenses)) expenses = data.expenses;
-                if (Array.isArray(data.regularPayments)) regularPayments = data.regularPayments;
-                if (Array.isArray(data.creditCards)) creditCards = data.creditCards;
-                if (Array.isArray(data.people)) people = data.people;
+                
+                // Enhanced validation for your backup format
+                if (!data || typeof data !== 'object') {
+                    NotificationService.error('Geçersiz dosya formatı');
+                    return;
+                }
+                
+                console.log('📂 Importing data from:', file.name, data);
+                
+                // Load raw data with multiple format support
+                if (Array.isArray(data.expenses) || Array.isArray(data.harcamalar)) {
+                    expenses = data.expenses || data.harcamalar || [];
+                }
+                if (Array.isArray(data.regularPayments) || Array.isArray(data.duzenliOdemeler)) {
+                    regularPayments = data.regularPayments || data.duzenliOdemeler || [];
+                }
+                if (Array.isArray(data.creditCards) || Array.isArray(data.kartlar)) {
+                    creditCards = data.creditCards || data.kartlar || [];
+                }
+                if (Array.isArray(data.people) || Array.isArray(data.kisiler)) {
+                    people = data.people || data.kisiler || [];
+                }
+                
                 // Save data
                 DataManager.save();
+                
                 // Update UI components
                 FormHandlers.updateCardOptions();
                 FormHandlers.updateUserOptions();
                 DataOperations.migrateRegularExpensesToDefinitions();
                 DataManager.updateAllViews();
+                
                 const importCount = {
-                    expenses: Array.isArray(data.expenses) ? data.expenses.length : 0,
-                    regularPayments: Array.isArray(data.regularPayments) ? data.regularPayments.length : 0,
-                    creditCards: Array.isArray(data.creditCards) ? data.creditCards.length : 0,
-                    people: Array.isArray(data.people) ? data.people.length : 0
+                    expenses: expenses.length,
+                    regularPayments: regularPayments.length,
+                    creditCards: creditCards.length,
+                    people: people.length
                 };
-                NotificationService.success(`Veriler içe aktarıldı: ${importCount.expenses} expense, ${importCount.regularPayments} düzenli ödeme, ${importCount.creditCards} card, ${importCount.people} kişi`);
+                
+                NotificationService.success(`✅ Veriler içe aktarıldı!\n💳 ${importCount.expenses} harcama\n🔄 ${importCount.regularPayments} düzenli ödeme\n🏦 ${importCount.creditCards} kart\n👤 ${importCount.people} kişi`);
                 fileInput.value = '';
+                
+                console.log('✅ Import completed:', importCount);
+                
             } catch (error) {
+                console.error('❌ Import error:', error);
                 NotificationService.error('Dosya okuma hatası: ' + error.message);
             }
         };
