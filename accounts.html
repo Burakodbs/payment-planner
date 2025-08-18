@@ -6,9 +6,9 @@
         <title>Hesaplar - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi cardı expensesınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
         <meta name="keywords"
-            content="kredi cardı, expense takip, fatura, ödeme, finans">
+            content="Kredi kartı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
 
         <meta name="theme-color" content="#007bff">
@@ -47,7 +47,7 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
+                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
                     </div>
 
                     <!-- Login Form Only -->
@@ -89,7 +89,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi cardsını
+                            <p>Takip etmek istediğiniz kredi kartlarını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -155,7 +155,7 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi cardı
+                                <div class="header-subtitle">Kredi kartı
                                     expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
@@ -166,15 +166,11 @@
                             <span>👤</span>
                             <span id="currentUserInfo">Kullanıcı</span>
                         </div>
-                        <button class="theme-toggle" onclick="toggleTheme()"
-                            title="Tema Değiştir">
-                            🌙
-                        </button>
                     </div>
                 </div>
                 <div class="tabs">
                     <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-                    <a href="add-expense.html" class="tab">➕ Add Expense</a>
+                    <a href="add-expense.html" class="tab">➕ Harcama Ekle</a>
                     <a href="expense-list.html" class="tab">📋 Harcama
                         Listesi</a>
                     <a href="accounts.html" class="tab active">💰 Hesaplar</a>
@@ -188,45 +184,107 @@
                 <div class="content">
                     <!-- Hesaplar Content -->
                     <div class="page-content">
-                        <h2>Hesaplar</h2>
-                        <p>Kişi bazında borç/alacak durumu ve gelecek taksit
-                            ödemeleri</p>
-
-                        <div class="table-container">
-                            <table id="accountsTable" class="accounts-table">
-                                <thead>
-                                    <tr>
-                                        <th>Kişi</th>
-                                        <th>Mevcut Harcama</th>
-                                        <th>Gelecek Taksitler</th>
-                                        <th>Toplam Borç</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="4"
-                                            style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                            Henüz data yok
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="page-header">
+                            <div class="page-header-content">
+                                <h2>💰 Hesaplar</h2>
+                                <p>Kişi bazında harcama durumu ve borç/alacak takibi</p>
+                            </div>
                         </div>
 
-                        <div class="debt-summary">
-                            <h3>Borç Açıklaması</h3>
-                            <div class="legend">
-                                <div class="legend-item">
-                                    <span
-                                        class="legend-color debt-positive"></span>
-                                    <span>Pozitif: Bu kişi toplam bu kadar ödeme
-                                        yapmış/yapacak</span>
+                        <!-- Özet Kartları -->
+                        <div class="accounts-summary-grid">
+                            <div class="summary-card positive">
+                                <div class="summary-icon">📈</div>
+                                <div class="summary-content">
+                                    <h3 id="totalExpensesAmount">0 TL</h3>
+                                    <p>Toplam Harcama</p>
                                 </div>
-                                <div class="legend-item">
-                                    <span
-                                        class="legend-color debt-negative"></span>
-                                    <span>Negatif: Bu kişiye bu kadar borç
-                                        var</span>
+                            </div>
+                            <div class="summary-card warning">
+                                <div class="summary-icon">📅</div>
+                                <div class="summary-content">
+                                    <h3 id="totalFutureAmount">0 TL</h3>
+                                    <p>Gelecek Taksitler</p>
+                                </div>
+                            </div>
+                            <div class="summary-card info">
+                                <div class="summary-icon">⚖️</div>
+                                <div class="summary-content">
+                                    <h3 id="accountBalance">0 TL</h3>
+                                    <p>Net Durum</p>
+                                </div>
+                            </div>
+                            <div class="summary-card neutral">
+                                <div class="summary-icon">👥</div>
+                                <div class="summary-content">
+                                    <h3 id="activeUsersCount">0</h3>
+                                    <p>Aktif Kullanıcı</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modern Hesaplar Tablosu -->
+                        <div class="accounts-table-card">
+                            <div class="table-header">
+                                <h3>📊 Detaylı Hesap Durumu</h3>
+                                <div class="table-actions">
+                                    <button class="btn btn-sm btn-outline" onclick="exportAccountsData()">
+                                        📤 Dışa Aktar
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table id="accountsTable" class="modern-accounts-table">
+                                    <thead>
+                                        <tr>
+                                            <th>👤 Kullanıcı</th>
+                                            <th>💳 Mevcut Harcama</th>
+                                            <th>📅 Gelecek Taksitler</th>
+                                            <th>💰 Toplam Durum</th>
+                                            <th>📊 Detay</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5" class="empty-row">
+                                                <div class="empty-state-small">
+                                                    <div class="empty-icon">💳</div>
+                                                    <div>Henüz veri yok</div>
+                                                    <small>Harcama ekledikten sonra hesaplar burada görünecek</small>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Açıklama ve Yardım -->
+                        <div class="accounts-info-grid">
+                            <div class="info-card">
+                                <h4>💡 Nasıl Çalışır?</h4>
+                                <ul>
+                                    <li><strong>Mevcut Harcama:</strong> O ana kadar yapılan tüm harcamalar</li>
+                                    <li><strong>Gelecek Taksitler:</strong> Taksitli alışverişlerin kalan ödemeleri</li>
+                                    <li><strong>Toplam Durum:</strong> Mevcut + Gelecek taksitlerin toplamı</li>
+                                </ul>
+                            </div>
+                            <div class="info-card">
+                                <h4>🎯 Renk Kodları</h4>
+                                <div class="color-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-dot positive"></span>
+                                        <span>Pozitif: Harcama yapılmış</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-dot negative"></span>
+                                        <span>Negatif: Borç var (nadir)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-dot neutral"></span>
+                                        <span>Nötr: Henüz harcama yok</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

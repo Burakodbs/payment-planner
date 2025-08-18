@@ -1,50 +1,42 @@
-// Centralized Data Manager
+﻿// Centralized Data Manager
 class DataManager {
     static save() {
         if (authSystem && authSystem.currentUser) {
             authSystem.saveUserData();
         }
     }
-
+    
     static getCards() {
         if (authSystem && authSystem.currentUserData) {
             return authSystem.currentUserData.creditCards || [];
         }
         return creditCards || [];
     }
-
+    
     static getUsers() {
         if (authSystem && authSystem.currentUserData) {
             return authSystem.currentUserData.people || [];
         }
         return people || [];
     }
-
     static updateAllViews() {
         // Update table if exists
         if (typeof updateExpenseTable === 'function') updateExpenseTable();
-        
         // Update dashboard if exists
         if (typeof updateDashboard === 'function') updateDashboard();
-        
         // Update accounts if exists
         if (typeof updateAccounts === 'function') updateAccounts();
-        
         // Update regular payments list if exists
         if (typeof updateRegularPaymentsList === 'function') updateRegularPaymentsList();
-        
         // Update statistics if exists
         if (typeof updateDataStats === 'function') updateDataStats();
-        
         // Update card/user management if exists
         if (typeof updateCardAndUserManagement === 'function') updateCardAndUserManagement();
     }
 }
-
 // Regular Payments Management - Merged from regular-payments.js
 class RegularPayments {
     static editingId = null;
-
     static showForm() {
         const form = document.getElementById('regularOdemeForm');
         if (!form) return;
@@ -52,7 +44,6 @@ class RegularPayments {
         const dateField = document.getElementById('regularStart');
         if (dateField) dateField.value = new Date().toISOString().slice(0, 10);
     }
-
     static cancel() {
         this.editingId = null;
         const form = document.getElementById('regularOdemeForm');
@@ -71,27 +62,31 @@ class RegularPayments {
             submitBtn.className = 'btn';
         }
     }
-
     static add() {
         if (this.editingId) return this.update();
-        
         const description = document.getElementById('regularDescription')?.value?.trim();
         const amountVal = document.getElementById('regularAmount')?.value;
         const card = document.getElementById('regularCard')?.value;
-        const user = document.getElementById('regularUser')?.value;
+        const person = document.getElementById('regularUser')?.value; // HTML'de regularUser ama data'da person saklayalım
         const start = document.getElementById('regularStart')?.value;
         
-        if (!description || !amountVal || !card || !user || !start) {
+        if (!description || !amountVal || !card || !person || !start) {
             NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
+            return;
+        }
+        
+        const parsedAmount = parseFloat(amountVal);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+            NotificationService.error('Lütfen geçerli bir tutar girin');
             return;
         }
         
         const regularPayment = {
             id: Date.now(),
             description,
-            amount: parseFloat(amountVal),
+            amount: parsedAmount,
             card,
-            user,
+            person, // Standardize to 'person' for consistency
             startDate: start,
             category: 'Regular Payment',
             active: true
@@ -104,28 +99,28 @@ class RegularPayments {
         NotificationService.success('Düzenli ödeme eklendi');
         DataManager.updateAllViews();
     }
-
     static updateList() {
         const container = document.getElementById('regularPaymentsList');
-        if (!container) return;
-        
+        // Only update if container exists (only on add-expense page)
+        if (!container) {
+            return;
+        }
         if (!regularPayments.length) {
             container.innerHTML = '<p style="color: var(--text-muted);">Henüz düzenli ödeme tanımlanmamış</p>';
             return;
         }
-        
         let html = '';
-        regularPayments.forEach(payment => {
-            const isActive = payment.aktif !== false;
+        regularPayments.forEach((payment, index) => {
+            const isActive = payment.active !== false;
             const statusStyle = isActive ? '' : 'opacity:0.6; background: var(--bg-muted);';
             const statusText = isActive ? '' : ' (Durduruldu)';
             const endDate = payment.endDate ? ` - End: ${payment.endDate}` : '';
-            
+            const personName = payment.person || payment.user || 'Unknown'; // Backward compatibility
             html += `
                 <div style="background: var(--bg-secondary); padding:12px; border-radius: var(--radius); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; ${statusStyle}">
                     <div>
                         <div style="font-weight:600; color:var(--text);">${payment.description}${statusText}</div>
-                        <div style="font-size:12px; color:var(--text-secondary);">${payment.amount} TL - ${payment.person} - ${payment.card}</div>
+                        <div style="font-size:12px; color:var(--text-secondary);">${payment.amount} TL - ${personName} - ${payment.card}</div>
                         <div style="font-size:12px; color:var(--text-muted);">Başlangıç: ${payment.startDate}${endDate}</div>
                     </div>
                     <div>
@@ -139,27 +134,22 @@ class RegularPayments {
                 </div>
             `;
         });
-        
         container.innerHTML = html;
     }
-
     static edit(id) {
         const payment = regularPayments.find(o => o.id === id);
         if (!payment) {
             NotificationService.error('Düzenli ödeme bulunamadı');
             return;
         }
-        
         this.editingId = id;
         const form = document.getElementById('regularOdemeForm');
         if (form) form.style.display = 'block';
-        
         document.getElementById('regularDescription').value = payment.description;
         document.getElementById('regularAmount').value = payment.amount;
         document.getElementById('regularCard').value = payment.card;
-        document.getElementById('regularUser').value = payment.person;
+        document.getElementById('regularUser').value = payment.person || payment.user || ''; // Backward compatibility
         document.getElementById('regularStart').value = payment.startDate;
-        
         const formTitle = document.getElementById('regularFormTitle');
         if (formTitle) formTitle.textContent = 'Düzenli Ödemeyi Düzenle';
         const submitBtn = document.getElementById('regularSubmitBtn');
@@ -167,22 +157,18 @@ class RegularPayments {
             submitBtn.textContent = 'Güncelle';
             submitBtn.className = 'btn btn-primary';
         }
-        
         NotificationService.info('Düzenleme modu aktif');
     }
-
     static update() {
         const description = document.getElementById('regularDescription')?.value?.trim();
         const amountVal = document.getElementById('regularAmount')?.value;
         const card = document.getElementById('regularCard')?.value;
-        const user = document.getElementById('regularUser')?.value;
+        const person = document.getElementById('regularUser')?.value; // HTML'de regularUser ama data'da person
         const start = document.getElementById('regularStart')?.value;
-        
-        if (!description || !amountVal || !card || !user || !start) {
+        if (!description || !amountVal || !card || !person || !start) {
             NotificationService.error('Lütfen tüm zorunlu alanları doldurun');
             return;
         }
-        
         const idx = regularPayments.findIndex(o => o.id === this.editingId);
         if (idx !== -1) {
             regularPayments[idx] = {
@@ -190,10 +176,9 @@ class RegularPayments {
                 description,
                 amount: parseFloat(amountVal),
                 card,
-                user,
+                person, // Standardize to 'person'
                 startDate: start
             };
-            
             DataManager.save();
             this.updateList();
             this.cancel();
@@ -201,14 +186,12 @@ class RegularPayments {
             DataManager.updateAllViews();
         }
     }
-
     static delete(id) {
         const payment = regularPayments.find(o => o.id === id);
         if (!payment) {
             NotificationService.error('Düzenli ödeme bulunamadı');
             return;
         }
-        
         if (confirm(`"${payment.description}" düzenli ödemeyi durdurmak istediğinizden emin misiniz?\n\nGeçmişteki ödemeler korunacak, sadece gelecekteki otomatik kayıtlar durdurulacak.`)) {
             const today = new Date().toISOString().slice(0, 10);
             const idx = regularPayments.findIndex(o => o.id === id);
@@ -216,30 +199,25 @@ class RegularPayments {
                 regularPayments[idx].endDate = today;
                 regularPayments[idx].aktif = false;
             }
-            
             DataManager.save();
             this.updateList();
             NotificationService.success('Düzenli ödeme durduruldu. Geçmiş kayıtlar korundu.');
             DataManager.updateAllViews();
         }
     }
-
     static reactivate(id) {
         const idx = regularPayments.findIndex(o => o.id === id);
         if (idx !== -1) {
             regularPayments[idx].aktif = true;
             delete regularPayments[idx].endDate;
-            
             DataManager.save();
             this.updateList();
             NotificationService.success('Düzenli ödeme yeniden başlatıldı');
         }
     }
-
     static permanentDelete(id) {
         const payment = regularPayments.find(o => o.id === id);
         if (!payment) return;
-        
         if (confirm(`"${payment.description}" düzenli ödemeyi tamamen silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!`)) {
             const idx = regularPayments.findIndex(o => o.id === id);
             if (idx !== -1) {
@@ -251,7 +229,6 @@ class RegularPayments {
         }
     }
 }
-
 // Backward compatibility functions
 function showRegularPaymentForm() { RegularPayments.showForm(); }
 function cancelRegularPayment() { RegularPayments.cancel(); }
@@ -259,40 +236,170 @@ function addRegularPayment() { RegularPayments.add(); }
 function updateRegularPaymentsList() { RegularPayments.updateList(); }
 function editRegularPayment(id) { RegularPayments.edit(id); }
 function deleteRegularPayment(id) { RegularPayments.delete(id); }
-
 // Backward compatibility
 function saveData() {
     DataManager.save();
 }
+// Debug function to test regular payments for monthly summary
+function debugRegularPaymentsForMonth(month) {
+    regularPayments.forEach((payment, index) => {
+        // Simplified logging - only essential info
+        if (payment.active !== false && payment.startDate) {
+            const person = payment.person || payment.user || 'Unknown';
+        }
+    });
+    if (typeof getRecurringPaymentsForMonth === 'function') {
+        const monthlyRecurring = getRecurringPaymentsForMonth(month);
+        return monthlyRecurring;
+    } else {
+        console.error('âŒ getRecurringPaymentsForMonth fonksiyonu bulunamadı!');
+    }
+}
+// Make debug function globally available
+window.debugRegularPaymentsForMonth = debugRegularPaymentsForMonth;
+// Debug function to check data loading status
+function debugDataStatus() {
+    console.log('=== DATA DEBUG INFO ===');
+    console.log('Regular payments:', regularPayments);
+    console.log('Current expenses count:', expenses.length);
+    
+    // Check for problematic regular payments
+    const problematicPayments = regularPayments.filter(payment => {
+        const amount = parseFloat(payment.amount);
+        return isNaN(amount) || amount <= 0;
+    });
+    
+    if (problematicPayments.length > 0) {
+        console.warn('Problematic regular payments found:', problematicPayments);
+    }
+    
+    // Check recent expenses for 0 amounts
+    const recentZeroAmountExpenses = expenses.filter(expense => {
+        return (parseFloat(expense.amount) || 0) === 0;
+    });
+    
+    if (recentZeroAmountExpenses.length > 0) {
+        console.warn('Zero amount expenses found:', recentZeroAmountExpenses);
+    }
+}
 
+// Function to clean zero amount expenses
+function cleanZeroAmountExpenses() {
+    const beforeCount = expenses.length;
+    const zeroExpenses = expenses.filter(expense => {
+        const amount = parseFloat(expense.amount);
+        return isNaN(amount) || amount <= 0;
+    });
+    
+    console.log('Zero amount expenses to be removed:', zeroExpenses);
+    
+    expenses = expenses.filter(expense => {
+        const amount = parseFloat(expense.amount);
+        return !isNaN(amount) && amount > 0;
+    });
+    
+    DataManager.save();
+    const removedCount = beforeCount - expenses.length;
+    console.log(`${removedCount} adet 0 TL'lik harcama temizlendi`);
+    
+    // Update views if on expense list page
+    if (typeof updateExpenseTable === 'function') {
+        updateExpenseTable();
+    }
+    
+    return removedCount;
+}
+// Make debug function globally available
+window.debugDataStatus = debugDataStatus;
+window.cleanZeroAmountExpenses = cleanZeroAmountExpenses;
+// Data migration: Convert user field to person for consistency
+function migrateUserToPersonFields() {
+    let migrationCount = 0;
+    regularPayments.forEach(payment => {
+        if (payment.user && !payment.person) {
+            payment.person = payment.user;
+            delete payment.user;
+            migrationCount++;
+        }
+    });
+    if (migrationCount > 0) {
+        if (migrationCount > 0) {
+            DataManager.save();
+        }
+        DataManager.save();
+        return migrationCount;
+    }
+    return 0;
+}
+// Auto-run migration on page load
+if (typeof regularPayments !== 'undefined' && regularPayments.length > 0) {
+    migrateUserToPersonFields();
+}
 // Expense Table Update
 function updateExpenseTable() {
     const tbody = document.querySelector('#expenseTable tbody');
-
     // Check if table exists (only on expense-listesi page)
     if (!tbody) {
-        // console.log('Expense table not found, skipping table update');
         return;
     }
-
+    
+    console.log('🔄 updateExpenseTable called:', {
+        expensesLength: expenses?.length || 0,
+        windowExpensesLength: window.expenses?.length || 0,
+        authSystemExists: typeof authSystem !== 'undefined',
+        currentUser: authSystem?.currentUser,
+        hasCurrentUserData: !!authSystem?.currentUserData,
+        authDataLength: authSystem?.currentUserData?.expenses?.length || 0
+    });
+    
+    // Always prefer window.expenses over global expenses variable
+    let workingExpenses = window.expenses || expenses || [];
+    
+    // If we have auth system data and window.expenses is empty, sync it
+    if (authSystem && authSystem.currentUserData && authSystem.currentUserData.expenses && workingExpenses.length === 0) {
+        console.log('🔄 Syncing from auth system to window.expenses...');
+        window.expenses = [...authSystem.currentUserData.expenses];
+        workingExpenses = window.expenses;
+        
+        // Also update global variable if it exists
+        if (typeof expenses !== 'undefined' && Array.isArray(expenses)) {
+            expenses.length = 0;
+            expenses.push(...authSystem.currentUserData.expenses);
+        }
+    }
+    
+    console.log('� Working with expenses array:', {
+        length: workingExpenses.length,
+        source: workingExpenses === window.expenses ? 'window.expenses' : 'global expenses'
+    });
+    
     const filteredExpenses = applyAllFilters();
-
     updateResultCount(filteredExpenses);
-
     tbody.innerHTML = '';
-
-    // console.log('Filtrelenmiş expense sayısı:', filteredExpenses.length);
-    // console.log('İlk 5 expense:', filteredExpenses.slice(0, 5));
-    // console.log('Tüm expenses:', expenses.length);
-
+    
+    console.log('📋 Filtered expenses:', filteredExpenses?.length || 0);
+    
+    if (!filteredExpenses || filteredExpenses.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    🔍 ${expenses?.length > 0 ? 'Filtrelere uygun harcama bulunamadı' : 'Henüz harcama kaydı yok'}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
     filteredExpenses.forEach((expense, index) => {
         const row = tbody.insertRow();
-        const taksitBilgi = expense.isTaksit ? `${expense.taksitNo}/${expense.toplamTaksit}` : '-';
-
+        // Hem eski hem yeni taksit alanlarını destekle
+        const isInstallment = expense.isInstallment || expense.isTaksit;
+        const installmentNumber = expense.installmentNumber || expense.taksitNo;
+        const totalInstallments = expense.totalInstallments || expense.toplamTaksit;
+        const taksitBilgi = isInstallment ? `${installmentNumber}/${totalInstallments}` : '-';
         let rowStyle = '';
         let taksitEtiket = '';
         let actionButton = '';
-
         if (expense.isFuture) {
             rowStyle = 'background-color: #fff3cd; color: #856404;';
             taksitEtiket = '';
@@ -310,9 +417,7 @@ function updateExpenseTable() {
                 <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id || 'undefined'})">Delete</button>
             `;
         }
-
-        const amountValue = expense.amount ? Number(expense.amount).toFixed(2) : '0.00';
-
+        const amountValue = expense.amount !== undefined && expense.amount !== null ? Number(expense.amount).toFixed(2) : '0.00';
         row.innerHTML = `
             <td style="${rowStyle}">${new Date(expense.date).toLocaleDateString('tr-TR')}</td>
             <td style="${rowStyle}">${expense.card || '-'}</td>
@@ -325,22 +430,19 @@ function updateExpenseTable() {
             </td>
         `;
     });
+    
+    console.log('✅ Table updated with', filteredExpenses.length, 'rows');
 }
-
 function updateResultCount(filteredExpenses) {
     const totalExpenses = expenses.length;
     const shownCount = filteredExpenses.length;
-
     const actualExpenses = filteredExpenses.filter(h => !h.isFuture && !h.isRegular).length;
     const futurePayments = filteredExpenses.filter(h => h.isFuture).length;
     const regularPaymentCount = filteredExpenses.filter(h => h.isRegular).length;
-
     let message = `${shownCount} records shown`;
-
     if (shownCount < totalExpenses) {
         message += ` (Total of ${totalExpenses} records)`;
     }
-
     if (futurePayments > 0 || regularPaymentCount > 0) {
         let detail = [];
         if (actualExpenses > 0) detail.push(`${actualExpenses} expense`);
@@ -348,51 +450,46 @@ function updateResultCount(filteredExpenses) {
         if (futurePayments > 0) detail.push(`${futurePayments} future installment`);
         message += ` | ${detail.join(' + ')}`;
     }
-
     const totalAmount = filteredExpenses.reduce((sum, h) => sum + (Number(h.amount) || 0), 0);
     message += ` | Total: ${totalAmount.toFixed(2)} TL`;
-
     const resultCountElement = document.getElementById('resultCount');
     if (resultCountElement) {
         resultCountElement.textContent = message;
     }
 }
-
 // Filtreleme ve Sıralama
 // Düzenli ödemeleri expense formatına dönüştür
 function getDuzenliOdemelerAsHarcamalar() {
     const currentDate = new Date();
     const currentMonth = currentDate.toISOString().slice(0, 7); // YYYY-MM format
     const today = currentDate.toISOString().slice(0, 10);
-
     // Sadece aktif düzenli ödemeleri dahil et
     const aktiveDuzenliOdemeler = regularPayments.filter(odeme => {
         // Aktif olmayan ödemeleri hariç tut
-        if (odeme.aktif === false) {
+        if (odeme.aktif === false || odeme.active === false) {
             return false;
         }
-
         // If end date exists and is before today, exclude it
-    if ((payment.endDate || payment.endDate) && (payment.endDate || payment.endDate) <= today) {
+        const endDate = odeme.endDate || odeme.bitisTarihi;
+        if (endDate && endDate <= today) {
             return false;
         }
-
         // Başlangıç tarihi bugünden sonra ise henüz başlamamış, hariç tut
         if (odeme.startDate && odeme.startDate > today) {
             return false;
         }
-
         return true;
     });
-
     return aktiveDuzenliOdemeler.map(odeme => {
+        const description = odeme.description || odeme.ad || 'Düzenli Ödeme';
+        const person = odeme.person || odeme.user || 'Unknown'; // Standardize to person
         return {
             id: `duzenli_${odeme.id}_${currentMonth}`,
             date: `${currentMonth}-15`, // Ayın ortasına koy
             card: odeme.card,
-            person: odeme.person,
+            person: person,
             kategori: 'Düzenli Ödeme',
-            description: `${odeme.description} (Düzenli Ödeme)`,
+            description: `${description} (Düzenli Ödeme)`,
             amount: odeme.amount,
             taksitNo: null,
             toplamTaksit: null,
@@ -401,86 +498,83 @@ function getDuzenliOdemelerAsHarcamalar() {
         };
     });
 }
-
 function applyAllFilters() {
-    // console.log('--- FILTRE BAŞLANGICI ---');
-    // console.log('Toplam expense sayısı:', expenses.length);
-    // console.log('Düzenli ödeme sayısı:', regularPayments.length);
-
-    // Harcamaları ve düzenli ödemeleri birleştir
-    let filtered = [...expenses];
-
+    // Always use window.expenses as the source of truth
+    let allExpenses = window.expenses || [];
+    
+    // If window.expenses is empty but auth system has data, sync it
+    if (allExpenses.length === 0 && authSystem && authSystem.currentUserData && authSystem.currentUserData.expenses) {
+        window.expenses = [...authSystem.currentUserData.expenses];
+        allExpenses = window.expenses;
+    }
+    
+    console.log('🔍 applyAllFilters called with expenses:', allExpenses.length);
+    
+    // Start with all expenses
+    let filtered = [...allExpenses];
+    
     // Check if filter elements exist (only on expense-listesi page)
     const filtreDateElement = document.getElementById('filtreTarih');
     if (!filtreDateElement) {
-        // console.log('Filter elements not found, skipping filtering');
+        console.log('📝 No filter elements found, returning all expenses');
         return filtered;
     }
-
     const selectedMonth = filtreDateElement.value;
-    // console.log('Seçilen ay:', selectedMonth);
-
+    
+    console.log('📅 Selected month filter:', selectedMonth);
+    
     if (selectedMonth) {
         const monthFiltered = filtered.filter(expense => expense.date.startsWith(selectedMonth));
-        // console.log('Ay filtresinden sonra:', monthFiltered.length);
-
         const futureTaksits = getFutureTaksits(selectedMonth);
         const recurringPayments = getRecurringPaymentsForMonth(selectedMonth);
-        // console.log('Gelecek taksit sayısı:', futureTaksits.length);
-        // console.log('Düzenli ödeme sayısı:', recurringPayments.length);
-
+        
         filtered = [...monthFiltered, ...futureTaksits, ...recurringPayments];
+        console.log('📊 Month filtered results:', {
+            monthFiltered: monthFiltered.length,
+            futureTaksits: futureTaksits.length,
+            recurringPayments: recurringPayments.length,
+            total: filtered.length
+        });
     } else {
-        filtered = [...expenses];
-        // console.log('Tarih filtresi yok, tüm expenses:', filtered.length);
+        filtered = [...(expenses || [])];
+        console.log('📊 No month filter, showing all expenses:', filtered.length);
     }
-
-    // console.log('Tarih filtresinden sonra toplam:', filtered.length);
-
+    
     const filterUserElement = document.getElementById('filterUser');
     const selectedUser = filterUserElement ? filterUserElement.value : '';
-    // console.log('Seçilen kullanıcı:', selectedUser);
     if (selectedUser) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(expense => expense.person === selectedUser);
-        // console.log(`Kullanıcı filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        console.log(`👤 User filter applied: ${beforeCount} → ${filtered.length} (${selectedUser})`);
     }
-
+    
     const filterCardElement = document.getElementById('filterCard');
     const selectedCard = filterCardElement ? filterCardElement.value : '';
-    // console.log('Seçilen card:', selectedCard);
     if (selectedCard) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(expense => expense.card === selectedCard);
-        // console.log(`Kart filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        console.log(`💳 Card filter applied: ${beforeCount} → ${filtered.length} (${selectedCard})`);
     }
-
+    
     const minAmountElement = document.getElementById('minAmount');
     const maxAmountElement = document.getElementById('maxAmount');
     const minAmountValue = minAmountElement ? minAmountElement.value : '';
     const maxAmountValue = maxAmountElement ? maxAmountElement.value : '';
     const minAmount = minAmountValue ? parseFloat(minAmountValue) : 0;
     const maxAmount = maxAmountValue ? parseFloat(maxAmountValue) : Infinity;
-
-    // console.log('Tutar aralığı:', minAmount, '-', maxAmount);
     if (minAmountValue || maxAmountValue) {
         const beforeCount = filtered.length;
         filtered = filtered.filter(expense => expense.amount >= minAmount && expense.amount <= maxAmount);
-        // console.log(`Tutar filtresinden sonra: ${beforeCount} -> ${filtered.length}`);
+        console.log(`💰 Amount filter applied: ${beforeCount} → ${filtered.length} (${minAmount}-${maxAmount})`);
     }
-
-    // console.log('Sıralama öncesi kayıt sayısı:', filtered.length);
-
+    
     const sortCriteriaElement = document.getElementById('sortCriteria');
     const sortCriteria = sortCriteriaElement ? sortCriteriaElement.value : 'date-desc';
     const [field, direction] = sortCriteria.split('-');
-    // console.log('Sıralama kriteri:', field, direction);
-
     try {
         const beforeSort = filtered.length;
         filtered.sort((a, b) => {
             let valueA, valueB;
-
             switch (field) {
                 case 'date':
                     valueA = new Date(a.date).getTime();
@@ -501,31 +595,22 @@ function applyAllFilters() {
                 default:
                     return 0;
             }
-
             if (field === 'amount' || field === 'date') {
                 if (isNaN(valueA) && !isNaN(valueB)) return 1;
                 if (!isNaN(valueA) && isNaN(valueB)) return -1;
                 if (isNaN(valueA) && isNaN(valueB)) return 0;
             }
-
             if (direction === 'asc') {
                 return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
             } else {
                 return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
             }
         });
-        // console.log(`Sıralama sonrası: ${beforeSort} -> ${filtered.length}`);
     } catch (e) {
         console.error('Sıralama hatası:', e);
     }
-
-    // console.log('--- FINAL SONUÇ ---');
-    // console.log('Döndürülen kayıt sayısı:', filtered.length);
-    // console.log('İlk 3 kayıt:', filtered.slice(0, 3));
-
     return filtered;
 }
-
 // Harcama İşlemleri
 function deleteHarcama(id) {
     const expense = expenses.find(h => h.id === id);
@@ -533,20 +618,16 @@ function deleteHarcama(id) {
         showToast('Expense not found', 'error');
         return;
     }
-
     let confirmMessage = 'Bu expenseyı silmek istediğinizden emin misiniz?';
-
     // Otomatik oluşturulan düzenli ödeme ise uyarı ver
     if (expense.isRegular) {
         confirmMessage = `Bu otomatik oluşturulan düzenli ödemeyi silmek istediğinizden emin misiniz?\n\n"${expense.description}"\n\nNot: Gelecek ay tekrar otomatik olarak oluşturulacaktır.`;
     }
-
     if (confirm(confirmMessage)) {
         expenses = expenses.filter(h => h.id !== id);
         saveData();
         updateExpenseTable();
         updateDashboard();
-
         if (expense.isRegular) {
             showToast('Düzenli ödeme silindi (gelecek ay yeniden oluşturulacak)', 'info');
         } else {
@@ -554,22 +635,18 @@ function deleteHarcama(id) {
         }
     }
 }
-
 // Form Event Listeners
 document.addEventListener('keydown', function (e) {
     const activeElement = document.activeElement;
     const isInUserSelect = activeElement === document.getElementById('user');
     const isInFormField = activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT';
-
     if (isInUserSelect || !isInFormField) {
         const userSelect = document.getElementById('user');
         const keyNum = parseInt(e.key);
-
         // Check if user select exists (only on expense-ekle page)
         if (!userSelect) {
             return;
         }
-
         if (keyNum >= 1 && keyNum <= 5 && keyNum <= people.length) {
             e.preventDefault();
             const selectedPerson = people[keyNum - 1];
@@ -584,7 +661,6 @@ document.addEventListener('keydown', function (e) {
         }
     }
 });
-
 // Form event listener - sadece form varsa ekle
 const expenseForm = document.getElementById('expenseForm');
 if (expenseForm) {

@@ -3,12 +3,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Add Expense - Kredi Kartı Harcama Takip Sistemi</title>
+        <title>Harcama Ekle - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi cardı expensesınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
         <meta name="keywords"
-            content="kredi cardı, expense takip, fatura, ödeme, finans">
+            content="Kredi kartı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
 
         <meta name="theme-color" content="#6366f1">
@@ -47,7 +47,7 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
+                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
                     </div>
 
                     <!-- Login Form Only -->
@@ -89,7 +89,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi cardsını
+                            <p>Takip etmek istediğiniz kredi kartlarını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -102,7 +102,7 @@
                                     onclick="addCard()">Kart Ekle</button>
 
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz card eklenmedi.
+                                    <p class="setup-help">Henüz kart eklenmedi.
                                         En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
@@ -153,7 +153,7 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi cardı
+                                <div class="header-subtitle">Kredi kartı
                                     expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
@@ -164,10 +164,6 @@
                             <span>👤</span>
                             <span id="currentUserInfo">Kullanıcı</span>
                         </div>
-                        <button class="theme-toggle" onclick="toggleTheme()"
-                            title="Tema Değiştir">
-                            🌙
-                        </button>
                     </div>
                 </div>
                 <div class="tabs">
@@ -185,7 +181,7 @@
                 </div>
 
                 <div class="content">
-                    <!-- Add Expenseme Content -->
+                    <!-- Harcama Ekleme Content -->
                     <div class="page-content">
                         <div class="page-tabs">
                             <button class="page-tab active"
@@ -196,9 +192,9 @@
                                 Ödemeler</button>
                         </div>
 
-                        <!-- Add Expenseme Tab -->
+                        <!-- Harcama Ekleme Tab -->
                         <div id="expenseTab" class="tab-content active">
-                            <h2>Yeni Add Expense</h2>
+                            <h2>Yeni Harcama Ekle</h2>
                             <div class="quick-info">
                                 <h3>Hızlı Ekleme</h3>
                                 <p>Sadece zorunlu alanları doldurun, Tab tuşuyla
@@ -228,7 +224,7 @@
                                         <label for="amount">Tutar (TL) *</label>
                                         <input type="number" name="amount"
                                             id="amount" step="0.01" min="0.01"
-                                            required>
+                                            required autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="form-row">

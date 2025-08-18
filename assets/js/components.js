@@ -1,41 +1,32 @@
 // Essential UI Components - Simplified and Clean
-
 // Header Component - Clean and minimal
 function renderHeader() {
     return `
         <div class="header">
             <div class="header-content">
                 <a href="index.html" class="header-brand">
-                    <div class="header-icon">💳</div>
-                    <div>
-                        <h1>Harcama Takip</h1>
-                        <div class="header-subtitle">Kredi cardı expense yönetimi</div>
-                    </div>
+                    <span class="brand-icon">💳</span>
+                    <span class="brand-text">Payment Planner</span>
                 </a>
-                
                 <div class="header-actions">
-                    <div class="header-user">
-                        <span>👤</span>
-                        <span id="currentUserInfo">Kullanıcı</span>
-                    </div>
-                    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                    <button class="btn btn-outline" onclick="authSystem.logout()">Çıkış</button>
                 </div>
             </div>
         </div>
     `;
 }
 
-// Navigation Component
+// Navigation Component - Improved
 function renderNavigation(activePage = '') {
     const navItems = [
-        { href: 'index.html', icon: '📊', text: 'Gösterge Paneli', id: 'dashboard' },
-        { href: 'expense-ekle.html', icon: '➕', text: 'Add Expense', id: 'expense-ekle' },
-        { href: 'expense-listesi.html', icon: '📋', text: 'Harcama Listesi', id: 'expense-listesi' },
-        { href: 'accounts.html', icon: '💰', text: 'Hesaplar', id: 'accounts' },
-        { href: 'aylik-ozet.html', icon: '📅', text: 'Aylık Özet', id: 'monthly-summary' },
-        { href: 'data-yonetimi.html', icon: '⚙️', text: 'Veri Yönetimi', id: 'data-yonetimi' }
+        { href: 'index.html', icon: '🏠', text: 'Ana Sayfa', id: 'dashboard' },
+        { href: 'add-expense.html', icon: '➕', text: 'Harcama Ekle', id: 'add-expense' },
+        { href: 'expense-list.html', icon: '�', text: 'Harcama Listesi', id: 'expense-list' },
+        { href: 'accounts.html', icon: '�', text: 'Hesaplar', id: 'accounts' },
+        { href: 'monthly-summary.html', icon: '�', text: 'Aylık Özet', id: 'monthly-summary' },
+        { href: 'statistics.html', icon: '�', text: 'İstatistikler', id: 'statistics' },
+        { href: 'data-management.html', icon: '⚙️', text: 'Veri Yönetimi', id: 'data-management' }
     ];
-
     const navHTML = navItems.map(item => {
         const isActive = item.id === activePage || 
                         (item.id === 'dashboard' && (activePage === 'index' || activePage === ''));
@@ -46,90 +37,95 @@ function renderNavigation(activePage = '') {
             </a>
         `;
     }).join('');
-
+    
     return `
         <nav class="navigation">
-            <div class="nav-container">
+            <div class="nav-content">
                 ${navHTML}
             </div>
         </nav>
     `;
 }
 
-// Auth Container Component - Simplified
-function renderAuthContainer() {
+// Footer Component - Simple
+function renderFooter() {
     return `
-        <div id="authContainer" style="display: none;">
-            <div class="auth-wrapper">
-                <div class="auth-container">
-                    <div class="auth-header">
-                        <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
-                    </div>
-
-                    <div id="loginForm" class="auth-form">
-                        <h2>Giriş Yap</h2>
-                        <form onsubmit="handleLogin(event)">
-                            <div class="form-group">
-                                <label for="loginUsername">Kullanıcı Adı</label>
-                                <input type="text" id="loginUsername" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="loginPassword">Şifre</label>
-                                <input type="password" id="loginPassword" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
-                        </form>
-                        <div class="auth-info">
-                            <p><strong>Admin Giriş:</strong> admin / admin123</p>
-                        </div>
-                    </div>
-                </div>
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Payment Planner - Gelişmiş Harcama Takip Sistemi</p>
             </div>
-        </div>
+        </footer>
     `;
 }
 
-// Setup Wizard Component - Simplified
+// Common page initialization
+function initializePage(pageId) {
+    // Render header
+    const headerContainer = document.querySelector('.header-container') || document.getElementById('header');
+    if (headerContainer) {
+        headerContainer.innerHTML = renderHeader();
+    }
+    
+    // Render navigation
+    const navContainer = document.querySelector('.nav-container') || document.getElementById('navigation');
+    if (navContainer) {
+        navContainer.innerHTML = renderNavigation(pageId);
+    }
+    
+    // Render footer
+    const footerContainer = document.querySelector('.footer-container') || document.getElementById('footer');
+    if (footerContainer) {
+        footerContainer.innerHTML = renderFooter();
+    }
+    
+    // Update page title if needed
+    const pageTitles = {
+        'dashboard': 'Ana Sayfa',
+        'add-expense': 'Harcama Ekle',
+        'expense-list': 'Harcama Listesi',
+        'accounts': 'Hesaplar',
+        'monthly-summary': 'Aylık Özet',
+        'statistics': 'İstatistikler',
+        'data-management': 'Veri Yönetimi'
+    };
+    
+    if (pageTitles[pageId]) {
+        document.title = `${pageTitles[pageId]} - Payment Planner`;
+    }
+}
+
+// Setup Wizard Component
 function renderSetupWizard() {
     return `
-        <div id="setupWizard" style="display: none;">
-            <div class="setup-wrapper">
-                <div class="setup-container">
-                    <div class="setup-header">
-                        <h1>🎉 Hoş Geldiniz!</h1>
-                        <p>Sisteminizi yapılandırmak için birkaç adım</p>
-                    </div>
-
-                    <div class="setup-steps">
-                        <div id="setupStep1" class="setup-step active">
-                            <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <div class="setup-form">
-                                <div class="form-group">
-                                    <input type="text" id="newCardName" placeholder="Kart adı girin...">
-                                </div>
-                                <button type="button" class="btn btn-secondary" onclick="addCard()">Kart Ekle</button>
-                                <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">En az bir card eklemeniz önerilir.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="setupStep2" class="setup-step">
-                            <h2>2. Kullanıcıları Ekleyin</h2>
-                            <div class="setup-form">
-                                <div class="form-group">
-                                    <input type="text" id="newUserName" placeholder="Kişi adı girin...">
-                                </div>
-                                <button type="button" class="btn btn-secondary" onclick="addUser()">Kişi Ekle</button>
-                                <div id="usersList" class="setup-list">
-                                    <p class="setup-help">En az bir kişi eklemeniz önerilir.</p>
-                                </div>
-                            </div>
+        <div class="setup-wizard">
+            <div class="wizard-container">
+                <div class="wizard-header">
+                    <h2>Hoş Geldiniz! 🎉</h2>
+                    <p>Harcama takip sisteminizi kurmak için birkaç dakika ayırın.</p>
+                </div>
+                
+                <div class="wizard-content">
+                    <div class="wizard-step active" id="step1">
+                        <h3>1. Kart Bilgilerinizi Ekleyin</h3>
+                        <div class="form-group">
+                            <label>Kredi Kartlarınızı ekleyin (virgülle ayırın):</label>
+                            <input type="text" id="setupCards" placeholder="Örnek: Garanti, İş Bankası, Akbank" 
+                                   class="form-control">
                         </div>
                     </div>
-
-                    <div class="setup-navigation">
+                    
+                    <div class="wizard-step" id="step2">
+                        <h3>2. Kişileri Tanımlayın</h3>
+                        <div class="form-group">
+                            <label>Harcama yapacak kişileri ekleyin (virgülle ayırın):</label>
+                            <input type="text" id="setupUsers" placeholder="Örnek: Ali, Ayşe, Mehmet" 
+                                   class="form-control">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="wizard-footer">
+                    <div class="wizard-actions">
                         <button id="prevStep" class="btn btn-outline" onclick="previousStep()" style="display: none;">Önceki</button>
                         <button id="nextStep" class="btn btn-primary" onclick="nextStep()">Sonraki</button>
                         <button id="finishSetup" class="btn btn-success" onclick="finishSetup()" style="display: none;">Tamamla</button>
@@ -140,8 +136,59 @@ function renderSetupWizard() {
     `;
 }
 
-// Global exports for backward compatibility
-window.renderHeader = renderHeader;
-window.renderNavigation = renderNavigation;
-window.renderAuthContainer = renderAuthContainer;
-window.renderSetupWizard = renderSetupWizard;
+// Wizard navigation functions
+function nextStep() {
+    const currentStep = document.querySelector('.wizard-step.active');
+    const nextStep = currentStep.nextElementSibling;
+    
+    if (nextStep && nextStep.classList.contains('wizard-step')) {
+        currentStep.classList.remove('active');
+        nextStep.classList.add('active');
+        
+        // Update buttons
+        document.getElementById('prevStep').style.display = 'inline-block';
+        
+        if (!nextStep.nextElementSibling || !nextStep.nextElementSibling.classList.contains('wizard-step')) {
+            document.getElementById('nextStep').style.display = 'none';
+            document.getElementById('finishSetup').style.display = 'inline-block';
+        }
+    }
+}
+
+function previousStep() {
+    const currentStep = document.querySelector('.wizard-step.active');
+    const prevStep = currentStep.previousElementSibling;
+    
+    if (prevStep && prevStep.classList.contains('wizard-step')) {
+        currentStep.classList.remove('active');
+        prevStep.classList.add('active');
+        
+        // Update buttons
+        if (!prevStep.previousElementSibling || !prevStep.previousElementSibling.classList.contains('wizard-step')) {
+            document.getElementById('prevStep').style.display = 'none';
+        }
+        
+        document.getElementById('nextStep').style.display = 'inline-block';
+        document.getElementById('finishSetup').style.display = 'none';
+    }
+}
+
+function finishSetup() {
+    const cards = document.getElementById('setupCards').value.split(',').map(s => s.trim()).filter(s => s);
+    const users = document.getElementById('setupUsers').value.split(',').map(s => s.trim()).filter(s => s);
+    
+    if (cards.length === 0) {
+        alert('En az bir kart eklemelisiniz!');
+        return;
+    }
+    
+    if (users.length === 0) {
+        alert('En az bir kişi eklemelisiniz!');
+        return;
+    }
+    
+    // Setup complete
+    if (typeof authSystem !== 'undefined' && authSystem) {
+        authSystem.completeSetup(cards, users);
+    }
+}

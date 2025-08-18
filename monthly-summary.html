@@ -6,9 +6,9 @@
         <title>Aylık Özet - Kredi Kartı Harcama Takip Sistemi</title>
 
         <meta name="description"
-            content="Kredi cardı expensesınızı ve düzenli ödemelerinizi profesyonelce takip edin">
+            content="Kredi kartı harcamalarınızı ve düzenli ödemelerinizi profesyonelce takip edin">
         <meta name="keywords"
-            content="kredi cardı, expense takip, fatura, ödeme, finans">
+            content="Kredi kartı, expense takip, fatura, ödeme, finans">
         <meta name="author" content="Harcama Takip Sistemi">
 
         <meta name="theme-color" content="#007bff">
@@ -47,7 +47,7 @@
                 <div class="auth-container">
                     <div class="auth-header">
                         <h1>💳 Harcama Takip Sistemi</h1>
-                        <p>Kredi cardı expensesınızı güvenle takip edin</p>
+                        <p>Kredi kartı harcamalarınızı güvenle takip edin</p>
                     </div>
 
                     <!-- Login Form Only -->
@@ -92,7 +92,7 @@
                         <!-- Step 1: Kart Ekleme -->
                         <div id="setupStep1" class="setup-step active">
                             <h2>1. Kredi Kartlarınızı Ekleyin</h2>
-                            <p>Takip etmek istediğiniz kredi cardsını
+                            <p>Takip etmek istediğiniz kredi kartlarını
                                 ekleyin</p>
 
                             <div class="setup-form">
@@ -105,7 +105,7 @@
                                     onclick="addCard()">Kart Ekle</button>
 
                                 <div id="cardsList" class="setup-list">
-                                    <p class="setup-help">Henüz card eklenmedi.
+                                    <p class="setup-help">Henüz kart eklenmedi.
                                         En az bir card eklemeniz önerilir.</p>
                                 </div>
                             </div>
@@ -156,7 +156,7 @@
                             <div class="header-icon">💳</div>
                             <div>
                                 <h1>Harcama Takip</h1>
-                                <div class="header-subtitle">Kredi cardı
+                                <div class="header-subtitle">Kredi kartı
                                     expensesınızı profesyonelce yönetin</div>
                             </div>
                         </a>
@@ -167,15 +167,11 @@
                             <span>👤</span>
                             <span id="currentUserInfo">Kullanıcı</span>
                         </div>
-                        <button class="theme-toggle" onclick="toggleTheme()"
-                            title="Tema Değiştir">
-                            🌙
-                        </button>
                     </div>
                 </div>
                 <div class="tabs">
                     <a href="index.html" class="tab">📊 Gösterge Paneli</a>
-                    <a href="add-expense.html" class="tab">➕ Add Expense</a>
+                    <a href="add-expense.html" class="tab">➕ Harcama Ekle</a>
                     <a href="expense-list.html" class="tab">📋 Harcama
                         Listesi</a>
                     <a href="accounts.html" class="tab">💰 Hesaplar</a>
@@ -190,22 +186,22 @@
                 <div class="content">
                     <!-- Aylık Özet Content -->
                     <div class="page-content">
-                        <h2>Aylık Özet</h2>
-
-                        <div class="month-selector">
-                            <div class="form-group">
-                                <label for="summaryDate">Hangi Ay?</label>
-                                <input type="month" id="summaryDate"
-                                    onchange="updateAylikOzet()">
+                        <div class="page-header">
+                            <div class="page-header-content">
+                                <h2>📊 Aylık Özet</h2>
+                                <p>Seçilen aya ait harcama özetinizi görüntüleyin</p>
+                            </div>
+                            <div class="month-selector-compact">
+                                <label for="summaryDate">📅 Ay:</label>
+                                <input type="month" id="summaryDate" class="month-input-compact">
                             </div>
                         </div>
 
                         <div id="monthlySummaryContent">
-                            <div
-                                style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📅</div>
                                 <h3>Ay seçin ve özet görüntülensin</h3>
-                                <p>Yukarıdaki tarih seçiciden hangi ayı görmek
-                                    istediğinizi seçin.</p>
+                                <p>Yukarıdaki tarih seçiciden hangi ayı görmek istediğinizi seçin.</p>
                             </div>
                         </div>
                     </div>

@@ -145,7 +145,6 @@ p {
     will-change: transform, box-shadow;
 }
 
-.theme-btn,
 .color-btn {
     transform: translateZ(0);
     backface-visibility: hidden;
